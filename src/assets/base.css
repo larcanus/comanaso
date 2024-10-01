@@ -22,7 +22,13 @@
 }
 
 :root {
-  --wb-kit-scrollbar-thumb-background-color: #007bff;
+  --vt-bt-background-color: #5e21f8;
+  --vt-bt-background-color-hover: #7644f5;
+  --vt-bt-text-color: #ffffff;
+}
+
+:root {
+  --wb-kit-scrollbar-thumb-background-color: #5e21f8;
   --wb-kit-scrollbar-track-background-color: #050000;
 
   /* Стили для всей полосы прокрутки */

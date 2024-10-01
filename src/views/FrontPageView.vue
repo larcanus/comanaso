@@ -5,6 +5,7 @@ import ThirdSection from '@/components/sections/ThirdSection.vue'
 import FooterSection from '@/components/sections/FooterSection.vue'
 import FormLogin from '@/components/forms/login/FormLogin.vue'
 import { inject, ref } from 'vue'
+
 const overflowXHiddenHandler = inject('overflowXHidden');
 const openLoginForm = () => {
   state.value.isLoginFormShow = !state.value.isLoginFormShow;
@@ -64,8 +65,8 @@ const state = ref({
   top: 4%;
   right: 6%;
   padding: 10px 0 10px 0;
-  background-color: #007bff;
-  color: #ffffff;
+  background-color: var(--vt-bt-background-color);
+  color: var(--vt-bt-text-color);
   border: none;
   border-radius: 1px;
   cursor: pointer;
@@ -76,7 +77,7 @@ const state = ref({
 }
 
 .floating-button:hover {
-  background-color: #0056b3;
+  background-color: var(--vt-bt-background-color-hover);
 }
 
 @media (max-width: 700px) {

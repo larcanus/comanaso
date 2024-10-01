@@ -3,13 +3,13 @@ import FrontPage from '@/views/FrontPageView.vue'
 import { provide } from 'vue'
 
 provide('overflowXHidden', (isHidden) => {
-  console.log(isHidden)
+  // todo? this solution deprecated.
   if(isHidden) {
     document.documentElement.style.setProperty('--wb-kit-scrollbar-thumb-background-color', 'rgba(47, 46, 46, 0.7)');
     document.documentElement.style.setProperty('--wb-kit-scrollbar-track-background-color', 'rgba(47, 46, 46, 0.7)');
   }
   else {
-    document.documentElement.style.setProperty('--wb-kit-scrollbar-thumb-background-color', '#007bff');
+    document.documentElement.style.setProperty('--wb-kit-scrollbar-thumb-background-color', '#5e21f8');
     document.documentElement.style.setProperty('--wb-kit-scrollbar-track-background-color', '#050000');
   }
   });
@@ -20,6 +20,7 @@ provide('overflowXHidden', (isHidden) => {
   </header>
 
   <main>
+    <RouterView />
     <FrontPage />
   </main>
 </template>

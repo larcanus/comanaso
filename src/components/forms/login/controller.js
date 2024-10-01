@@ -1,6 +1,6 @@
 class Controller {
   sendRestAuthentication({ email, password }) {
-    return fetch('https://c4e94deece2dd3d5.mokky.dev/auth', {
+    return fetch('https://a3c60676f813acc0.mokky.dev/auth', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -14,7 +14,7 @@ class Controller {
   }
 
   sendRestRegistration({ name: fullName, email, password }) {
-    return fetch('https://c4e94deece2dd3d5.mokky.dev/register', {
+    return fetch('https://a3c60676f813acc0.mokky.dev/register', {
       method: 'POST',
       headers: {
         Accept: 'application/json',

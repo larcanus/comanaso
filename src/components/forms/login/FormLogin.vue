@@ -1,7 +1,9 @@
 <script setup>
-import { nextTick, ref, useTemplateRef } from 'vue'
-import { controller } from '@/components/forms/login/controller.js'
-
+import {nextTick, ref, useTemplateRef} from 'vue'
+import {controller} from '@/components/forms/login/controller.js'
+import { useRoute, useRouter } from 'vue-router'
+const router = useRouter();
+const route = useRoute();
 const props = defineProps({
   h2LoginLoc: {
     type: String,
@@ -47,10 +49,18 @@ const props = defineProps({
     type: String,
     default: 'Create account'
   },
-  messageInputValidError: {
+  messageLoginError: {
     type: String,
-    default: 'Error valid text'
-  }
+    default: 'Error in login or password.\n Are you sure you entered the correct data?'
+  },
+  messageRegistrationError: {
+    type: String,
+    default: 'This login already exists'
+  },
+  messageRegistrationSuccess: {
+    type: String,
+    default: 'Successfully registered. You can now log in.',
+  },
 })
 
 const state = ref({
@@ -65,17 +75,12 @@ const state = ref({
   isErrorLogin: false,
   messageInputLoginValidError: '',
   messageInputPSWValidError: '',
-  messageLoginError: 'Error in login or password.\n Are you sure you entered the correct data?',
-  messageRegistrationError: 'This login already exists',
-  messageRegistrationSuccess: 'Successfully registered. You can now log in.',
   isAllDisabled: false,
   tooltipTimeout: null,
   tooltipBigTimeout: null
 })
 
 const loginInputRef = useTemplateRef('inputLogin')
-
-// const inputNameRef = useTemplateRef('inputName');
 
 async function onClickOk() {
   if (checkValidInputs()) {
@@ -93,6 +98,7 @@ async function onClickSignIn() {
   })
   if (res.ok && [200, 201, 202].includes(res.status)) {
     await controller.setUserData(res)
+    await router.push('/main')
   } else {
     showLoginError()
   }
@@ -136,7 +142,7 @@ function showRegistrationError() {
 
 function showRegistrationSuccessful() {
   state.value.isSuccessfulRegistration = true
-  console.log(state.value.isSuccessfulRegistration)
+
   clearTimeout(state.value.tooltipBigTimeout)
   state.value.tooltipBigTimeout = setTimeout(() => {
     state.value.isSuccessfulRegistration = false
@@ -207,8 +213,6 @@ function hiddenTooltip() {
     }, 3000)
   }
 }
-
-
 </script>
 
 <template>
@@ -216,7 +220,9 @@ function hiddenTooltip() {
     <div class="form-container">
       <form>
         <div class="header-container">
-          <p class="sign" v-if="state.isRegister" @click="state.isRegister=false">{{ props.signParagraph }}</p>
+          <p class="sign" v-if="state.isRegister" @click="state.isRegister=false">
+            {{ props.signParagraph }}
+          </p>
           <h2>{{ state.isRegister ? h2RegLoc : h2LoginLoc }}</h2>
         </div>
         <div class="input-container" v-if="state.isRegister">
@@ -224,11 +230,12 @@ function hiddenTooltip() {
           <input ref="inputName" id="inputName" type="text" v-model="state.nameValue"
                  :placeholder="props.placeholderNameLoc"
                  :disabled="state.isAllDisabled" required>
-          <div class="tooltip" :class="{invalid : state.isErrorValidInputName}">{{ state.messageInputNameValidError }}
+          <div class="tooltip" :class="{invalid : state.isErrorValidInputName}">
+            {{ state.messageInputNameValidError }}
           </div>
           <div class="tooltip tooltipBig" :class="{invalid : state.isErrorRegistration}"
                @click.prevent="onClickTooltipBig">
-            {{ state.messageRegistrationError }}
+            {{ props.messageRegistrationError }}
           </div>
         </div>
         <div class="input-container">
@@ -236,8 +243,8 @@ function hiddenTooltip() {
           <input ref="inputLogin" id="inputLogin" type="text" v-model="state.loginValue"
                  :placeholder="props.placeholderLoginLoc"
                  :disabled="state.isAllDisabled" required>
-          <div class="tooltip" :class="{invalid : state.isErrorValidInputLogin}">{{ state.messageInputLoginValidError
-            }}
+          <div class="tooltip" :class="{invalid : state.isErrorValidInputLogin}">
+            {{ state.messageInputLoginValidError }}
           </div>
 
         </div>
@@ -246,21 +253,24 @@ function hiddenTooltip() {
           <input ref="inputPsw" id="inputPsw" type="password" v-model="state.passwordValue"
                  :placeholder="props.placeholderPasswordLoc"
                  :disabled="state.isAllDisabled" required>
-          <div class="tooltip" :class="{invalid : state.isErrorValidInputPsw}">{{ state.messageInputPSWValidError }}
+          <div class="tooltip" :class="{invalid : state.isErrorValidInputPsw}">
+               {{ state.messageInputPSWValidError }}
           </div>
           <div class="tooltip tooltipBig" :class="{invalid : state.isErrorLogin}"
                @click.prevent="onClickTooltipBig">
-            {{ state.messageLoginError }}
+            {{ props.messageLoginError }}
           </div>
           <div class="tooltip tooltipBig" :class="{successful : state.isSuccessfulRegistration}">
-            {{ state.messageRegistrationSuccess }}
+            {{ props.messageRegistrationSuccess }}
           </div>
         </div>
         <button class="ok-btn" @click.prevent="onClickOk" :disabled="state.isAllDisabled"
-                :class="{disabled : state.isAllDisabled}">{{ state.isRegister ? buttonRegisterLoc : buttonLoginLoc }}
+                :class="{disabled : state.isAllDisabled}">
+          {{ state.isRegister ? buttonRegisterLoc : buttonLoginLoc }}
         </button>
         <button class="sub-btn" @click.prevent="state.isRegister = true" :disabled="state.isAllDisabled"
-                :class="{disabled : state.isAllDisabled}" v-if="!state.isRegister">{{ props.buttonRegisterLoc }}
+                :class="{disabled : state.isAllDisabled}" v-if="!state.isRegister">
+          {{ props.buttonRegisterLoc }}
         </button>
       </form>
     </div>
@@ -362,13 +372,13 @@ p {
 }
 
 .ok-btn {
-  background-color: #8bc34a;
-  color: #ffffff;
+  background-color: var(--vt-bt-background-color);
+  color: var(--vt-bt-text-color);
 }
 
 .sub-btn {
-  background-color: #9c27b0;
-  color: #ffffff;
+  background-color: var(--vt-bt-background-color);
+  color: var(--vt-bt-text-color);
 }
 
 .form-container button:hover {
