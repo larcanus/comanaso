@@ -1,13 +1,11 @@
 <template>
   <div class="security-info-slot">
     <div class="info-icon">
-      <slot name="icon">
-      </slot>
+      <slot name="icon"> </slot>
     </div>
     <div class="info-text-div">
       <p class="info-text">
-        <slot name="info">
-        </slot>
+        <slot name="info"> </slot>
       </p>
     </div>
   </div>

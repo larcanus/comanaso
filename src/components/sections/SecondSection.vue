@@ -15,9 +15,7 @@ const steps = ref([
         <img :src="step.imagePath" alt="Step Image" class="image" />
         <p class="card-text">{{ step.text }}</p>
       </div>
-      <div v-if="index < 2" class="arrow">
-        →
-      </div>
+      <div v-if="index < 2" class="arrow">→</div>
     </div>
   </section>
 </template>

@@ -5,7 +5,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <img :src="props.pathIcon" alt="Icon"/>
+  <img :src="props.pathIcon" alt="Icon" />
 </template>
 
 <style scoped>

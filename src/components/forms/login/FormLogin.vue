@@ -1,9 +1,8 @@
 <script setup>
-import {nextTick, ref, useTemplateRef} from 'vue'
-import {controller} from '@/components/forms/login/controller.js'
-import { useRoute, useRouter } from 'vue-router'
-const router = useRouter();
-const route = useRoute();
+import { nextTick, ref, useTemplateRef } from 'vue'
+import { controller } from '@/components/forms/login/controller.js'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const props = defineProps({
   h2LoginLoc: {
     type: String,
@@ -59,8 +58,8 @@ const props = defineProps({
   },
   messageRegistrationSuccess: {
     type: String,
-    default: 'Successfully registered. You can now log in.',
-  },
+    default: 'Successfully registered. You can now log in.'
+  }
 })
 
 const state = ref({
@@ -197,7 +196,11 @@ function checkValidInputs() {
       state.value.isErrorValidInputName = false
     }
 
-    return !(state.value.isErrorValidInputLogin || state.value.isErrorValidInputPsw || state.value.isErrorValidInputName)
+    return !(
+      state.value.isErrorValidInputLogin ||
+      state.value.isErrorValidInputPsw ||
+      state.value.isErrorValidInputName
+    )
   }
 
   return !(state.value.isErrorValidInputLogin || state.value.isErrorValidInputPsw)
@@ -205,7 +208,11 @@ function checkValidInputs() {
 
 function hiddenTooltip() {
   clearTimeout(state.value.tooltipTimeout)
-  if (state.value.isErrorValidInputLogin || state.value.isErrorValidInputPsw || state.value.isErrorValidInputName) {
+  if (
+    state.value.isErrorValidInputLogin ||
+    state.value.isErrorValidInputPsw ||
+    state.value.isErrorValidInputName
+  ) {
     state.value.tooltipTimeout = setTimeout(() => {
       state.value.isErrorValidInputLogin = false
       state.value.isErrorValidInputPsw = false
@@ -220,56 +227,88 @@ function hiddenTooltip() {
     <div class="form-container">
       <form>
         <div class="header-container">
-          <p class="sign" v-if="state.isRegister" @click="state.isRegister=false">
+          <p class="sign" v-if="state.isRegister" @click="state.isRegister = false">
             {{ props.signParagraph }}
           </p>
           <h2>{{ state.isRegister ? h2RegLoc : h2LoginLoc }}</h2>
         </div>
         <div class="input-container" v-if="state.isRegister">
           <label for="inputName">{{ props.labelNameLoc }}</label>
-          <input ref="inputName" id="inputName" type="text" v-model="state.nameValue"
-                 :placeholder="props.placeholderNameLoc"
-                 :disabled="state.isAllDisabled" required>
-          <div class="tooltip" :class="{invalid : state.isErrorValidInputName}">
+          <input
+            ref="inputName"
+            id="inputName"
+            type="text"
+            v-model="state.nameValue"
+            :placeholder="props.placeholderNameLoc"
+            :disabled="state.isAllDisabled"
+            required
+          />
+          <div class="tooltip" :class="{ invalid: state.isErrorValidInputName }">
             {{ state.messageInputNameValidError }}
           </div>
-          <div class="tooltip tooltipBig" :class="{invalid : state.isErrorRegistration}"
-               @click.prevent="onClickTooltipBig">
+          <div
+            class="tooltip tooltipBig"
+            :class="{ invalid: state.isErrorRegistration }"
+            @click.prevent="onClickTooltipBig"
+          >
             {{ props.messageRegistrationError }}
           </div>
         </div>
         <div class="input-container">
           <label for="inputLogin">{{ props.labelLoginLoc }}</label>
-          <input ref="inputLogin" id="inputLogin" type="text" v-model="state.loginValue"
-                 :placeholder="props.placeholderLoginLoc"
-                 :disabled="state.isAllDisabled" required>
-          <div class="tooltip" :class="{invalid : state.isErrorValidInputLogin}">
+          <input
+            ref="inputLogin"
+            id="inputLogin"
+            type="text"
+            v-model="state.loginValue"
+            :placeholder="props.placeholderLoginLoc"
+            :disabled="state.isAllDisabled"
+            required
+          />
+          <div class="tooltip" :class="{ invalid: state.isErrorValidInputLogin }">
             {{ state.messageInputLoginValidError }}
           </div>
-
         </div>
         <div class="input-container">
           <label for="inputPsw">{{ props.labelPswLoc }}</label>
-          <input ref="inputPsw" id="inputPsw" type="password" v-model="state.passwordValue"
-                 :placeholder="props.placeholderPasswordLoc"
-                 :disabled="state.isAllDisabled" required>
-          <div class="tooltip" :class="{invalid : state.isErrorValidInputPsw}">
-               {{ state.messageInputPSWValidError }}
+          <input
+            ref="inputPsw"
+            id="inputPsw"
+            type="password"
+            v-model="state.passwordValue"
+            :placeholder="props.placeholderPasswordLoc"
+            :disabled="state.isAllDisabled"
+            required
+          />
+          <div class="tooltip" :class="{ invalid: state.isErrorValidInputPsw }">
+            {{ state.messageInputPSWValidError }}
           </div>
-          <div class="tooltip tooltipBig" :class="{invalid : state.isErrorLogin}"
-               @click.prevent="onClickTooltipBig">
+          <div
+            class="tooltip tooltipBig"
+            :class="{ invalid: state.isErrorLogin }"
+            @click.prevent="onClickTooltipBig"
+          >
             {{ props.messageLoginError }}
           </div>
-          <div class="tooltip tooltipBig" :class="{successful : state.isSuccessfulRegistration}">
+          <div class="tooltip tooltipBig" :class="{ successful: state.isSuccessfulRegistration }">
             {{ props.messageRegistrationSuccess }}
           </div>
         </div>
-        <button class="ok-btn" @click.prevent="onClickOk" :disabled="state.isAllDisabled"
-                :class="{disabled : state.isAllDisabled}">
+        <button
+          class="ok-btn"
+          @click.prevent="onClickOk"
+          :disabled="state.isAllDisabled"
+          :class="{ disabled: state.isAllDisabled }"
+        >
           {{ state.isRegister ? buttonRegisterLoc : buttonLoginLoc }}
         </button>
-        <button class="sub-btn" @click.prevent="state.isRegister = true" :disabled="state.isAllDisabled"
-                :class="{disabled : state.isAllDisabled}" v-if="!state.isRegister">
+        <button
+          class="sub-btn"
+          @click.prevent="state.isRegister = true"
+          :disabled="state.isAllDisabled"
+          :class="{ disabled: state.isAllDisabled }"
+          v-if="!state.isRegister"
+        >
           {{ props.buttonRegisterLoc }}
         </button>
       </form>
@@ -341,8 +380,8 @@ p {
   cursor: pointer;
 }
 
-.form-container input[type="text"],
-.form-container input[type="password"] {
+.form-container input[type='text'],
+.form-container input[type='password'] {
   width: 100%;
   padding: 10px;
   margin: 10px 0;

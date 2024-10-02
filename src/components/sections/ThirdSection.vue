@@ -5,9 +5,15 @@ import SecurityIcon from '@/components/sections/elements/SecurityIcon.vue'
 
 const infoItems = ref([
   { icon: 'src/assets/animated-protection.gif', text: 'Мы не собираем ваши личные данные.' },
-  { icon: 'src/assets/animated-analytic-time.gif', text: 'Анализ данных происходит только во время работы сайта.' },
+  {
+    icon: 'src/assets/animated-analytic-time.gif',
+    text: 'Анализ данных происходит только во время работы сайта.'
+  },
   { icon: 'src/assets/animated-db-save.gif', text: 'Мы не храним ваши данные на наших серверах.' },
-  { icon: 'src/assets/animated-fences.gif', text: 'Ваши данные защищены современными методами шифрования.' },
+  {
+    icon: 'src/assets/animated-fences.gif',
+    text: 'Ваши данные защищены современными методами шифрования.'
+  }
 ])
 </script>
 
@@ -19,7 +25,7 @@ const infoItems = ref([
         <div class="info-row" v-for="(item, index) in infoItems" :key="index">
           <SecurityInfoSlot>
             <template #icon>
-              <SecurityIcon :path-icon="item.icon"/>
+              <SecurityIcon :path-icon="item.icon" />
             </template>
             <template #info>
               {{ item.text }}
@@ -58,7 +64,7 @@ const infoItems = ref([
 }
 
 @media (max-width: 900px) {
-  .third h2{
+  .third h2 {
     font-size: 23px;
   }
 
@@ -87,5 +93,4 @@ const infoItems = ref([
     margin: 15px 0 0 0;
   }
 }
-
 </style>

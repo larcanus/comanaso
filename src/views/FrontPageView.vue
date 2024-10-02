@@ -6,29 +6,28 @@ import FooterSection from '@/components/sections/FooterSection.vue'
 import FormLogin from '@/components/forms/login/FormLogin.vue'
 import { inject, ref } from 'vue'
 
-const overflowXHiddenHandler = inject('overflowXHidden');
+const overflowXHiddenHandler = inject('overflowXHidden')
 const openLoginForm = () => {
-  state.value.isLoginFormShow = !state.value.isLoginFormShow;
-  if(overflowXHiddenHandler) {
-    overflowXHiddenHandler(state.value.isLoginFormShow);
+  state.value.isLoginFormShow = !state.value.isLoginFormShow
+  if (overflowXHiddenHandler) {
+    overflowXHiddenHandler(state.value.isLoginFormShow)
   }
 }
 
 const props = defineProps({
   buttonLoginLoc: {
     type: String,
-    default: 'Login',
+    default: 'Login'
   },
   isLoginFormShow: {
     type: Boolean,
-    default: false,
-  },
+    default: false
+  }
 })
 
 const state = ref({
-  isLoginFormShow: false,
+  isLoginFormShow: false
 })
-
 </script>
 
 <template>
@@ -40,7 +39,7 @@ const state = ref({
       <FooterSection />
     </div>
     <FormLogin v-if="state.isLoginFormShow" />
-    <button class="floating-button" @click="openLoginForm">{{props.buttonLoginLoc}}</button>
+    <button class="floating-button" @click="openLoginForm">{{ props.buttonLoginLoc }}</button>
   </div>
 </template>
 

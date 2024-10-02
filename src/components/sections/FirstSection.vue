@@ -1,27 +1,21 @@
-<script setup>
-
-</script>
+<script setup></script>
 
 <template>
   <section class="section first">
     <h3>Проанализируй свое время</h3>
-    <h1>
-      На нашем сайте вы можете проводить анализ данных ваших аккаунтов.
-    </h1>
-    <h1>
-      Мы предлагаем инструменты для:
-    </h1>
+    <h1>На нашем сайте вы можете проводить анализ данных ваших аккаунтов.</h1>
+    <h1>Мы предлагаем инструменты для:</h1>
     <div class="card">
       <div class="tools">
-        <img class="icon" src="@/assets/clock-icon.svg" alt="dots icon">
+        <img class="icon" src="@/assets/clock-icon.svg" alt="dots icon" />
         <p>Анализа затраченного времени</p>
       </div>
       <div class="tools">
-        <img class="icon" src="@/assets/list-icon.svg" alt="dots icon">
+        <img class="icon" src="@/assets/list-icon.svg" alt="dots icon" />
         <p>Отслеживания ключевых метрик</p>
       </div>
       <div class="tools">
-        <img class="icon" src="@/assets/layers-icon.svg" alt="dots icon">
+        <img class="icon" src="@/assets/layers-icon.svg" alt="dots icon" />
         <p>Создания наглядных отчетов</p>
       </div>
     </div>
@@ -105,6 +99,6 @@
   background-size: cover; /* Оставляем изображение в его естественном размере */
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-image: url('@/assets/2.png')
+  background-image: url('@/assets/2.png');
 }
 </style>
