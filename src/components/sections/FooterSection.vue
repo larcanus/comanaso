@@ -17,9 +17,10 @@
 <style scoped>
 .footer {
   background-color: #1c1c1c;
-  color: #fff;
+  color: #9a9999;
   padding: 20px;
   text-align: center;
+  width: 100%;
 }
 
 .footer p {

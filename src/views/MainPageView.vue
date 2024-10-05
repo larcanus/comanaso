@@ -2,10 +2,14 @@
 
 import {useRouter} from "vue-router";
 import {ref} from "vue";
+import FooterSection from "@/components/sections/FooterSection.vue";
 
 const router = useRouter();
 
-  const sections = ['account', 'analytics', 'settings'];
+const sections = [
+  {path: 'account', name: 'АККАУНТЫ'},
+  {path: 'analytics', name: 'АНАЛИТИКА'},
+  {path: 'settings', name: 'НАСТРОЙКИ'}];
 const state = ref({
   selectedSection: 'account',
 })
@@ -26,48 +30,41 @@ const selectSection = (section) => {
         <h2 class="user-name">Иван Иванов</h2>
       </div>
       <nav class="navigation">
-        <!--        <ul>-->
-        <!--          <li @click="selectSection('account')">Аккаунты</li>-->
-        <!--          <li @click="selectSection('analytics')">Доступные данные</li>-->
-        <!--          <li @click="selectSection('settings')">Настройки</li>-->
-        <!--        </ul>-->
         <button
             v-for="section in sections"
             :key="section"
-            @click="selectSection(section)"
-            :class="{ active: state.selectedSection === section }"
+            @click="selectSection(section.path)"
+            :class="{ active: state.selectedSection === section.path }"
             class="nav-button"
         >
-          {{ section }}
+          {{ section.name }}
         </button>
       </nav>
     </aside>
 
-    <main class="content">
+    <div class="content">
       <router-view/>
-    </main>
-
-    <footer class="footer">
-      <p>Справочная информация</p>
-    </footer>
+      <FooterSection />
+    </div>
   </div>
 </template>
 
 <style scoped>
 .container {
-  display: flex;
-  height: 100vh;
-  flex-direction: column;
-}
+  overflow-x: hidden;
+ }
 
 .sidebar {
   width: 25%;
-  background-color: #f4f4f4;
-  padding: 20px;
+  background: linear-gradient(rgba(135, 60, 255, 0.4), rgba(135, 60, 255, 0.0) 80%),
+  linear-gradient(-45deg, rgba(120, 155, 255, 0.9) 25%, rgba(255, 160, 65, 0.9) 75%);
+  padding: 20px 24px 20px 20px;
   box-sizing: border-box;
   position: fixed;
+  align-self: flex-start;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: hidden;
+  overflow-x: hidden;
 }
 
 .user-info {
@@ -83,27 +80,20 @@ const selectSection = (section) => {
 
 .user-name {
   margin-top: 10px;
-  font-size: 18px;
-  color: #252272;
+  font-size: 19px;
+  color: #1e1c52;
 }
 
 .content {
   margin-left: 25%;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
   flex-grow: 1;
-}
-
-.footer {
-  background-color: #1c1c1c;
-  color: #fff;
-  padding: 10px;
-  text-align: center;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  box-sizing: border-box;
+  width: 75%;
+  min-height: 100vh;
+  background: rgb(51,16,84);
+  background: linear-gradient(90deg, rgba(51,16,84,1) 0%, rgba(25,9,73,1) 9%, rgba(2,2,64,1) 17%, rgba(3,3,48,1) 27%, rgba(3,3,34,1) 36%, rgba(3,3,34,1) 62%, rgba(2,2,48,1) 72%, rgba(1,1,63,1) 83%, rgba(23,8,70,1) 91%, rgba(48,15,78,1) 100%);
 }
 
 .navigation {
@@ -114,13 +104,15 @@ const selectSection = (section) => {
 .nav-button {
   width: 100%;
   padding: 10px;
-  margin: 5px 0;
-  background-color: transparent;
-  border: none;
-  text-align: left;
+  margin: 10px 10px 10px 0;
+  border: 1px;
+  border-radius: 1px;
+  text-align: center;
   cursor: pointer;
   transition: transform 0.2s, background-color 0.2s;
   position: relative;
+  background-color: #3d33a2;
+  color: #fff;
 }
 
 .nav-button:hover {
@@ -128,19 +120,7 @@ const selectSection = (section) => {
 }
 
 .nav-button.active {
-  background-color: #007bff;
+  background-color: #221b5e;
   color: #fff;
-}
-
-.nav-button.active::after {
-  content: '';
-  position: absolute;
-  right: -15px; /* Смещение стрелки за пределы кнопки */
-  top: 0;
-  height: 100%;
-  width: 0;
-  border-left: 15px solid #007bff; /* Цвет стрелки */
-  border-top: 16px solid transparent;
-  border-bottom: 16px solid transparent;
 }
 </style>
