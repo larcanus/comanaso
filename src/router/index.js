@@ -60,6 +60,10 @@ router.beforeEach(async (to, from) => {
 	if (to.meta.requiresAuth && !isAuthenticated && to.name !== 'home') {
 		return {name: 'home'}
 	}
+
+	if (to.meta.requiresAuth && isAuthenticated && to.name === 'main') {
+		return {name: 'account'}
+	}
 })
 
 export default router
