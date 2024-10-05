@@ -3,7 +3,9 @@
 import {useRouter} from "vue-router";
 import {ref} from "vue";
 import FooterSection from "@/components/sections/FooterSection.vue";
+import { useUserStore } from '@/store/user'
 
+const store = useUserStore();
 const router = useRouter();
 
 const sections = [
@@ -15,7 +17,6 @@ const state = ref({
 })
 
 const selectSection = (section) => {
-  console.log(section)
   state.value.selectedSection = section;
   router.push({path: `/main/${section}`});
 };
@@ -27,7 +28,7 @@ const selectSection = (section) => {
     <aside class="sidebar">
       <div class="user-info">
         <img src="@/assets/empty-avatar.png" alt="User Avatar" class="avatar"/>
-        <h2 class="user-name">Иван Иванов</h2>
+        <h2 class="user-name">{{store.state.fullName}}</h2>
       </div>
       <nav class="navigation">
         <button
