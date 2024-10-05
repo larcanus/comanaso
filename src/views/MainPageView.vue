@@ -3,7 +3,8 @@
 import {useRouter} from "vue-router";
 import {ref} from "vue";
 import FooterSection from "@/components/sections/FooterSection.vue";
-import { useUserStore } from '@/store/user'
+import {useUserStore} from '@/store/user'
+import LogOut from "@/components/buttons/LogOut.vue";
 
 const store = useUserStore();
 const router = useRouter();
@@ -28,7 +29,7 @@ const selectSection = (section) => {
     <aside class="sidebar">
       <div class="user-info">
         <img src="@/assets/empty-avatar.png" alt="User Avatar" class="avatar"/>
-        <h2 class="user-name">{{store.state.fullName}}</h2>
+        <h2 class="user-name">{{ store.state.fullName }}</h2>
       </div>
       <nav class="navigation">
         <button
@@ -41,11 +42,14 @@ const selectSection = (section) => {
           {{ section.name }}
         </button>
       </nav>
+      <div class="logout-button">
+        <LogOut/>
+      </div>
     </aside>
 
     <div class="content">
       <router-view/>
-      <FooterSection />
+      <FooterSection/>
     </div>
   </div>
 </template>
@@ -53,7 +57,7 @@ const selectSection = (section) => {
 <style scoped>
 .container {
   overflow-x: hidden;
- }
+}
 
 .sidebar {
   width: 25%;
@@ -62,10 +66,16 @@ const selectSection = (section) => {
   padding: 20px 24px 20px 20px;
   box-sizing: border-box;
   position: fixed;
-  align-self: flex-start;
   height: 100%;
   overflow-y: hidden;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.logout-button
+{
+  margin-top: auto;
 }
 
 .user-info {
@@ -93,8 +103,8 @@ const selectSection = (section) => {
   flex-grow: 1;
   width: 75%;
   min-height: 100vh;
-  background: rgb(51,16,84);
-  background: linear-gradient(90deg, rgba(51,16,84,1) 0%, rgba(25,9,73,1) 9%, rgba(2,2,64,1) 17%, rgba(3,3,48,1) 27%, rgba(3,3,34,1) 36%, rgba(3,3,34,1) 62%, rgba(2,2,48,1) 72%, rgba(1,1,63,1) 83%, rgba(23,8,70,1) 91%, rgba(48,15,78,1) 100%);
+  background: rgb(51, 16, 84);
+  background: linear-gradient(90deg, rgba(51, 16, 84, 1) 0%, rgba(25, 9, 73, 1) 9%, rgba(2, 2, 64, 1) 17%, rgba(3, 3, 48, 1) 27%, rgba(3, 3, 34, 1) 36%, rgba(3, 3, 34, 1) 62%, rgba(2, 2, 48, 1) 72%, rgba(1, 1, 63, 1) 83%, rgba(23, 8, 70, 1) 91%, rgba(48, 15, 78, 1) 100%);
 }
 
 .navigation {
