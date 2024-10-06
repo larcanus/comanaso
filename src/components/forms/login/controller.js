@@ -1,7 +1,9 @@
 const {useUserStore} = await import ('@/store/user')
+const {useAuthStore} = await import ('@/store/auth')
 
 export class Controller {
-	store = useUserStore()
+	userStore = useUserStore()
+	authStore = useAuthStore()
 
 	sendRestAuthentication({email, password}) {
 		return fetch('https://a3c60676f813acc0.mokky.dev/auth', {
@@ -34,6 +36,11 @@ export class Controller {
 
 	async setStoreUserData(response) {
 		const userData = await response.json()
-		return this.store.setUserData(userData.data);
+		this.userStore.setUserData(userData.data);
+		this.authStore.setAuthData({
+			userId: userData.data.id,
+			token: userData.token,
+			isAuthenticated: true,
+		});
 	}
 }

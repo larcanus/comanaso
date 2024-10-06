@@ -5,7 +5,7 @@ import AccountView from "@/views/AccountView.vue";
 import AnalyticsView from "@/views/AnalyticsView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 
-const isAuthenticated = true; // from cookie or store
+const {useAuthStore} = await import ('@/store/auth')
 
 
 const router = createRouter({
@@ -57,11 +57,12 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from) => {
-	if (to.meta.requiresAuth && !isAuthenticated && to.name !== 'home') {
+	const authStore = useAuthStore();
+	if (to.meta.requiresAuth && !authStore.state.isAuthenticated && to.name !== 'home') {
 		return {name: 'home'}
 	}
 
-	if (to.meta.requiresAuth && isAuthenticated && to.name === 'main') {
+	if (to.meta.requiresAuth && authStore.state.isAuthenticated && to.name === 'main') {
 		return {name: 'account'}
 	}
 })
