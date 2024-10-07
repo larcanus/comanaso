@@ -1,30 +1,30 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
-  const defaultStateModel = {
-    id: 0,
-    fullName: 'Name',
-    avatar: ''
-  }
+    const defaultStateModel = {
+        id: 0,
+        fullName: 'Name',
+        avatar: '',
+    };
 
-  const state = ref(defaultStateModel)
+    const state = ref(defaultStateModel);
 
-  function setUserData(user) {
-    this.state = user
-  }
+    function setUserData(user) {
+        this.state = user;
+    }
 
-  function updateUserFullName(name) {
-    this.state.fullName = name
-  }
+    function updateUserFullName(name) {
+        this.state.fullName = name;
+    }
 
-  function setAvatar(avatar) {
-    this.state.avatar = avatar
-  }
+    function setAvatar(avatar) {
+        this.state.avatar = avatar;
+    }
 
-  function $reset() {
-    this.state = defaultStateModel
-  }
+    function $reset() {
+        this.state = defaultStateModel;
+    }
 
-  return { state, $reset, setUserData, setAvatar, updateUserFullName }
-})
+    return { state, $reset, setUserData, setAvatar, updateUserFullName };
+});
