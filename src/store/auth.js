@@ -8,11 +8,15 @@ export const useAuthStore = defineStore('auth', () => {
 		isAuthenticated: false,
 	}
 
-	const state = ref(defaultStateModel);
+	const stateModel = ref(Object.assign({}, defaultStateModel));
 
-	function setAuthData(newState)
-	{
+	function setAuthData(newState) {
 		this.state = newState;
+	}
+
+	function setToken(token) {
+		this.state.token = token;
+		this.state.isAuthenticated = true;
 	}
 
 	function $reset()
@@ -20,5 +24,5 @@ export const useAuthStore = defineStore('auth', () => {
 		this.state = defaultStateModel;
 	}
 
-	return { state, $reset, setAuthData }
+	return { state: stateModel, $reset, setAuthData, setToken }
 });

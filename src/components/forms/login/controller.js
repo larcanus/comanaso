@@ -1,3 +1,5 @@
+import {setUserData} from "@/store/localStorage.js";
+
 const {useUserStore} = await import ('@/store/user')
 const {useAuthStore} = await import ('@/store/auth')
 
@@ -42,5 +44,9 @@ export class Controller {
 			token: userData.token,
 			isAuthenticated: true,
 		});
+
+		const {setAuthToken, setUserData} = await import("@/store/localStorage.js");
+		setAuthToken(userData.token);
+		setUserData(userData.data);
 	}
 }

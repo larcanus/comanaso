@@ -1,16 +1,11 @@
 <script setup>
-import {useUserStore} from '@/store/user'
-import {useAuthStore} from '@/store/auth'
 import {useRouter} from "vue-router";
-
-const storeUser = useUserStore();
-const storeAuth = useAuthStore();
+import {logoutStore} from "@/store/storeController.js";
 const router = useRouter();
 
 function onClickContainer() {
-  storeUser.$reset();
-  storeAuth.$reset();
-  router.replace({path:'/'})
+  logoutStore();
+  router.replace({name:'home'})
 }
 
 </script>
