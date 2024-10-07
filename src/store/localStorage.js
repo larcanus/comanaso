@@ -7,13 +7,13 @@ const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
 const TOKEN_TTL_MS = 3600000; // 1 hour
 
-export async function initLocalStore() {
+async function initLocalStore() {
 	await setAuthTokenToStore();
 	bindListener();
 }
 
 async function setAuthTokenToStore() {
-	const currentToken = await getToken();
+	const currentToken = await getAuthToken();
 	if (currentToken && !isTokenExpired(currentToken.timeStamp)) {
 		const authStore = useAuthStore();
 		authStore.setToken(currentToken.value);
@@ -48,7 +48,7 @@ const isTokenExpired = (timeStamp) => {
 	return diff > TOKEN_TTL_MS;
 };
 
-export function setAuthToken(access_token) {
+function setAuthToken(access_token) {
 	localStorage.setItem(
 		TOKEN_KEY,
 		JSON.stringify({
@@ -58,7 +58,7 @@ export function setAuthToken(access_token) {
 	);
 }
 
-export async function getToken() {
+async function getAuthToken() {
 	let result = null;
 	try {
 		const token = localStorage.getItem(TOKEN_KEY);
@@ -70,14 +70,14 @@ export async function getToken() {
 	return result;
 }
 
-export function setUserData(data) {
+function setUserData(data) {
 	localStorage.setItem(
 		USER_KEY,
 		JSON.stringify(data)
 	);
 }
 
-export async function getUserData() {
+async function getUserData() {
 	let result = null;
 	try {
 		const userData = localStorage.getItem(USER_KEY);
@@ -93,6 +93,14 @@ function removeAuthToken() {
 	localStorage.removeItem(TOKEN_KEY);
 }
 
-export function clearLocalStorage() {
+function clearLocalStorage() {
 	localStorage.clear();
 }
+
+const localStorageUtils = {
+	initLocalStore,
+	clearLocalStorage,
+	setAuthToken,
+	setUserData,
+}
+export default localStorageUtils
