@@ -98,8 +98,8 @@ async function onClickSignIn() {
     password: state.value.passwordValue
   })
   if (res.ok && [200, 201, 202].includes(res.status)) {
-    await controller.setStoreUserData(res);
-    await router.push('/main');
+    await controller.setStoreUserData(res)
+    await router.push('/main')
   } else {
     showLoginError()
   }
@@ -113,10 +113,10 @@ async function onClickCreateAccount() {
     password: state.value.passwordValue
   })
   if (res.ok && [200, 201, 202].includes(res.status)) {
-    showRegistrationSuccessful();
-    await controller.setStoreUserData(res);
+    showRegistrationSuccessful()
+    await controller.setStoreUserData(res)
   } else {
-    showRegistrationError();
+    showRegistrationError()
   }
 }
 
@@ -137,8 +137,8 @@ function showRegistrationError() {
   state.value.tooltipBigTimeout = setTimeout(async () => {
     state.value.isErrorRegistration = false
     state.value.isAllDisabled = false
-    await nextTick();
-    loginInputRef.value.focus();
+    await nextTick()
+    loginInputRef.value.focus()
   }, 3000)
 }
 
@@ -147,56 +147,56 @@ function showRegistrationSuccessful() {
 
   clearTimeout(state.value.tooltipBigTimeout)
   state.value.tooltipBigTimeout = setTimeout(() => {
-    state.value.isSuccessfulRegistration = false;
-    state.value.isErrorLogin = false;
-    state.value.isErrorRegistration = false;
-    state.value.isRegister = false;
-    state.value.isAllDisabled = false;
+    state.value.isSuccessfulRegistration = false
+    state.value.isErrorLogin = false
+    state.value.isErrorRegistration = false
+    state.value.isRegister = false
+    state.value.isAllDisabled = false
   }, 2000)
 }
 
 async function onClickTooltipBig() {
-  clearTimeout(state.value.tooltipBigTimeout);
-  state.value.isErrorLogin = false;
-  state.value.isErrorRegistration = false;
-  state.value.isAllDisabled = false;
-  await nextTick();
-  loginInputRef.value.focus();
+  clearTimeout(state.value.tooltipBigTimeout)
+  state.value.isErrorLogin = false
+  state.value.isErrorRegistration = false
+  state.value.isAllDisabled = false
+  await nextTick()
+  loginInputRef.value.focus()
 }
 
 function checkValidInputs() {
   if (!/^[а-яА-ЯёЁa-zA-Z0-9]+$/.test(state.value.loginValue)) {
-    state.value.messageInputLoginValidError = 'Login must include letters or numbers';
-    state.value.isErrorValidInputLogin = true;
+    state.value.messageInputLoginValidError = 'Login must include letters or numbers'
+    state.value.isErrorValidInputLogin = true
   } else if (state.value.loginValue.length < 5) {
-    state.value.messageInputLoginValidError = 'Login should be greater than 5 symbols';
-    state.value.isErrorValidInputLogin = true;
+    state.value.messageInputLoginValidError = 'Login should be greater than 5 symbols'
+    state.value.isErrorValidInputLogin = true
   } else {
-    state.value.messageInputLoginValidError = '';
-    state.value.isErrorValidInputLogin = false;
+    state.value.messageInputLoginValidError = ''
+    state.value.isErrorValidInputLogin = false
   }
 
   if (!/^[a-zA-Z0-9]*$/.test(state.value.passwordValue)) {
-    state.value.messageInputPSWValidError = 'Password must include only letters and numbers';
-    state.value.isErrorValidInputPsw = true;
+    state.value.messageInputPSWValidError = 'Password must include only letters and numbers'
+    state.value.isErrorValidInputPsw = true
   } else if (state.value.passwordValue.length < 5) {
-    state.value.messageInputPSWValidError = 'Password should be greater than 5 symbols';
-    state.value.isErrorValidInputPsw = true;
+    state.value.messageInputPSWValidError = 'Password should be greater than 5 symbols'
+    state.value.isErrorValidInputPsw = true
   } else {
-    state.value.messageInputPSWValidError = '';
-    state.value.isErrorValidInputPsw = false;
+    state.value.messageInputPSWValidError = ''
+    state.value.isErrorValidInputPsw = false
   }
 
   if (state.value.isRegister) {
     if (!/^[а-яА-ЯёЁa-zA-Z0-9]+$/.test(state.value.nameValue)) {
-      state.value.messageInputNameValidError = 'Name must include letters or numbers';
-      state.value.isErrorValidInputName = true;
+      state.value.messageInputNameValidError = 'Name must include letters or numbers'
+      state.value.isErrorValidInputName = true
     } else if (state.value.nameValue.length < 3) {
-      state.value.messageInputNameValidError = 'Name should be greater than 3 symbols';
-      state.value.isErrorValidInputName = true;
+      state.value.messageInputNameValidError = 'Name should be greater than 3 symbols'
+      state.value.isErrorValidInputName = true
     } else {
-      state.value.messageInputNameValidError = '';
-      state.value.isErrorValidInputName = false;
+      state.value.messageInputNameValidError = ''
+      state.value.isErrorValidInputName = false
     }
 
     return !(
@@ -217,9 +217,9 @@ function hiddenTooltip() {
     state.value.isErrorValidInputName
   ) {
     state.value.tooltipTimeout = setTimeout(() => {
-      state.value.isErrorValidInputLogin = false;
-      state.value.isErrorValidInputPsw = false;
-      state.value.isErrorValidInputName = false;
+      state.value.isErrorValidInputLogin = false
+      state.value.isErrorValidInputPsw = false
+      state.value.isErrorValidInputName = false
     }, 3000)
   }
 }

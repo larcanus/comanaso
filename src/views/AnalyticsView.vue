@@ -1,6 +1,4 @@
-<script setup>
-
-</script>
+<script setup></script>
 
 <template>
   <div class="view-container">
@@ -10,7 +8,7 @@
 </template>
 
 <style scoped>
-.view-container{
+.view-container {
   min-height: 100vh;
 }
 </style>

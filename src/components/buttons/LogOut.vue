@@ -1,32 +1,29 @@
 <script setup>
-import {useRouter} from "vue-router";
-import {logoutStore} from "@/store/storeController.js";
-const router = useRouter();
+import { useRouter } from 'vue-router'
+import { logoutStore } from '@/store/storeController.js'
+const router = useRouter()
 
 function onClickContainer() {
-  logoutStore();
-  router.replace({name:'home'})
+  logoutStore()
+  router.replace({ name: 'home' })
 }
-
 </script>
 
 <template>
   <div class="container" @click="onClickContainer">
-    <img src="@/assets/log-out.png" alt="logout" class="button-img"/>
+    <img src="@/assets/log-out.png" alt="logout" class="button-img" />
   </div>
 </template>
 
 <style scoped>
-.container
-{
+.container {
   margin: 5px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
 }
-.button-img
-{
+.button-img {
   width: 70px;
   height: 70px;
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { provide} from 'vue'
+import { provide } from 'vue'
 
 provide('overflowXHidden', (isHidden) => {
   // todo? this solution deprecated.
@@ -23,7 +23,6 @@ provide('overflowXHidden', (isHidden) => {
     )
   }
 })
-
 </script>
 
 <template>
