@@ -1,8 +1,8 @@
 import { logoutStore } from '@/store/storeController.js';
 import router from '@/router/index.js';
 
-const { useAuthStore } = await import('@/store/auth');
-const { useUserStore } = await import('@/store/user.js');
+import useAuthStore from '@/store/auth';
+import useUserStore from '@/store/user';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
 const TOKEN_TTL_MS = 3600000; // 1 hour

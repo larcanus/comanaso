@@ -1,6 +1,6 @@
 import localStorageUtils from '@/store/localStorage.js';
-const { useUserStore } = await import('@/store/user');
-const { useAuthStore } = await import('@/store/auth');
+import useAuthStore from '@/store/auth';
+import useUserStore from '@/store/user';
 
 export function logoutStore() {
     try {
