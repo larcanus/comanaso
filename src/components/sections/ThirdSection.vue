@@ -2,22 +2,26 @@
 import { ref } from 'vue';
 import SecurityInfoSlot from './elements/SecurityInfoSlot.vue';
 import SecurityIcon from '@/components/sections/elements/SecurityIcon.vue';
+import imageProtectionPath from '@/assets/animated-protection.gif';
+import imageAnalyticPath from '@/assets/animated-analytic-time.gif';
+import imageDBSavePath from '@/assets/animated-db-save.gif';
+import imageFencesPath from '@/assets/animated-fences.gif';
 
 const infoItems = ref([
     {
-        icon: 'src/assets/animated-protection.gif',
+        icon: imageProtectionPath,
         text: 'Мы не собираем ваши личные данные.',
     },
     {
-        icon: 'src/assets/animated-analytic-time.gif',
+        icon: imageAnalyticPath,
         text: 'Анализ данных происходит только во время работы сайта.',
     },
     {
-        icon: 'src/assets/animated-db-save.gif',
+        icon: imageDBSavePath,
         text: 'Мы не храним ваши данные на наших серверах.',
     },
     {
-        icon: 'src/assets/animated-fences.gif',
+        icon: imageFencesPath,
         text: 'Ваши данные защищены современными методами шифрования.',
     },
 ]);

@@ -1,14 +1,20 @@
 <script setup>
 import { ref } from 'vue';
+import imageLoginPath from '@/assets/login-card.png';
+import imageVkPath from '@/assets/vk.svg';
+import imageDataPath from '@/assets/data-card.png';
+
 
 const steps = ref([
     {
-        imagePath: 'src/assets/login-card.png',
+        imagePath: imageLoginPath,
         text: 'Зарегистрируйтесь на сайте.',
     },
-    { imagePath: 'src/assets/vk.svg', text: 'Подключите ваши аккаунты.' },
     {
-        imagePath: 'src/assets/data-card.png',
+        imagePath: imageVkPath,
+        text: 'Подключите ваши аккаунты.' },
+    {
+        imagePath: imageDataPath,
         text: 'Начните анализировать данные.',
     },
 ]);
