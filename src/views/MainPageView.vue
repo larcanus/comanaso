@@ -15,17 +15,37 @@ const sections = [
 ];
 const state = ref({
     selectedSection: 'account',
+    showSidebar: false,
 });
 
 const selectSection = (section) => {
     state.value.selectedSection = section;
     router.push({ path: `/main/${section}` });
 };
+
+function onMenuClick() {
+    state.value.showSidebar = !state.value.showSidebar;
+}
 </script>
 
 <template>
     <div class="container">
-        <aside class="sidebar">
+        <Transition name="menu" mode="out-in">
+            <div
+                class="menu-div"
+                v-if="!state.showSidebar"
+                @click="onMenuClick"
+            >
+                <img src="@/assets/menu.png" alt="menu" />
+            </div>
+        </Transition>
+        <aside class="sidebar" :class="{ sidebarShow: state.showSidebar }">
+            <div
+                class="menu-cancel-div"
+                @click="state.showSidebar = !state.showSidebar"
+            >
+                <img src="@/assets/cancel-sq.png" alt="cancel-menu" />
+            </div>
             <div class="user-info">
                 <img
                     src="@/assets/empty-avatar.png"
@@ -156,5 +176,78 @@ const selectSection = (section) => {
 .nav-button.active {
     background-color: #221b5e;
     color: #fff;
+}
+
+.menu-div {
+    display: flex;
+    position: absolute;
+    margin: 50px 50px 50px 50px;
+    flex-direction: row;
+    align-items: flex-end;
+    align-content: center;
+    justify-content: flex-end;
+}
+
+.menu-cancel-div {
+    display: none;
+    margin: 0 0 50px 0;
+    flex-direction: row;
+    align-items: flex-end;
+    align-content: center;
+    justify-content: flex-end;
+}
+
+.menu-div img {
+    width: 50px;
+    height: 50px;
+}
+
+.menu-enter-active {
+    transition: all 0.3s ease-out;
+}
+.menu-leave-active {
+    transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.menu-enter-from,
+.menu-leave-to {
+    transform: rotate(0.3turn);
+    opacity: 0;
+}
+
+.menu-cancel-div img {
+    width: 40px;
+    height: 40px;
+}
+
+@media (max-width: 750px) {
+    .sidebar {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(-20%);
+        width: 50%;
+    }
+    .sidebarShow {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(0);
+        transition:
+            opacity 0.4s ease-in-out,
+            transform 0.4s ease-in-out;
+    }
+
+    .menu-cancel-div {
+        display: flex;
+    }
+
+    .content {
+        margin: 0;
+        width: 100%;
+    }
+}
+
+@media (min-width: 800px) {
+    .menu-div {
+        display: none;
+    }
 }
 </style>
