@@ -4,7 +4,6 @@ import imageLoginPath from '@/assets/login-card.png';
 import imageVkPath from '@/assets/vk.svg';
 import imageDataPath from '@/assets/data-card.png';
 
-
 const steps = ref([
     {
         imagePath: imageLoginPath,
@@ -12,7 +11,8 @@ const steps = ref([
     },
     {
         imagePath: imageVkPath,
-        text: 'Подключите ваши аккаунты.' },
+        text: 'Подключите ваши аккаунты.',
+    },
     {
         imagePath: imageDataPath,
         text: 'Начните анализировать данные.',

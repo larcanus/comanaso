@@ -93,9 +93,11 @@ function onMenuClick() {
             rgba(120, 155, 255, 0.9) 25%,
             rgba(255, 160, 65, 0.9) 75%
         );
+    background-color: #412e85;
     padding: 20px 24px 20px 20px;
     box-sizing: border-box;
     position: fixed;
+    z-index: 2;
     height: 100%;
     overflow-y: hidden;
     overflow-x: hidden;
@@ -181,7 +183,7 @@ function onMenuClick() {
 .menu-div {
     display: flex;
     position: absolute;
-    margin: 50px 50px 50px 50px;
+    margin: 30px 30px 30px 30px;
     flex-direction: row;
     align-items: flex-end;
     align-content: center;

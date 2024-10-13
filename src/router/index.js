@@ -56,7 +56,6 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to) => {
-
     const authStore = useAuthStore();
     console.log('authStore', authStore);
     if (

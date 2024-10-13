@@ -29,5 +29,4 @@ export const useUserStore = defineStore('user', () => {
     return { state, $reset, setUserData, setAvatar, updateUserFullName };
 });
 
-
 export default useUserStore;

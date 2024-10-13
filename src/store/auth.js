@@ -26,4 +26,4 @@ export const useAuthStore = defineStore('auth', () => {
     return { state: stateModel, $reset, setAuthData, setToken };
 });
 
-export default useAuthStore
+export default useAuthStore;
