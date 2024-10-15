@@ -16,7 +16,7 @@ const state = reactive({
 
 accStore.$onAction(({ name, after }) => {
     after(() => {
-        if (name === 'setAccountData') {
+        if (name === 'setAccountData' || name === 'deleteAccountData') {
             state.accounts = accStore.getCollectionId();
         }
     });

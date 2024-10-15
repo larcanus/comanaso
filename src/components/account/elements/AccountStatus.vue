@@ -22,6 +22,8 @@ const statusData = computed(() => {
             };
         case 'error':
             return { imagePath: circleErrorImagePath, textStatus: 'ошибка' };
+        default:
+            return { imagePath: circleErrorImagePath, textStatus: 'ошибка' };
     }
 });
 </script>

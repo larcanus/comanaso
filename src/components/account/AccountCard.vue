@@ -24,8 +24,8 @@ const state = reactive({
 
 accountStore.$onAction(({ name, after }) => {
     after((result) => {
-        if (name === 'changeStatus') {
-            state.status = result;
+        if (name === 'changeStatus' && result.id === state.id) {
+            state.status = result.status;
         }
     });
 });
@@ -40,9 +40,17 @@ function onClickSave() {
 function onClickEdit() {
     state.isEdit = !state.isEdit;
 }
+function onClickDelete() {
+    console.log('onClickDelete');
+    accountStore.deleteAccountData(state.id)
+}
 function onClickStart() {
     state.isConnect = !state.isConnect;
     accountStore.changeStatus(state.id, 'connect');
+}
+function onClickDisconnect() {
+    state.isConnect = !state.isConnect;
+    accountStore.changeStatus(state.id, 'offline');
 }
 </script>
 
@@ -89,11 +97,27 @@ function onClickStart() {
                     Редактировать
                 </button>
                 <button
-                    v-if="!state.isEdit"
+                    v-if="state.isEdit"
+                    :disabled="state.isConnect"
+                    @click="onClickDelete"
+                    class="button-cancel"
+                >
+                    Удалить аккаунт
+                </button>
+                <button
+                    v-if="!state.isEdit && !state.isConnect"
                     :disabled="state.isConnect"
                     @click="onClickStart"
                 >
                     Старт!
+                </button>
+                <button
+                    v-if="!state.isEdit && state.isConnect"
+                    :disabled="!state.isConnect"
+                    @click="onClickDisconnect"
+                    class="button-cancel"
+                >
+                    Отключить
                 </button>
             </div>
         </div>
@@ -171,6 +195,14 @@ input:disabled {
 
 .buttons button:hover {
     background-color: #0056b3;
+}
+
+.buttons .button-cancel {
+    background-color: #d34343;
+}
+
+.buttons .button-cancel:hover {
+    background-color: #6e2424;
 }
 
 @media (max-width: 700px) {

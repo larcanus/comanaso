@@ -23,6 +23,12 @@ export const useAccountStore = defineStore('account', () => {
         return { ...this.state[accountData.id] };
     }
 
+    function deleteAccountData(id) {
+        delete this.state[id];
+
+        return { ...this.state };
+    }
+
     function updateAccountData(accountData) {
         const existingAccountData = state[accountData.id];
         this.state[accountData.id] = validate({
@@ -45,7 +51,7 @@ export const useAccountStore = defineStore('account', () => {
     function changeStatus(id, status) {
         this.state[id].status = status;
 
-        return status;
+        return {id, status};
     }
 
     function $reset() {
@@ -65,6 +71,7 @@ export const useAccountStore = defineStore('account', () => {
         $reset,
         getCollectionId,
         setAccountData,
+        deleteAccountData,
         updateAccountData,
         getById,
         changeStatus,
