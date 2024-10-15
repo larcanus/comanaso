@@ -1,35 +1,48 @@
 <script setup>
-import { ref, defineProps, reactive } from 'vue';
+import { defineProps, reactive } from 'vue';
 import AccountStatus from '@/components/account/elements/AccountStatus.vue';
+import useAccountStore from '@/store/account.js';
+const accountStore = useAccountStore();
 const props = defineProps({
-    account: Object,
+    account: Number,
 });
+const accountData = accountStore.getById(props.account);
+
 const state = reactive({
-    isConnect: false,
-    isEdit: false,
-    id: 0,
-    name: '',
-    entity: '',
-    apiId: null,
-    apiHash: '',
-    phoneNumber: '',
+    ...{
+        isConnect: accountData.status !== 'offline',
+        isEdit: false,
+        id: 0,
+        name: '',
+        entity: '',
+        apiId: null,
+        apiHash: '',
+        phoneNumber: '',
+    },
+    ...accountData,
+});
+
+accountStore.$onAction(({ name, after }) => {
+    after((result) => {
+        if (name === 'changeStatus') {
+            state.status = result;
+        }
+    });
 });
 
 function onClickSave() {
-    console.log('onClickSave');
-    console.log(state.isEdit);
     state.isEdit = !state.isEdit;
+    const newStateAccount = { ...state };
+    delete newStateAccount.isEdit;
+    accountStore.updateAccountData(newStateAccount);
 }
 
 function onClickEdit() {
-    console.log('onClickEdit');
-    console.log(state.isEdit);
     state.isEdit = !state.isEdit;
 }
 function onClickStart() {
-    console.log('onClickStart');
-    console.log(state.isConnect);
     state.isConnect = !state.isConnect;
+    accountStore.changeStatus(state.id, 'connect');
 }
 </script>
 
@@ -37,7 +50,7 @@ function onClickStart() {
     <div class="product-card">
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
-            <AccountStatus />
+            <AccountStatus v-bind="{ status: state.status }" />
         </div>
         <div class="product-details">
             <input

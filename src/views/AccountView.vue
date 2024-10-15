@@ -1,18 +1,25 @@
 <script setup>
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
-import { ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { getDialogs } from 'telegram/client/dialogs.js';
 import AddAccount from '@/components/buttons/AddAccount.vue';
 import AccountCard from '@/components/account/AccountCard.vue';
+import useAccountStore from '@/store/account.js';
 // import input from 'input';
-
-const state = ref({
+const accStore = useAccountStore();
+const accountIds = accStore.getCollectionId();
+const state = reactive({
     valueInput: '',
-    accounts: [
-        { entity: 'tl', id: 1 },
-        { entity: 'tl', id: 2 },
-    ],
+    accounts: accountIds || [],
+});
+
+accStore.$onAction(({ name, after }) => {
+    after(() => {
+        if (name === 'setAccountData') {
+            state.accounts = accStore.getCollectionId();
+        }
+    });
 });
 
 async function onClickConnect() {
@@ -44,7 +51,6 @@ async function onClickConnect() {
     //     const result = await client.getDialogs();
     // console.log('result', result); // prints the result
 }
-
 </script>
 
 <template>
@@ -62,7 +68,7 @@ async function onClickConnect() {
         <!--        -->
         <!--        <input @change="state.valueInput" placeholder="code"/>-->
         <div class="accounts-container">
-            <div v-for="account of state.accounts" :key="account.id">
+            <div v-for="account of state.accounts" :key="account">
                 <AccountCard v-bind="{ account }" />
             </div>
             <AddAccount />

@@ -1,9 +1,26 @@
 <script setup>
 import imagePlusPath from '@/assets/plus.png';
+import useAccountStore from '@/store/account.js';
+const accStore = useAccountStore();
+function onClickDiv() {
+    const ids = accStore.getCollectionId();
+    if (ids.length > 5) {
+        console.log('to match acc'); // TODO notify
+        alert('куда тебе столько?');
+        return;
+    }
+
+    let id = 0;
+    if (ids.length > 0) {
+        id = ++ids.sort()[ids.length - 1];
+    }
+
+    accStore.setAccountData({ id });
+}
 </script>
 
 <template>
-    <div class="div-image">
+    <div class="div-image" @click="onClickDiv">
         <img :src="imagePlusPath" alt="acc" />
     </div>
 </template>

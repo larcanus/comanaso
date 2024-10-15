@@ -3,14 +3,14 @@ import circleOffImagePath from '@/assets/circle-off.png';
 import circleOkImagePath from '@/assets/circle-ok.png';
 import circleArrowsImagePath from '@/assets/circle-arrows.png';
 import circleErrorImagePath from '@/assets/circle-error.png';
-import { computed, reactive } from 'vue';
+import { computed, defineProps, reactive } from 'vue';
 
-const state = reactive({
-    status: 'offline',
+const props = defineProps({
+    status: String,
 });
 
 const statusData = computed(() => {
-    switch (state.status) {
+    switch (props.status) {
         case 'offline':
             return { imagePath: circleOffImagePath, textStatus: 'отключен' };
         case 'online':
@@ -18,7 +18,7 @@ const statusData = computed(() => {
         case 'connect':
             return {
                 imagePath: circleArrowsImagePath,
-                textStatus: 'соединение...',
+                textStatus: 'соединение',
             };
         case 'error':
             return { imagePath: circleErrorImagePath, textStatus: 'ошибка' };
@@ -47,5 +47,9 @@ img {
     height: 20px;
     border-radius: 2px;
     margin: 5px;
+}
+p {
+    font-size: 10px;
+    color: #afadad;
 }
 </style>

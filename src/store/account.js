@@ -6,9 +6,10 @@ export const useAccountStore = defineStore('account', () => {
         id: 0,
         name: '',
         entity: '',
-        apiId: 0,
+        apiId: '',
         apiHash: '',
         phoneNumber: '',
+        status: 'offline', // 'offline' 'connect' 'online' 'error'
     };
 
     const state = ref({});
@@ -18,6 +19,33 @@ export const useAccountStore = defineStore('account', () => {
             ...defaultStateModel,
             ...accountData,
         });
+
+        return { ...this.state[accountData.id] };
+    }
+
+    function updateAccountData(accountData) {
+        const existingAccountData = state[accountData.id];
+        this.state[accountData.id] = validate({
+            ...defaultStateModel,
+            ...existingAccountData,
+            ...accountData,
+        });
+
+        return { ...this.state[accountData.id] };
+    }
+
+    function getCollectionId() {
+        return Object.keys(this.state);
+    }
+
+    function getById(id) {
+        return { ...this.state[id] };
+    }
+
+    function changeStatus(id, status) {
+        this.state[id].status = status;
+
+        return status;
     }
 
     function $reset() {
@@ -32,7 +60,15 @@ export const useAccountStore = defineStore('account', () => {
         return fields;
     }
 
-    return { state, $reset, setAccountData };
+    return {
+        state,
+        $reset,
+        getCollectionId,
+        setAccountData,
+        updateAccountData,
+        getById,
+        changeStatus,
+    };
 });
 
 function generatePositiveAccountName() {
