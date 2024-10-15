@@ -90,6 +90,7 @@ function generatePositiveAccountName() {
         'Потрясающий',
         'Блестящий',
         'Исключительный',
+        'Невероятный',
     ];
 
     const noun = 'аккаунт';

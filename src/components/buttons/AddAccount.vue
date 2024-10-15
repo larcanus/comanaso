@@ -31,6 +31,7 @@ function onClickDiv() {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin: 20px 0 40px 0;
 }
 
 img {

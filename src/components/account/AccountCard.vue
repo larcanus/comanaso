@@ -4,7 +4,7 @@ import AccountStatus from '@/components/account/elements/AccountStatus.vue';
 import useAccountStore from '@/store/account.js';
 const accountStore = useAccountStore();
 const props = defineProps({
-    account: Number,
+    account: String,
 });
 const accountData = accountStore.getById(props.account);
 
