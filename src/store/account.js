@@ -16,7 +16,9 @@ export const useAccountStore = defineStore('account', () => {
     const state = ref({});
 
     function setAccountsDataFromLocalStore(accountsData) {
-        this.state = accountsData;
+        if(accountsData) {
+            this.state = accountsData;
+        }
     }
 
     async function setAccountData(accountData) {
