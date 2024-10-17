@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import imageLoginPath from '@/assets/login-card.png';
-import imageVkPath from '@/assets/vk.svg';
+import imageTgPath from '@/assets/telegram.png';
 import imageDataPath from '@/assets/data-card.png';
 
 const steps = ref([
@@ -10,7 +10,7 @@ const steps = ref([
         text: 'Зарегистрируйтесь на сайте.',
     },
     {
-        imagePath: imageVkPath,
+        imagePath: imageTgPath,
         text: 'Подключите ваши аккаунты.',
     },
     {

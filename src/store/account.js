@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { deleteAccountLocalStore, setAccountLocalStore, updateAccountLocalStore } from '@/store/storeController.js';
 
 export const useAccountStore = defineStore('account', () => {
     const defaultStateModel = {
@@ -14,28 +15,35 @@ export const useAccountStore = defineStore('account', () => {
 
     const state = ref({});
 
-    function setAccountData(accountData) {
+    function setAccountsDataFromLocalStore(accountsData) {
+        this.state = accountsData;
+    }
+
+    async function setAccountData(accountData) {
         this.state[accountData.id] = validate({
             ...defaultStateModel,
             ...accountData,
         });
+        await setAccountLocalStore(this.state);
 
         return { ...this.state[accountData.id] };
     }
 
-    function deleteAccountData(id) {
+    async function deleteAccountData(id) {
         delete this.state[id];
+        await deleteAccountLocalStore(this.state);
 
         return { ...this.state };
     }
 
-    function updateAccountData(accountData) {
+    async function updateAccountData(accountData) {
         const existingAccountData = state[accountData.id];
         this.state[accountData.id] = validate({
             ...defaultStateModel,
             ...existingAccountData,
             ...accountData,
         });
+        await updateAccountLocalStore(this.state);
 
         return { ...this.state[accountData.id] };
     }
@@ -48,10 +56,11 @@ export const useAccountStore = defineStore('account', () => {
         return { ...this.state[id] };
     }
 
-    function changeStatus(id, status) {
+    async function changeStatus(id, status) {
         this.state[id].status = status;
+        await updateAccountLocalStore(this.state);
 
-        return {id, status};
+        return { id, status };
     }
 
     function $reset() {
@@ -70,6 +79,7 @@ export const useAccountStore = defineStore('account', () => {
         state,
         $reset,
         getCollectionId,
+        setAccountsDataFromLocalStore,
         setAccountData,
         deleteAccountData,
         updateAccountData,

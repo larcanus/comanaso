@@ -1,10 +1,12 @@
-import { logoutStore } from '@/store/storeController.js';
+import { logoutAllStore } from '@/store/storeController.js';
 import router from '@/router/index.js';
 
 import useAuthStore from '@/store/auth';
 import useUserStore from '@/store/user';
+import useAccountStore from '@/store/account.js';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
+const ACC_KEY = 'acc_data';
 const TOKEN_TTL_MS = 3600000; // 1 hour
 
 async function initLocalStore() {
@@ -19,6 +21,7 @@ async function setAuthTokenToStore() {
         authStore.setToken(currentToken.value);
 
         await setUserDataToStore();
+        await setAccountDataToStore();
     } else {
         clearLocalStorage();
     }
@@ -27,7 +30,15 @@ async function setAuthTokenToStore() {
 async function setUserDataToStore() {
     const userData = await getUserData();
     const userStore = useUserStore();
+
     userStore.setUserData(userData);
+}
+
+async function setAccountDataToStore() {
+    const accData = await getAccountData();
+    const accStore = useAccountStore();
+
+    accStore.setAccountsDataFromLocalStore(accData);
 }
 
 function bindListener() {
@@ -36,7 +47,7 @@ function bindListener() {
             (e.key === TOKEN_KEY && e.newValue === null) ||
             (e.key === null && e.newValue === null)
         ) {
-            logoutStore();
+            logoutAllStore();
             router.replace({ name: 'home' }).catch(console.error);
         }
     });
@@ -97,10 +108,28 @@ function clearLocalStorage() {
     localStorage.clear();
 }
 
+function setAccountData(data)
+{
+    localStorage.setItem(ACC_KEY, JSON.stringify(data));
+}
+
+async function getAccountData() {
+    let result = null;
+    try {
+        const accData = localStorage.getItem(ACC_KEY);
+        accData && (result = await JSON.parse(accData));
+    } catch (error) {
+        console.error(error);
+    }
+
+    return result;
+}
+
 const localStorageUtils = {
     initLocalStore,
     clearLocalStorage,
     setAuthToken,
     setUserData,
+    setAccountData
 };
 export default localStorageUtils;

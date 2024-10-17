@@ -1,4 +1,4 @@
-import { logInStore } from '@/store/storeController.js';
+import { logInAllStore } from '@/store/storeController.js';
 
 export class Controller {
     sendRestAuthentication({ email, password }) {
@@ -32,6 +32,6 @@ export class Controller {
 
     async setStoreUserData(response) {
         const userData = await response.json();
-        await logInStore(userData);
+        await logInAllStore(userData);
     }
 }

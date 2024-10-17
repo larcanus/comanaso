@@ -2,7 +2,7 @@ import localStorageUtils from '@/store/localStorage.js';
 import useAuthStore from '@/store/auth';
 import useUserStore from '@/store/user';
 
-export function logoutStore() {
+export function logoutAllStore() {
     try {
         const userStore = useUserStore();
         const authStore = useAuthStore();
@@ -15,7 +15,7 @@ export function logoutStore() {
     }
 }
 
-export async function logInStore(userData) {
+export async function logInAllStore(userData) {
     try {
         const userStore = useUserStore();
         const authStore = useAuthStore();
@@ -32,4 +32,28 @@ export async function logInStore(userData) {
     } catch (e) {
         console.error(e);
     }
+}
+
+export async function setAccountLocalStore(state) {
+    try {
+        localStorageUtils.setAccountData(state);
+    } catch (e) {
+        console.error(e);
+    }
+}
+export async function deleteAccountLocalStore(state) {
+    try {
+        localStorageUtils.setAccountData(state);
+    } catch (e) {
+        console.error(e);
+    }
+}
+export async function updateAccountLocalStore(state) {
+    try {
+        localStorageUtils.setAccountData(state);
+    } catch (e) {
+        console.error(e);
+    }
+}
+export async function getAccountsData(userData) {
 }

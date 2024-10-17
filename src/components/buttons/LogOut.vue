@@ -1,10 +1,10 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { logoutStore } from '@/store/storeController.js';
+import { logoutAllStore } from '@/store/storeController.js';
 const router = useRouter();
 
 function onClickContainer() {
-    logoutStore();
+    logoutAllStore();
     router.replace({ name: 'home' });
 }
 </script>

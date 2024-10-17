@@ -34,6 +34,7 @@ function onClickSave() {
     state.isEdit = !state.isEdit;
     const newStateAccount = { ...state };
     delete newStateAccount.isEdit;
+    delete newStateAccount.isConnect;
     accountStore.updateAccountData(newStateAccount);
 }
 

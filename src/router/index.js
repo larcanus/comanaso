@@ -6,7 +6,6 @@ import AnalyticsView from '@/views/AnalyticsView.vue';
 import SettingsView from '@/views/SettingsView.vue';
 import useAuthStore from '@/store/auth';
 
-console.log(useAuthStore);
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -57,7 +56,7 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
     const authStore = useAuthStore();
-    console.log('authStore', authStore);
+
     if (
         to.meta.requiresAuth &&
         !authStore.state.isAuthenticated &&
