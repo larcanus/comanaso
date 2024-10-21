@@ -1,12 +1,10 @@
 <script setup>
-import { Api, TelegramClient } from 'telegram';
-import { StringSession } from 'telegram/sessions';
 import { reactive, ref, watch } from 'vue';
 import { getDialogs } from 'telegram/client/dialogs.js';
 import AddAccount from '@/components/buttons/AddAccount.vue';
 import AccountCard from '@/components/account/AccountCard.vue';
 import useAccountStore from '@/store/account.js';
-// import input from 'input';
+
 const accStore = useAccountStore();
 const accountIds = accStore.getCollectionId();
 const state = reactive({

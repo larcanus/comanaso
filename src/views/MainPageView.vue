@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import FooterSection from '@/components/sections/FooterSection.vue';
 import { useUserStore } from '@/store/user';
 import LogOut from '@/components/buttons/LogOut.vue';
+import Toast from '@/components/toast/Toast.vue';
 
 const store = useUserStore();
 const router = useRouter();
@@ -75,6 +76,7 @@ function onMenuClick() {
             <FooterSection />
         </div>
     </div>
+    <Toast />
 </template>
 
 <style scoped>

@@ -1,8 +1,12 @@
 <script setup>
-import { defineProps, reactive } from 'vue';
+import { defineProps, reactive, watch } from 'vue';
+import { Api, TelegramClient } from 'telegram';
+import { StringSession } from 'telegram/sessions';
 import AccountStatus from '@/components/account/elements/AccountStatus.vue';
 import useAccountStore from '@/store/account.js';
+import useToastStore from '@/store/toast.js';
 const accountStore = useAccountStore();
+const toastStore = useToastStore();
 const props = defineProps({
     account: String,
 });
@@ -42,16 +46,54 @@ function onClickEdit() {
     state.isEdit = !state.isEdit;
 }
 function onClickDelete() {
-    console.log('onClickDelete');
     accountStore.deleteAccountData(state.id)
 }
 function onClickStart() {
+    if(!isValidConnectData({apiId: state.apiId, apiHash: state.apiHash}))
+    {
+       toastStore.addToast('error', 'erororororor')
+        return;
+    }
     state.isConnect = !state.isConnect;
     accountStore.changeStatus(state.id, 'connect');
+    startConnectAccount();
 }
 function onClickDisconnect() {
     state.isConnect = !state.isConnect;
     accountStore.changeStatus(state.id, 'offline');
+}
+
+function startConnectAccount() {
+    const apiId = state.apiId || 27151307;
+    const apiHash = state.apiHash || "ff9d24b00baaa16907c31afdbe318fd7";
+
+    const stringSession = new StringSession();
+
+    const client = new TelegramClient(stringSession, apiId, apiHash, {
+            connectionRetries: 2,
+        });
+}
+function isValidConnectData(fields)
+{
+    let result = true;
+    Object.keys(fields).forEach((field) => {
+        if(fields[field])
+        {
+            result = false;
+        }
+
+        if( typeof fields[field] === 'string' && fields[field].length === 0)
+        {
+            result = false;
+        }
+
+        if( typeof fields[field] === 'number' && fields[field] < 10000)
+        {
+            result = false;
+        }
+    })
+
+    return result;
 }
 </script>
 
