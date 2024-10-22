@@ -1,5 +1,7 @@
 <script setup>
 import { reactive } from 'vue';
+import okImagePath from '@/assets/circle-ok.png';
+import errorImagePath from '@/assets/circle-error.png';
 import useToastStore from '@/store/toast.js';
 const toastStore = useToastStore();
 const state = reactive({
@@ -12,6 +14,15 @@ toastStore.$subscribe((mutation, store) => {
     }
 })
 
+function getImagePath(type) {
+    switch (type)
+    {
+        case 'ok': return okImagePath
+        case 'error': return errorImagePath
+        default: return errorImagePath
+    }
+}
+
 </script>
 
 <template>
@@ -22,7 +33,10 @@ toastStore.$subscribe((mutation, store) => {
                     <li
                         v-for="toast in state.toasts"
                         :key="toast.text"
+                        class="toast"
+                        :class="`toast-type-${toast.type}`"
                     >
+                        <img :src="getImagePath(toast.type)" alt="status-icon" class="icon">
                         <span>
                             {{ toast.text }}
                         </span>
@@ -56,4 +70,40 @@ toastStore.$subscribe((mutation, store) => {
     flex-direction: column;
     gap: 1rem;
 }
+
+.toast {
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    padding: 0.5rem;
+
+    opacity: 0.9;
+    border-radius: 2px;
+    margin: 10px;
+    text-align: center;
+    place-items: center;
+    max-width: 250px;
+    width: 250px;
+    white-space: break-spaces;
+}
+
+.toast-type-error
+{
+    background-color: #d0363e;
+}
+.toast-type-ok
+{
+    background-color: #42e362;
+}
+.toast-type-info
+{
+    background-color: #d8a600;
+}
+
+.icon {
+    width: 1rem;
+    height: 1rem;
+    margin: 0.5rem;
+}
+
 </style>

@@ -5,12 +5,15 @@ import { StringSession } from 'telegram/sessions';
 import AccountStatus from '@/components/account/elements/AccountStatus.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
+
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
 const props = defineProps({
     account: String,
 });
 const accountData = accountStore.getById(props.account);
+const LOC_TOAST_VALID_ERROR = 'Ошибка данных. Проверьте поля аккаунта';
+const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент создан';
 
 const state = reactive({
     ...{
@@ -45,19 +48,23 @@ function onClickSave() {
 function onClickEdit() {
     state.isEdit = !state.isEdit;
 }
+
 function onClickDelete() {
-    accountStore.deleteAccountData(state.id)
+    accountStore.deleteAccountData(state.id);
 }
+
 function onClickStart() {
-    if(!isValidConnectData({apiId: state.apiId, apiHash: state.apiHash}))
-    {
-       toastStore.addToast('error', 'erororororor')
+    if (!isValidConnectData({ apiId: state.apiId, apiHash: state.apiHash })) {
+        toastStore.addToast('error', LOC_TOAST_VALID_ERROR);
+
         return;
     }
+
     state.isConnect = !state.isConnect;
     accountStore.changeStatus(state.id, 'connect');
     startConnectAccount();
 }
+
 function onClickDisconnect() {
     state.isConnect = !state.isConnect;
     accountStore.changeStatus(state.id, 'offline');
@@ -65,33 +72,32 @@ function onClickDisconnect() {
 
 function startConnectAccount() {
     const apiId = state.apiId || 27151307;
-    const apiHash = state.apiHash || "ff9d24b00baaa16907c31afdbe318fd7";
+    const apiHash = state.apiHash || 'ff9d24b00baaa16907c31afdbe318fd7';
 
     const stringSession = new StringSession();
 
     const client = new TelegramClient(stringSession, apiId, apiHash, {
-            connectionRetries: 2,
-        });
+        connectionRetries: 2,
+    });
+
+    toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
 }
-function isValidConnectData(fields)
-{
+
+function isValidConnectData(fields) {
     let result = true;
     Object.keys(fields).forEach((field) => {
-        if(fields[field])
-        {
+        if (!fields[field]) {
             result = false;
         }
 
-        if( typeof fields[field] === 'string' && fields[field].length === 0)
-        {
+        if (typeof fields[field] === 'string' && fields[field].length === 0) {
             result = false;
         }
 
-        if( typeof fields[field] === 'number' && fields[field] < 10000)
-        {
+        if (typeof fields[field] === 'string' && fields[field].length === 0) {
             result = false;
         }
-    })
+    });
 
     return result;
 }
@@ -223,6 +229,7 @@ input:disabled {
     color: #a6a5a5;
     cursor: not-allowed;
 }
+
 .buttons button:disabled:hover {
     background-color: #2c3e50;
 }
