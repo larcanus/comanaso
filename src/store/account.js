@@ -7,9 +7,9 @@ export const useAccountStore = defineStore('account', () => {
         id: 0,
         name: '',
         entity: '',
-        apiId: '',
-        apiHash: '',
-        phoneNumber: '',
+        apiId: 27151307,
+        apiHash: 'ff9d24b00baaa16907c31afdbe318fd7',
+        phoneNumber: '+79056002730',
         status: 'offline', // 'offline' 'connect' 'online' 'error'
     };
 

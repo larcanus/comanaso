@@ -10,7 +10,7 @@ function onClickDiv() {
         return;
     }
 
-    let id = 0;
+    let id = 1;
     if (ids.length > 0) {
         id = ++ids.sort()[ids.length - 1];
     }

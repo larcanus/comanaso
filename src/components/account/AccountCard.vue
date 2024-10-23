@@ -1,13 +1,13 @@
 <script setup>
-import { defineProps, reactive, watch } from 'vue';
-import { Api, TelegramClient } from 'telegram';
-import { StringSession } from 'telegram/sessions';
+import { defineProps, reactive, onBeforeMount } from 'vue';
 import AccountStatus from '@/components/account/elements/AccountStatus.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
+import useConnectionStore from '@/store/connection.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
+const connectionStore = useConnectionStore();
 const props = defineProps({
     account: String,
 });
@@ -22,17 +22,36 @@ const state = reactive({
         id: 0,
         name: '',
         entity: '',
-        apiId: null,
+        apiId: '',
         apiHash: '',
         phoneNumber: '',
     },
     ...accountData,
 });
 
+onBeforeMount(async () => {
+    await checkClient();
+});
+
+async function checkClient() {
+    const client = await connectionStore.getClientById(state.id);
+
+    console.log('checkClient client.connected:', client.connected);
+
+    if (client) {
+        const status = client.connected ? 'online' : 'offline';
+        await accountStore.changeStatus(state.id, status);
+    } else {
+        await accountStore.changeStatus(state.id, 'offline');
+    }
+}
+
+
 accountStore.$onAction(({ name, after }) => {
     after((result) => {
         if (name === 'changeStatus' && result.id === state.id) {
             state.status = result.status;
+            state.isConnect = result.status !== 'offline';
         }
     });
 });
@@ -62,25 +81,78 @@ function onClickStart() {
 
     state.isConnect = !state.isConnect;
     accountStore.changeStatus(state.id, 'connect');
-    startConnectAccount();
+    try {
+        startConnectAccount();
+    } catch (error) {
+        console.error(error);
+        state.isConnect = !state.isConnect;
+        accountStore.changeStatus(state.id, 'error');
+    }
 }
 
-function onClickDisconnect() {
+async function onClickDisconnect() {
+    const client = await connectionStore.getClientById(state.id);
+    await client?.disconnect();
+    await client?.destroy();
+    client.session.save();
     state.isConnect = !state.isConnect;
-    accountStore.changeStatus(state.id, 'offline');
+    await accountStore.changeStatus(state.id, 'offline');
+    connectionStore.setConnection(state.id, {
+        client: null,
+        account: state.id,
+    });
 }
 
-function startConnectAccount() {
-    const apiId = state.apiId || 27151307;
-    const apiHash = state.apiHash || 'ff9d24b00baaa16907c31afdbe318fd7';
+async function startConnectAccount() {
+    const client = await connectionStore.getClientById(state.id);
+    console.log('startConnectAccount connection', client);
+    await client?.connect();
 
-    const stringSession = new StringSession();
-
-    const client = new TelegramClient(stringSession, apiId, apiHash, {
-        connectionRetries: 2,
-    });
-
-    toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
+    try {
+        if (client && await client.checkAuthorization()) {
+            const result = await client.getDialogs();
+            console.log('result 1', result); // prints the result
+            await accountStore.changeStatus(state.id, 'online');
+            await client.sendMessage('me', { message: 'Hello! if 1' });
+        } else {
+            // client = await createClient(state.apiId, state.apiHash);
+            console.log('new client', client);
+            await client.start({
+                phoneNumber: state.phoneNumber,
+                password: async () => prompt('password!'),
+                phoneCode: async () => {
+                    const res = prompt('code!');
+                    console.log(res);
+                    if (res === null) {
+                        await client.destroy();
+                    }
+                    return res;
+                },
+                onError: (err) => console.log(err),
+            });
+            client.session.save();
+            // storeSession.save();
+            // await storeSession.load();
+            // console.log('storeSession', storeSession);
+            // console.log('storeSession authKey', storeSession.authKey);
+            connectionStore.setConnection(state.id, {
+                client,
+                account: state.id,
+            });
+            toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
+            await accountStore.changeStatus(state.id, 'online');
+            console.log(client.disconnected);
+            console.log(client.connected);
+            const result = await client.getDialogs();
+            console.log('result 2', result); // prints the result
+            await client.sendMessage('me', { message: 'Hello!' });
+            console.log(client.connected);
+        }
+    } catch (error) {
+        console.error(error);
+        await client.destroy();
+        await accountStore.changeStatus(state.id, 'error');
+    }
 }
 
 function isValidConnectData(fields) {
@@ -101,6 +173,17 @@ function isValidConnectData(fields) {
 
     return result;
 }
+
+async function check() {
+    const client = await connectionStore.getClientById(state.id);
+    console.log('check client', client);
+    try {
+        await client.sendMessage('me', { message: 'Hello! check' });
+        client.session.save();
+    } catch (e) {
+        console.error(e);
+    }
+}
 </script>
 
 <template>
@@ -108,6 +191,10 @@ function isValidConnectData(fields) {
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
             <AccountStatus v-bind="{ status: state.status }" />
+            <button @click="check" class="button">
+                >
+                check
+            </button>
         </div>
         <div class="product-details">
             <input
