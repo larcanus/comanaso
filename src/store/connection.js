@@ -4,53 +4,31 @@ import { createClient } from '@/utils/connection.js';
 import useAccountStore from '@/store/account.js';
 
 export const useConnectionStore = defineStore('connection', () => {
-    const defaultStateModel = {
-        client: null,
-        account: 0,
-    };
-
+    let client = null;
     const state = ref({});
 
-    function getStateById(id) {
-        return this.state[id];
-    }
-
-    function getClientById(id) {
-        const state = this.state[id];
-
-        if(state?.client) {
-            return state.client;
+    async function getClientByAccountId(id) {
+        if(!client)
+        {
+            client = await tryGetClientByAccountId(id)
         }
-
-        if(!state?.client) {
-            this.state[id] = {
-                ...defaultStateModel,
-                client:  tryGetClientByAccountId(id),
-            }
-
-            return this.state[id].client;
-        }
-
-        return null;
+        return client;
     }
 
-    function setConnection(id, newState) {
-        this.state[id] = newState;
-    }
-
-    function setClient(id, client) {
-        this.state[id].client = client;
+    function setClient(newClient) {
+        client = newClient
     }
 
     function $reset() {
-        this.state = defaultStateModel;
+        this.state = {};
+        client = null;
     }
 
-    return { state, $reset, setConnection, setClient, getStateById, getClientById };
+    return { state, $reset, setClient, getClientByAccountId };
 });
 
 async function tryGetClientByAccountId(accountId) {
-    console.log('tryGetClientByKeyAuth', accountId);
+    console.log('store tryGetClientByAccountId accountId:', accountId);
     const accountStore = useAccountStore();
     const accountData = accountStore.getById(accountId);
 

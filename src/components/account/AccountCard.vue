@@ -4,6 +4,8 @@ import AccountStatus from '@/components/account/elements/AccountStatus.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 import useConnectionStore from '@/store/connection.js';
+import { Api } from 'telegram';
+import { auth } from 'telegram/tl/api.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -34,7 +36,7 @@ onBeforeMount(async () => {
 });
 
 async function checkClient() {
-    const client = await connectionStore.getClientById(state.id);
+    const client = await connectionStore.getClientByAccountId(state.id);
 
     console.log('checkClient client.connected:', client.connected);
 
@@ -45,7 +47,6 @@ async function checkClient() {
         await accountStore.changeStatus(state.id, 'offline');
     }
 }
-
 
 accountStore.$onAction(({ name, after }) => {
     after((result) => {
@@ -91,25 +92,35 @@ function onClickStart() {
 }
 
 async function onClickDisconnect() {
-    const client = await connectionStore.getClientById(state.id);
+    const client = await connectionStore.getClientByAccountId(state.id);
+    const resultLogout = await client.invoke(
+        new Api.auth.LogOut(),
+    );
+    console.log('logout --->', resultLogout);
     await client?.disconnect();
+    await client?.session.delete();
     await client?.destroy();
-    client.session.save();
     state.isConnect = !state.isConnect;
     await accountStore.changeStatus(state.id, 'offline');
-    connectionStore.setConnection(state.id, {
-        client: null,
-        account: state.id,
-    });
+    connectionStore.setClient(null);
 }
 
 async function startConnectAccount() {
-    const client = await connectionStore.getClientById(state.id);
+    const client = await connectionStore.getClientByAccountId(state.id);
+    await client.session.load();
     console.log('startConnectAccount connection', client);
-    await client?.connect();
+
 
     try {
-        if (client && await client.checkAuthorization()) {
+        if (client.disconnect === true && client.connect === undefined) {
+            console.log('client.disconnect === true && client.connect === undefined', client.disconnect === true, client.connect === undefined);
+            console.log('client?.connect()', client?.connect());
+            const resConnect = await client?.connect();
+            console.log('resConnect', resConnect);
+        }
+
+        if (await client.checkAuthorization()) {
+            console.log('client.checkAuthorization()', true);
             const result = await client.getDialogs();
             console.log('result 1', result); // prints the result
             await accountStore.changeStatus(state.id, 'online');
@@ -119,15 +130,8 @@ async function startConnectAccount() {
             console.log('new client', client);
             await client.start({
                 phoneNumber: state.phoneNumber,
-                password: async () => prompt('password!'),
-                phoneCode: async () => {
-                    const res = prompt('code!');
-                    console.log(res);
-                    if (res === null) {
-                        await client.destroy();
-                    }
-                    return res;
-                },
+                // password: async () => prompt('password!'),
+                phoneCode: async () =>  prompt('code!'),
                 onError: (err) => console.log(err),
             });
             client.session.save();
@@ -135,21 +139,18 @@ async function startConnectAccount() {
             // await storeSession.load();
             // console.log('storeSession', storeSession);
             // console.log('storeSession authKey', storeSession.authKey);
-            connectionStore.setConnection(state.id, {
-                client,
-                account: state.id,
-            });
+            connectionStore.setClient(client);
             toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
             await accountStore.changeStatus(state.id, 'online');
             console.log(client.disconnected);
             console.log(client.connected);
             const result = await client.getDialogs();
             console.log('result 2', result); // prints the result
-            await client.sendMessage('me', { message: 'Hello!' });
-            console.log(client.connected);
+            await client.sendMessage('me', { message: 'Hello! before start' });
         }
     } catch (error) {
-        console.error(error);
+        console.error('catch start connection', error);
+        await client?.disconnect();
         await client.destroy();
         await accountStore.changeStatus(state.id, 'error');
     }
@@ -175,11 +176,36 @@ function isValidConnectData(fields) {
 }
 
 async function check() {
-    const client = await connectionStore.getClientById(state.id);
+    const client = await connectionStore.getClientByAccountId(state.id);
     console.log('check client', client);
     try {
-        await client.sendMessage('me', { message: 'Hello! check' });
-        client.session.save();
+        // await client.sendMessage('me', { message: 'Hello! check' });
+        // client.session.save();
+        const result = await client.invoke(
+            new Api.account.GetAuthorizations(),
+        );
+        console.log('result check GetAuthorizations', result);
+        // const currentSession = result.authorizations.find((auth) => auth.current)
+        // const currentSession = result.authorizations[1]
+        // console.log('currentSession', currentSession);
+        // console.log('currentSession', currentSession.hash);
+
+        // const resultReset = await client.invoke(
+        //     new Api.account.ResetAuthorization({hash: currentSession.hash }),
+        // );
+        // console.log('result resultReset', resultReset);
+        // const resultLogout = await client.invoke(
+        //     new Api.auth.LogOut(),
+        // );
+        // console.log('result resultLogout', resultLogout);
+
+        // const res = await client.checkAuthorization()
+        // console.log('result res', res);
+        // const result2 = await client.invoke(
+        //     new Api.account.GetAuthorizations(),
+        // );
+        // console.log('result result2', result2)
+
     } catch (e) {
         console.error(e);
     }
