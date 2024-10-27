@@ -11,6 +11,7 @@ export const useAccountStore = defineStore('account', () => {
         apiHash: 'ff9d24b00baaa16907c31afdbe318fd7',
         phoneNumber: '+79056002730',
         status: 'offline', // 'offline' 'connect' 'online' 'error'
+        errorMessage: ''
     };
 
     const state = ref({});
@@ -58,11 +59,12 @@ export const useAccountStore = defineStore('account', () => {
         return { ...this.state[id] };
     }
 
-    async function changeStatus(id, status) {
+    async function changeStatus(id, status, errorMessage = null) {
         this.state[id].status = status;
+        this.state[id].errorMessage = errorMessage;
         await updateAccountLocalStore(this.state);
 
-        return { id, status };
+        return { id, status, errorMessage };
     }
 
     function $reset() {

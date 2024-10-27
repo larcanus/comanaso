@@ -6,6 +6,7 @@ import useToastStore from '@/store/toast.js';
 import useConnectionStore from '@/store/connection.js';
 import { Api } from 'telegram';
 import { auth } from 'telegram/tl/api.js';
+import DetailPopup from '@/components/modal/DetailPopup.vue';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -15,12 +16,15 @@ const props = defineProps({
 });
 const accountData = accountStore.getById(props.account);
 const LOC_TOAST_VALID_ERROR = 'Ошибка данных. Проверьте поля аккаунта';
+const LOC_TOAST_CONNECT_ERROR = 'Ошибка подключения';
 const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент создан';
 
 const state = reactive({
     ...{
         isConnect: accountData.status !== 'offline',
         isEdit: false,
+        isModalVisible: false,
+        modalMessage: null,
         id: 0,
         name: '',
         entity: '',
@@ -53,6 +57,7 @@ accountStore.$onAction(({ name, after }) => {
         if (name === 'changeStatus' && result.id === state.id) {
             state.status = result.status;
             state.isConnect = result.status !== 'offline';
+            state.modalMessage = result.errorMessage;
         }
     });
 });
@@ -62,6 +67,8 @@ function onClickSave() {
     const newStateAccount = { ...state };
     delete newStateAccount.isEdit;
     delete newStateAccount.isConnect;
+    delete newStateAccount.modalMessage;
+    delete newStateAccount.isModalVisible;
     accountStore.updateAccountData(newStateAccount);
 }
 
@@ -130,15 +137,16 @@ async function startConnectAccount() {
             console.log('new client', client);
             await client.start({
                 phoneNumber: state.phoneNumber,
-                // password: async () => prompt('password!'),
+                password: async () => prompt('password!'),
                 phoneCode: async () =>  prompt('code!'),
-                onError: (err) => console.log(err),
+                onError: (err) => {
+                    console.log('start onError', err)
+                    accountStore.changeStatus(state.id, 'error', prepareErrorMessage(err));
+                    state.isConnect = !state.isConnect;
+               }
             });
+
             client.session.save();
-            // storeSession.save();
-            // await storeSession.load();
-            // console.log('storeSession', storeSession);
-            // console.log('storeSession authKey', storeSession.authKey);
             connectionStore.setClient(client);
             toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
             await accountStore.changeStatus(state.id, 'online');
@@ -149,11 +157,38 @@ async function startConnectAccount() {
             await client.sendMessage('me', { message: 'Hello! before start' });
         }
     } catch (error) {
-        console.error('catch start connection', error);
+        console.error('start connection catch:', error);
+        await client?.session.delete();
         await client?.disconnect();
         await client.destroy();
-        await accountStore.changeStatus(state.id, 'error');
+        connectionStore.setClient(null);
+        await accountStore.changeStatus(state.id, 'error', prepareErrorMessage(error));
+        state.isConnect = !state.isConnect;
+        toastStore.addToast('error', LOC_TOAST_CONNECT_ERROR);
     }
+}
+
+function prepareErrorMessage(error) {
+    let errorObj = { title: '', desc: '' };
+    errorObj.title = `Ошибка подключения - ${error?.errorMessage} ${error.code}`;
+    errorObj.desc = `сообщение - ${error.message}`;
+
+    return errorObj;
+}
+
+function prepareDetailMessage() {
+    let messageObj = { title: '', desc: '' };
+    if(state.isConnect)
+    {
+        messageObj.title = 'Клиент создан и подключен';
+        messageObj.desc = 'Можно выполнять запросы, после окончания сессии не забудь отключится!';
+    }
+    else {
+        messageObj.title = `Клиент создан, но не подключен`;
+        messageObj.desc = 'Возможно авторизация уже пройдена, попробуй подключиться снова';
+    }
+
+    return messageObj;
 }
 
 function isValidConnectData(fields) {
@@ -174,17 +209,23 @@ function isValidConnectData(fields) {
 
     return result;
 }
-
 async function check() {
-    const client = await connectionStore.getClientByAccountId(state.id);
-    console.log('check client', client);
-    try {
-        // await client.sendMessage('me', { message: 'Hello! check' });
-        // client.session.save();
-        const result = await client.invoke(
-            new Api.account.GetAuthorizations(),
-        );
-        console.log('result check GetAuthorizations', result);
+    if(state.modalMessage === null)
+    {
+        state.modalMessage = prepareDetailMessage();
+    }
+
+    state.isModalVisible = true;
+
+    // const client = await connectionStore.getClientByAccountId(state.id);
+    // console.log('check client', client);
+    // try {
+    //     // await client.sendMessage('me', { message: 'Hello! check' });
+    //     // client.session.save();
+    //     const result = await client.invoke(
+    //         new Api.account.GetAuthorizations(),
+    //     );
+    //     console.log('result check GetAuthorizations', result);
         // const currentSession = result.authorizations.find((auth) => auth.current)
         // const currentSession = result.authorizations[1]
         // console.log('currentSession', currentSession);
@@ -205,10 +246,10 @@ async function check() {
         //     new Api.account.GetAuthorizations(),
         // );
         // console.log('result result2', result2)
-
-    } catch (e) {
-        console.error(e);
-    }
+    //
+    // } catch (e) {
+    //     console.error(e);
+    // }
 }
 </script>
 
@@ -217,10 +258,10 @@ async function check() {
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
             <AccountStatus v-bind="{ status: state.status }" />
-            <button @click="check" class="button">
-                >
-                check
+            <button @click="check" class="button-detail">
+                подробности
             </button>
+            <DetailPopup :message="state.modalMessage" :isVisible="state.isModalVisible" @close="state.isModalVisible = false" />
         </div>
         <div class="product-details">
             <input
@@ -366,6 +407,10 @@ input:disabled {
 
 .buttons .button-cancel:hover {
     background-color: #6e2424;
+}
+
+.button-detail {
+    background-color: #b6b3b3;
 }
 
 @media (max-width: 700px) {
