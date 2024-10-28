@@ -14,7 +14,6 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
-
 function closeModal() {
     emit('close');
 }
@@ -62,12 +61,15 @@ function closeModal() {
 .content
 {
     margin: 1% 0 4% 0;
+    color: #030101;
 }
 
 button {
     cursor: pointer;
     width: 50%;
     max-width: 70%;
+    padding: 2px;
+    height: max-content;
     background-color: var(--vt-bt-background-color);
     color: var(--vt-bt-text-color);
     border-radius: 1px;

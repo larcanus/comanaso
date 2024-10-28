@@ -7,6 +7,7 @@ import useConnectionStore from '@/store/connection.js';
 import { Api } from 'telegram';
 import { auth } from 'telegram/tl/api.js';
 import DetailPopup from '@/components/modal/DetailPopup.vue';
+import Confirm from '@/components/modal/Confirm.vue';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -23,8 +24,10 @@ const state = reactive({
     ...{
         isConnect: accountData.status !== 'offline',
         isEdit: false,
-        isModalVisible: false,
-        modalMessage: null,
+        isModalPopupInfoVisible: false,
+        isModalConfirmVisible: false,
+        modalConfirmMessage: null,
+        modalPopupInfoMessage: null,
         id: 0,
         name: '',
         entity: '',
@@ -34,6 +37,7 @@ const state = reactive({
     },
     ...accountData,
 });
+let resolveConfirmPromise;
 
 onBeforeMount(async () => {
     await checkClient();
@@ -57,7 +61,7 @@ accountStore.$onAction(({ name, after }) => {
         if (name === 'changeStatus' && result.id === state.id) {
             state.status = result.status;
             state.isConnect = result.status !== 'offline';
-            state.modalMessage = result.errorMessage;
+            state.modalPopupInfoMessage = result.errorMessage;
         }
     });
 });
@@ -67,8 +71,8 @@ function onClickSave() {
     const newStateAccount = { ...state };
     delete newStateAccount.isEdit;
     delete newStateAccount.isConnect;
-    delete newStateAccount.modalMessage;
-    delete newStateAccount.isModalVisible;
+    delete newStateAccount.modalPopupInfoMessage;
+    delete newStateAccount.isModalPopupInfoVisible;
     accountStore.updateAccountData(newStateAccount);
 }
 
@@ -138,7 +142,7 @@ async function startConnectAccount() {
             await client.start({
                 phoneNumber: state.phoneNumber,
                 password: async () => prompt('password!'),
-                phoneCode: async () =>  prompt('code!'),
+                phoneCode: async () => await showConfirm(),
                 onError: (err) => {
                     console.log('start onError', err)
                     accountStore.changeStatus(state.id, 'error', prepareErrorMessage(err));
@@ -181,7 +185,7 @@ function prepareDetailMessage() {
     if(state.isConnect)
     {
         messageObj.title = 'Клиент создан и подключен';
-        messageObj.desc = 'Можно выполнять запросы, после окончания сессии не забудь отключится!';
+        messageObj.desc = 'Можно выполнять запросы. После окончания сессии не забудь отключиться!';
     }
     else {
         messageObj.title = `Клиент создан, но не подключен`;
@@ -210,12 +214,12 @@ function isValidConnectData(fields) {
     return result;
 }
 async function check() {
-    if(state.modalMessage === null)
+    if(state.modalPopupInfoMessage === null)
     {
-        state.modalMessage = prepareDetailMessage();
+        state.modalPopupInfoMessage = prepareDetailMessage();
     }
 
-    state.isModalVisible = true;
+    state.isModalPopupInfoVisible = true;
 
     // const client = await connectionStore.getClientByAccountId(state.id);
     // console.log('check client', client);
@@ -251,6 +255,26 @@ async function check() {
     //     console.error(e);
     // }
 }
+
+function showConfirm(message) {
+    state.modalConfirmMessage = message || 'Введите код для входа в Telegram';
+    state.isModalConfirmVisible = true;
+
+    return new Promise((resolve) => {
+        resolveConfirmPromise = resolve;
+    });
+}
+
+function handleConfirm(inputValue) {
+    state.isModalConfirmVisible = false;
+    resolveConfirmPromise(inputValue);
+}
+
+function handleCancel() {
+    console.log('Action cancelled');
+    state.isModalConfirmVisible = false;
+    resolveConfirmPromise(false);
+}
 </script>
 
 <template>
@@ -261,7 +285,7 @@ async function check() {
             <button @click="check" class="button-detail">
                 подробности
             </button>
-            <DetailPopup :message="state.modalMessage" :isVisible="state.isModalVisible" @close="state.isModalVisible = false" />
+            <DetailPopup :message="state.modalPopupInfoMessage" :isVisible="state.isModalPopupInfoVisible" @close="state.isModalPopupInfoVisible = false" />
         </div>
         <div class="product-details">
             <input
@@ -323,6 +347,12 @@ async function check() {
                     Отключить
                 </button>
             </div>
+            <Confirm
+                :message="state.modalConfirmMessage"
+                :isVisible="state.isModalConfirmVisible"
+                @confirm="handleConfirm"
+                @cancel="handleCancel"
+            />
         </div>
     </div>
 </template>

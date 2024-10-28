@@ -24,7 +24,10 @@
 :root {
     --vt-bt-background-color: #5e21f8;
     --vt-bt-background-color-hover: #7644f5;
+    --vt-bt-cancel-background-color: #d34343;
+    --vt-bt-cancel-background-color-hover: #6e2424;
     --vt-bt-text-color: #ffffff;
+    --vt-bt-height: 15px;
 }
 
 :root {
