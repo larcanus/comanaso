@@ -46,13 +46,30 @@ onBeforeMount(async () => {
 async function checkClient() {
     const client = await connectionStore.getClientByAccountId(state.id);
 
-    console.log('checkClient client.connected:', client.connected);
+    console.log('checkClient client.connected:', client.connected, client.disconnected);
 
-    if (client) {
-        const status = client.connected ? 'online' : 'offline';
-        await accountStore.changeStatus(state.id, status);
-    } else {
-        await accountStore.changeStatus(state.id, 'offline');
+    try {
+        if (client) {
+            let status = 'offline';
+            // check 1
+            if (client.connected && await client.checkAuthorization()) {
+                status = 'online';
+            }
+            // check 2 try to connect and auth
+            const connectResult = await client.connect();
+            console.log('checkClient connectResult', connectResult);
+            const authResult = await client.checkAuthorization();
+            console.log('checkClient authResult', authResult);
+            if (connectResult && authResult) {
+                status = 'online';
+            }
+
+            await accountStore.changeStatus(state.id, status);
+        } else {
+            await accountStore.changeStatus(state.id, 'offline');
+        }
+    } catch (error) {
+        console.error('checkClient catch:', error);
     }
 }
 
@@ -124,41 +141,48 @@ async function startConnectAccount() {
 
     try {
         if (client.disconnect === true && client.connect === undefined) {
-            console.log('client.disconnect === true && client.connect === undefined', client.disconnect === true, client.connect === undefined);
-            console.log('client?.connect()', client?.connect());
             const resConnect = await client?.connect();
-            console.log('resConnect', resConnect);
+            console.log('try connect:', resConnect);
         }
 
-        if (await client.checkAuthorization()) {
-            console.log('client.checkAuthorization()', true);
+        const authResult = await client.checkAuthorization();
+        console.log('check authorization:', authResult);
+        if (authResult) {
             const result = await client.getDialogs();
-            console.log('result 1', result); // prints the result
+            console.log('result 1 dialog after auth', result); // prints the result
             await accountStore.changeStatus(state.id, 'online');
-            await client.sendMessage('me', { message: 'Hello! if 1' });
         } else {
-            // client = await createClient(state.apiId, state.apiHash);
-            console.log('new client', client);
+            console.log('create new connect');
             await client.start({
                 phoneNumber: state.phoneNumber,
                 password: async () => prompt('password!'),
-                phoneCode: async () => await showConfirm(),
-                onError: (err) => {
+                phoneCode: async () => {
+                    const res  = await showConfirm();
+                    if (res)
+                    {
+                        return res;
+                    }
+
+                    if(res === false)
+                    {
+                        location.reload();
+                    }
+                },
+                onError: async (err) => {
                     console.log('start onError', err)
-                    accountStore.changeStatus(state.id, 'error', prepareErrorMessage(err));
+                    await accountStore.changeStatus(state.id, 'error', prepareErrorMessage(err));
                     state.isConnect = !state.isConnect;
-               }
+                    toastStore.addToast('error', err.message);
+                }
             });
 
             client.session.save();
             connectionStore.setClient(client);
             toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
             await accountStore.changeStatus(state.id, 'online');
-            console.log(client.disconnected);
-            console.log(client.connected);
             const result = await client.getDialogs();
-            console.log('result 2', result); // prints the result
-            await client.sendMessage('me', { message: 'Hello! before start' });
+            console.log('result 2 dialog after new connect', result); // prints the result
+            await client.sendMessage('me', { message: 'Hello! Comanaso connected.' });
         }
     } catch (error) {
         console.error('start connection catch:', error);
@@ -271,7 +295,6 @@ function handleConfirm(inputValue) {
 }
 
 function handleCancel() {
-    console.log('Action cancelled');
     state.isModalConfirmVisible = false;
     resolveConfirmPromise(false);
 }
