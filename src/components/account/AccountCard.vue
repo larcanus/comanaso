@@ -443,26 +443,33 @@ input:disabled {
 .buttons button {
     padding: 5px 10px;
     border: none;
-    background-color: #007bff;
+    background-color: var(--vt-bt-background-color);
     color: white;
     border-radius: 3px;
     cursor: pointer;
 }
 
 .buttons button:hover {
-    background-color: #0056b3;
+    background-color: var(--vt-bt-background-color-hover);
 }
 
 .buttons .button-cancel {
-    background-color: #d34343;
+    background-color: var(--vt-bt-cancel-background-color);
 }
 
 .buttons .button-cancel:hover {
-    background-color: #6e2424;
+    background-color: var(--vt-bt-cancel-background-color-hover);
 }
 
 .button-detail {
-    background-color: #b6b3b3;
+    border: none;
+    border-radius: 2px;
+    color: var(--vt-c-white-soft);
+    cursor: pointer;
+    background-color:  var(--vt-bt-info-background-color);
+}
+.button-detail:hover {
+    background-color:  var(--vt-bt-info-background-color-hover);
 }
 
 @media (max-width: 700px) {

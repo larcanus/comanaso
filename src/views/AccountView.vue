@@ -55,16 +55,9 @@ async function onClickConnect() {
     <div class="view-container">
         <div class="header-container">
             <h1>Аккаунты</h1>
-            <p>Здесь отображается информация об аккаунтах.</p>
+            <p>Здесь отображается основная информация ваших аккаунтов и их состоянии.</p>
         </div>
 
-        <!--        <div class="button-container">-->
-        <!--            <button @click="onClickConnect">-->
-        <!--                подключить-->
-        <!--            </button>-->
-        <!--        </div>-->
-        <!--        -->
-        <!--        <input @change="state.valueInput" placeholder="code"/>-->
         <div class="accounts-container">
             <div v-for="account of state.accounts" :key="account">
                 <AccountCard v-bind="{ account }" />
@@ -91,8 +84,12 @@ async function onClickConnect() {
     margin: 20px;
 }
 
+.accounts-container {
+    margin: 20px;
+}
+
 p,
 h1 {
-    color: white;
+    color: #e3e2e2;
 }
 </style>

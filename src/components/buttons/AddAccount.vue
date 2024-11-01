@@ -22,8 +22,8 @@ function onClickDiv() {
 </script>
 
 <template>
-    <div class="div-image" @click="onClickDiv">
-        <img :src="imagePlusPath" alt="acc" />
+    <div class="div-image" >
+        <img :src="imagePlusPath" alt="acc" @click="onClickDiv"/>
     </div>
 </template>
 

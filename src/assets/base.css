@@ -26,6 +26,8 @@
     --vt-bt-background-color-hover: #7644f5;
     --vt-bt-cancel-background-color: #d34343;
     --vt-bt-cancel-background-color-hover: #6e2424;
+    --vt-bt-info-background-color: #1582ee;
+    --vt-bt-info-background-color-hover: #05417a;
     --vt-bt-text-color: #ffffff;
     --vt-bt-height: 15px;
 }
