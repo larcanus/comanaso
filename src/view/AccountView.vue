@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { getDialogs } from 'telegram/client/dialogs.js';
-import AddAccount from '@/components/buttons/AddAccount.vue';
+import AddAccount from '@/components/button/AddAccount.vue';
 import AccountCard from '@/components/account/AccountCard.vue';
 import useAccountStore from '@/store/account.js';
 

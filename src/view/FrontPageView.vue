@@ -1,9 +1,9 @@
 <script setup>
-import FirstSection from '@/components/sections/FirstSection.vue';
-import SecondSection from '@/components/sections/SecondSection.vue';
-import ThirdSection from '@/components/sections/ThirdSection.vue';
-import FooterSection from '@/components/sections/FooterSection.vue';
-import FormLogin from '@/components/forms/login/FormLogin.vue';
+import FirstSection from '@/components/front-page-section/FirstSection.vue';
+import SecondSection from '@/components/front-page-section/SecondSection.vue';
+import ThirdSection from '@/components/front-page-section/ThirdSection.vue';
+import FooterSection from '@/components/front-page-section/FooterSection.vue';
+import FormLogin from '@/components/form/login/FormLogin.vue';
 import { inject, ref } from 'vue';
 
 const overflowXHiddenHandler = inject('overflowXHidden');

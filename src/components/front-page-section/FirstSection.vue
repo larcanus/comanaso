@@ -113,6 +113,6 @@
     background-size: cover; /* Оставляем изображение в его естественном размере */
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background-image: url('@/assets/2.png');
+    background-image: url('@/assets/background-front-page-people.png');
 }
 </style>

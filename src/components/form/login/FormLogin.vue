@@ -1,6 +1,6 @@
 <script setup>
 import { nextTick, ref, useTemplateRef } from 'vue';
-import { Controller } from '@/components/forms/login/controller.js';
+import { Controller } from '@/components/form/login/controller.js';
 import { useRouter } from 'vue-router';
 const controller = new Controller();
 
@@ -302,6 +302,7 @@ function hiddenTooltip() {
                         v-model="state.passwordValue"
                         :placeholder="props.placeholderPasswordLoc"
                         :disabled="state.isAllDisabled"
+                        autocomplete="on"
                         required
                     />
                     <div

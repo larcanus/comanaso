@@ -1,9 +1,9 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-import FooterSection from '@/components/sections/FooterSection.vue';
+import FooterSection from '@/components/front-page-section/FooterSection.vue';
 import { useUserStore } from '@/store/user';
-import LogOut from '@/components/buttons/LogOut.vue';
+import LogOut from '@/components/button/LogOut.vue';
 import Toast from '@/components/toast/Toast.vue';
 
 const store = useUserStore();

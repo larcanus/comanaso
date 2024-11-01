@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import SecurityInfoSlot from './elements/SecurityInfoSlot.vue';
-import SecurityIcon from '@/components/sections/elements/SecurityIcon.vue';
+import SecurityIcon from '@/components/front-page-section/elements/SecurityIcon.vue';
 import imageProtectionPath from '@/assets/animated-protection.gif';
 import imageAnalyticPath from '@/assets/animated-analytic-time.gif';
 import imageDBSavePath from '@/assets/animated-db-save.gif';
