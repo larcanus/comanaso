@@ -37,7 +37,6 @@ const state = reactive({
     },
     ...accountData,
 });
-let resolveConfirmPromise;
 
 onBeforeMount(async () => {
     await checkClient();
@@ -267,6 +266,7 @@ async function showDetail() {
     // }
 }
 
+let resolveConfirmPromise;
 function showConfirm(message) {
     state.modalConfirmMessage = message || 'Введите код для входа в Telegram';
     state.isModalConfirmVisible = true;
@@ -276,12 +276,12 @@ function showConfirm(message) {
     });
 }
 
-function handleConfirm(inputValue) {
+function handleConfirmOk(inputValue) {
     state.isModalConfirmVisible = false;
     resolveConfirmPromise(inputValue);
 }
 
-function handleCancel() {
+function handleConfirmCancel() {
     state.isModalConfirmVisible = false;
     resolveConfirmPromise(false);
 }
@@ -360,8 +360,8 @@ function handleCancel() {
             <Confirm
                 :message="state.modalConfirmMessage"
                 :isVisible="state.isModalConfirmVisible"
-                @confirm="handleConfirm"
-                @cancel="handleCancel"
+                @confirm="handleConfirmOk"
+                @cancel="handleConfirmCancel"
             />
         </div>
     </div>
