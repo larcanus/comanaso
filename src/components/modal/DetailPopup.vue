@@ -72,7 +72,7 @@ button {
     height: max-content;
     background-color: var(--vt-bt-background-color);
     color: var(--vt-bt-text-color);
-    border-radius: 1px;
+    border-radius: 2px;
 }
 button:hover {
     background-color: var(--vt-bt-background-color-hover);

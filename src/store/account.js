@@ -72,11 +72,18 @@ export const useAccountStore = defineStore('account', () => {
     }
 
     function validate(fields) {
-        if (fields.name === null || fields.name.length === 0) {
-            fields.name = `${generatePositiveAccountName()} telegram`;
+        const preparedFields = {};
+        Object.keys(fields).forEach((key) => {
+            if(key in defaultStateModel) {
+                preparedFields[key] = fields[key];
+            }
+        })
+
+        if (preparedFields.name === null || preparedFields.name.length === 0) {
+            preparedFields.name = `${generatePositiveAccountName()} telegram`;
         }
 
-        return fields;
+        return preparedFields;
     }
 
     return {

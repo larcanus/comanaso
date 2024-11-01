@@ -79,16 +79,16 @@ accountStore.$onAction(({ name, after }) => {
             state.isConnect = result.status !== 'offline';
             state.modalPopupInfoMessage = result.errorMessage;
         }
+
+        if (name === 'updateAccountData' && result.id === state.id) {
+            Object.assign(state, result)
+        }
     });
 });
 
 function onClickSave() {
     state.isEdit = !state.isEdit;
     const newStateAccount = { ...state };
-    delete newStateAccount.isEdit;
-    delete newStateAccount.isConnect;
-    delete newStateAccount.modalPopupInfoMessage;
-    delete newStateAccount.isModalPopupInfoVisible;
     accountStore.updateAccountData(newStateAccount);
 }
 

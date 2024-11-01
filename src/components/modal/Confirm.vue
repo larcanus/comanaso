@@ -98,7 +98,7 @@ button {
     padding: 2px;
     background-color: var(--vt-bt-background-color);
     color: var(--vt-bt-text-color);
-    border-radius: 1px;
+    border-radius: 2px;
 }
 
 button:hover {
