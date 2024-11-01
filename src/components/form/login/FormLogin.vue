@@ -429,6 +429,7 @@ p {
     padding: 0 5px;
     font-size: 12px;
     color: #7c7b7b;
+    border-radius: 5px;
 }
 
 .form-container button {

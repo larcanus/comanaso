@@ -1,4 +1,4 @@
-import { TelegramClient } from 'telegram';
+import { Api, TelegramClient } from 'telegram';
 import { StoreSession, StringSession } from 'telegram/sessions';
 
 export async function createClient(apiId, apiHash) {
@@ -14,6 +14,18 @@ export async function createClient(apiId, apiHash) {
     storeSession.save();
 
     return client;
+}
+
+export async function fullDisconnectClient(client) {
+    await client?.disconnect();
+    await client?.session.delete();
+    await client?.destroy();
+}
+
+export async function logOut(client) {
+    return client.invoke(
+        new Api.auth.LogOut(),
+    );
 }
 
 

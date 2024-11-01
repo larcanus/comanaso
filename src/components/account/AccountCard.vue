@@ -1,12 +1,12 @@
 <script setup>
 import { defineProps, reactive, onBeforeMount } from 'vue';
 import AccountStatus from '@/components/account/elements/AccountStatus.vue';
+import DetailPopup from '@/components/modal/DetailPopup.vue';
+import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 import useConnectionStore from '@/store/connection.js';
-import { Api } from 'telegram';
-import DetailPopup from '@/components/modal/DetailPopup.vue';
-import Confirm from '@/components/modal/Confirm.vue';
+import { fullDisconnectClient, logOut } from '@/utils/connection.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -15,9 +15,10 @@ const props = defineProps({
     account: String,
 });
 const accountData = accountStore.getById(props.account);
+
 const LOC_TOAST_VALID_ERROR = 'Ошибка данных. Проверьте поля аккаунта';
 const LOC_TOAST_CONNECT_ERROR = 'Ошибка подключения';
-const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент создан';
+const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент подключен!';
 
 const state = reactive({
     ...{
@@ -46,7 +47,6 @@ async function checkClient() {
     const client = await connectionStore.getClientByAccountId(state.id);
 
     console.log('checkClient client.connected:', client.connected, client.disconnected);
-
     try {
         if (client) {
             let status = 'offline';
@@ -107,27 +107,20 @@ function onClickStart() {
         return;
     }
 
-    state.isConnect = !state.isConnect;
     accountStore.changeStatus(state.id, 'connect');
     try {
         startConnectAccount();
     } catch (error) {
         console.error(error);
-        state.isConnect = !state.isConnect;
         accountStore.changeStatus(state.id, 'error');
     }
 }
 
 async function onClickDisconnect() {
     const client = await connectionStore.getClientByAccountId(state.id);
-    const resultLogout = await client.invoke(
-        new Api.auth.LogOut(),
-    );
+    const resultLogout = await logOut();
     console.log('logout --->', resultLogout);
-    await client?.disconnect();
-    await client?.session.delete();
-    await client?.destroy();
-    state.isConnect = !state.isConnect;
+    await fullDisconnectClient(client)
     await accountStore.changeStatus(state.id, 'offline');
     connectionStore.setClient(null);
 }
@@ -136,7 +129,6 @@ async function startConnectAccount() {
     const client = await connectionStore.getClientByAccountId(state.id);
     await client.session.load();
     console.log('startConnectAccount connection', client);
-
 
     try {
         if (client.disconnect === true && client.connect === undefined) {
@@ -170,7 +162,6 @@ async function startConnectAccount() {
                 onError: async (err) => {
                     console.log('start onError', err)
                     await accountStore.changeStatus(state.id, 'error', prepareErrorMessage(err));
-                    state.isConnect = !state.isConnect;
                     toastStore.addToast('error', err.message);
                 }
             });
@@ -185,12 +176,9 @@ async function startConnectAccount() {
         }
     } catch (error) {
         console.error('start connection catch:', error);
-        await client?.session.delete();
-        await client?.disconnect();
-        await client.destroy();
+        await fullDisconnectClient(client)
         connectionStore.setClient(null);
         await accountStore.changeStatus(state.id, 'error', prepareErrorMessage(error));
-        state.isConnect = !state.isConnect;
         toastStore.addToast('error', LOC_TOAST_CONNECT_ERROR);
     }
 }
@@ -236,7 +224,7 @@ function isValidConnectData(fields) {
 
     return result;
 }
-async function check() {
+async function showDetail() {
     if(state.modalPopupInfoMessage === null)
     {
         state.modalPopupInfoMessage = prepareDetailMessage();
@@ -304,7 +292,7 @@ function handleCancel() {
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
             <AccountStatus v-bind="{ status: state.status }" />
-            <button @click="check" class="button-detail">
+            <button @click="showDetail" class="button-detail">
                 подробности
             </button>
             <DetailPopup :message="state.modalPopupInfoMessage" :isVisible="state.isModalPopupInfoVisible" @close="state.isModalPopupInfoVisible = false" />
