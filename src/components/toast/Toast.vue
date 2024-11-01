@@ -87,6 +87,10 @@ function getImagePath(type) {
     white-space: break-spaces;
 }
 
+span {
+    color: var(--vt-c-white-soft);
+}
+
 .toast-type-error
 {
     background-color: #d0363e;
