@@ -1,12 +1,14 @@
 <script setup>
 import imagePlusPath from '@/assets/plus.png';
 import useAccountStore from '@/store/account.js';
+import useToastStore from '@/store/toast.js';
 const accStore = useAccountStore();
+const toastStore = useToastStore();
+const LIMIT_ACCOUNT_TEXT = 'Сейчас доступно создание только одного аккаунта'
 function onClickDiv() {
     const ids = accStore.getCollectionId();
-    if (ids.length > 5) {
-        console.log('to match acc'); // TODO notify
-        alert('куда тебе столько?');
+    if (ids.length >= 1) {
+        toastStore.addToast('error', LIMIT_ACCOUNT_TEXT);
         return;
     }
 

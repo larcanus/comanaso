@@ -5,7 +5,6 @@ import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 import useConnectionStore from '@/store/connection.js';
 import { Api } from 'telegram';
-import { auth } from 'telegram/tl/api.js';
 import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
 
