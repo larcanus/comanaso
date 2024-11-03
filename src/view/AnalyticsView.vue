@@ -1,4 +1,6 @@
-<script setup></script>
+<script setup>
+import DialogTable from '@/components/table/DialogTable.vue';
+</script>
 
 <template>
     <div class="view-container">
@@ -6,6 +8,7 @@
             <h1>Доступная аналитика</h1>
             <p>Здесь отображаются доступные данные и аналитика.</p>
         </div>
+        <DialogTable />
     </div>
 </template>
 
