@@ -1,76 +1,85 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+
+// Все возможные колонки
+const allColumns = [
+    { key: 'name', label: 'Name' },
+    { key: 'status', label: 'Status' },
+    { key: 'value1', label: 'Value' },
+    { key: 'value2', label: 'Value' },
+    { key: 'value3', label: 'Value' },
+    { key: 'value4', label: 'Value' },
+];
+const visibleColumns = ref(allColumns.map(column => column.key));
+const showColumnMenu = ref(false);
+
+
 const isMobileWidth = (width) => width <= 750;
 const mainDivWidth = ref(window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.90 : 0.7));
 
 function updateDivWidth() {
     mainDivWidth.value = window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7);
 }
-
+const appNode = computed( () => document.querySelector('#app') );
 onMounted(() => {
-    window.addEventListener('resize', updateDivWidth);
+    subscribeEventListeners();
 });
+
+onUnmounted(() => {
+    unsubscribeEventListeners();
+})
+
+function subscribeEventListeners() {
+    console.log(appNode);
+    window.addEventListener('resize', updateDivWidth);
+    appNode.value.addEventListener('click',  hideColumnMenu);
+}
+
+function unsubscribeEventListeners() {
+    window.removeEventListener('resize', updateDivWidth);
+    appNode.value.removeEventListener('click', hideColumnMenu);
+}
+
+function hideColumnMenu(e) {
+    if(e.target.id && e.target.id.includes('column'))
+    {
+        return;
+    }
+    showColumnMenu.value = false;
+}
 
 onUnmounted(() => {
     window.removeEventListener('resize', updateDivWidth);
 });
 
-// Данные таблицы
+
 const data = ref([
     { id: 1, name: 'Item 1', status: 'Loading...', value: 10 },
     { id: 2, name: 'Item 2', status: 'Loading...', value: 20 },
-// Добавьте больше данных по мере необходимости
+    { id: 3, name: 'Item 3', status: 'Loading...', value: 20 },
+    { id: 4, name: 'Item 4', status: 'Loading...', value: 20 },
+    { id: 5, name: 'Item 5', status: 'Loading...', value: 20 },
 ]);
 
-// Все возможные колонки
-const allColumns = [
-    { key: 'name', label: 'Name' },
-    { key: 'status', label: 'Status' },
-    { key: 'value', label: 'Value' },
-    { key: 'value', label: 'Value' },
-    { key: 'value', label: 'Value' },
-    { key: 'value', label: 'Value' },
-    { key: 'value', label: 'Value' },
-    { key: 'value', label: 'Value' },
-    { key: 'value', label: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-    { key: 'value', lllabel: 'Value' },
-];
-
-// Видимые колонки по умолчанию
-const visibleColumns = ref(allColumns.map(column => column.key));
-
-// Управление меню колонок
-const showColumnMenu = ref(false);
 
 function toggleColumnMenu() {
     showColumnMenu.value = !showColumnMenu.value;
 }
 
-// Текущая страница и количество строк на странице
-const currentPage = ref(1);
-const rowsPerPage = 10;
 
-// Вычисляемые данные для отображения на текущей странице
+const currentPage = ref(1);
+const rowsPerPage = 5;
+
+
 const paginatedData = computed(() => {
     const start = (currentPage.value - 1) * rowsPerPage;
     const end = start + rowsPerPage;
     return data.value.slice(start, end);
 });
 
-// Общее количество страниц
+
 const totalPages = computed(() => Math.ceil(data.value.length / rowsPerPage));
 
-// Функция для переключения видимости колонок
 function toggleColumn(columnKey) {
     if (visibleColumns.value.includes(columnKey)) {
         visibleColumns.value = visibleColumns.value.filter(key => key !== columnKey);
@@ -103,26 +112,27 @@ function nextPage() {
     }
 }
 
-// Пример обновления данных в ячейках
-setTimeout(() => {
-    data.value = data.value.map(item => ({
-        ...item,
-        status: 'Loaded',
-    }));
-}, 2000);
+// // Пример обновления данных в ячейках
+// setTimeout(() => {
+//     data.value = data.value.map(item => ({
+//         ...item,
+//         status: 'Loaded',
+//     }));
+// }, 2000);
 </script>
 
 <template>
-    <div class="table-controls">
-        <button @click="toggleColumnMenu" class="edit-columns-button">✏️</button>
-        <div v-if="showColumnMenu" class="column-menu">
+    <div class="table-controls" id="table-controls">
+        <button @click="toggleColumnMenu" id="edit-columns-button" class="edit-columns-button">✏️</button>
+        <div v-if="showColumnMenu" id="column-menu" class="column-menu">
             <div v-for="column in allColumns" :key="column.key" class="column-menu-item">
                 <input
+                    :id="`column-menu-input-${column.key}`"
                     type="checkbox"
                     :checked="visibleColumns.includes(column.key)"
                     @change="toggleColumn(column.key)"
                 />
-                <label @click="toggleColumn(column.key)">
+                <label :id="`column-menu-input-${column.key}`" :for="`column-menu-input-${column.key}`">
                     {{ column.label }}
                 </label>
             </div>
@@ -162,16 +172,15 @@ setTimeout(() => {
 <style scoped>
 
 .main-container {
-    background-color: #246279;
     max-width: 1000px;
     min-width: 100px;
-    border: 1px solid #d8000c;
     box-sizing: border-box;
     overflow-x: auto;
 }
 
 .table-container {
     display: flex;
+    flex-direction: column;
 }
 
 .styled-table {
@@ -179,7 +188,7 @@ setTimeout(() => {
 }
 
 .styled-table thead {
-    background-color: #f4f4f4;
+    background-color: #ada1af;
     color: #333;
 }
 
@@ -194,8 +203,8 @@ setTimeout(() => {
     font-weight: bold;
 }
 
-.styled-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+.styled-table tbody tr{
+    background-color: #ebe7ee;
 }
 
 .table-controls {
