@@ -1,6 +1,5 @@
 <script setup>
-import { reactive, ref, watch } from 'vue';
-import { getDialogs } from 'telegram/client/dialogs.js';
+import { reactive } from 'vue';
 import AddAccount from '@/components/button/AddAccount.vue';
 import AccountCard from '@/components/account/AccountCard.vue';
 import useAccountStore from '@/store/account.js';
@@ -20,35 +19,6 @@ accStore.$onAction(({ name, after }) => {
     });
 });
 
-async function onClickConnect() {
-    // console.log('onClickConnect');
-    // console.log(state.value.valueInput);
-    // // console.log(input);
-    // const test = '149.154.167.40:443';
-    // const prop = '149.154.167.50:443';
-    // const apiId = 27151307;
-    // const apiHash = "ff9d24b00baaa16907c31afdbe318fd7";
-    // const stringSession = new StringSession();
-    // console.log('stringSession', stringSession);
-    //
-    // const client = new TelegramClient(stringSession, apiId, apiHash, {
-    //         connectionRetries: 5,
-    //     });
-    // console.log(Api);
-    // console.log(Api.messages);
-    //     await client.start({
-    //         phoneNumber: "+79056002730",
-    //         password: "Master1090",
-    //         phoneCode: async () => prompt('nunu!'),
-    //         onError: (err) => console.log(err),
-    //     });
-    //     console.log("You should now be connected.");
-    //     console.log(client.session.save()); // Save this string to avoid logging in again
-    //     // await client.sendMessage("me", { message: "Hello!" });
-    //     // await client.connect();
-    //     const result = await client.getDialogs();
-    // console.log('result', result); // prints the result
-}
 </script>
 
 <template>

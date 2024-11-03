@@ -117,7 +117,7 @@ function onClickStart() {
 
 async function onClickDisconnect() {
     const client = await connectionStore.getClientByAccountId(state.id);
-    const resultLogout = await logOut();
+    const resultLogout = await logOut(client);
     console.log('logout --->', resultLogout);
     await fullDisconnectClient(client)
     await accountStore.changeStatus(state.id, 'offline');

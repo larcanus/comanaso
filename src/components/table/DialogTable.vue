@@ -1,14 +1,20 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, toRaw } from 'vue';
+import useDialogStore from '@/store/dialogs.js';
+const dialogStore = useDialogStore();
 
-// Все возможные колонки
+const dialogState = ref(dialogStore.validateDialogs(dialogStore.state));
+
 const allColumns = [
-    { key: 'name', label: 'Name' },
-    { key: 'status', label: 'Status' },
-    { key: 'value1', label: 'Value' },
-    { key: 'value2', label: 'Value' },
-    { key: 'value3', label: 'Value' },
-    { key: 'value4', label: 'Value' },
+    { key: 'title', label: 'Наименование' },
+    { key: 'archived', label: 'В архиве' },
+    { key: 'type', label: 'Тип' },
+    { key: 'id', label: 'Id' },
+    { key: 'folderId', label: 'Папка' },
+    { key: 'pinned', label: 'Закреплен' },
+    { key: 'unreadCount', label: 'Непрочитанные' },
+    { key: 'mute', label: 'Заглушен до' },
+    { key: 'date', label: 'Дата обновления' },
 ];
 const visibleColumns = ref(allColumns.map(column => column.key));
 const showColumnMenu = ref(false);
@@ -40,6 +46,14 @@ function unsubscribeEventListeners() {
     appNode.value.removeEventListener('click', hideColumnMenu);
 }
 
+dialogStore.$onAction(({ name, after }) => {
+    after((result) => {
+        if (name === 'setDialogs') {
+            dialogState.value = dialogStore.validateDialogs(result)
+        }
+    });
+});
+
 function hideColumnMenu(e) {
     if(e.target.id && e.target.id.includes('column'))
     {
@@ -51,15 +65,6 @@ function hideColumnMenu(e) {
 onUnmounted(() => {
     window.removeEventListener('resize', updateDivWidth);
 });
-
-
-const data = ref([
-    { id: 1, name: 'Item 1', status: 'Loading...', value: 10 },
-    { id: 2, name: 'Item 2', status: 'Loading...', value: 20 },
-    { id: 3, name: 'Item 3', status: 'Loading...', value: 20 },
-    { id: 4, name: 'Item 4', status: 'Loading...', value: 20 },
-    { id: 5, name: 'Item 5', status: 'Loading...', value: 20 },
-]);
 
 
 function toggleColumnMenu() {
@@ -74,11 +79,14 @@ const rowsPerPage = 5;
 const paginatedData = computed(() => {
     const start = (currentPage.value - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    return data.value.slice(start, end);
+    const res = dialogState.value.slice(start, end);
+    const preparedData = res.map(item => toRaw(item));
+    console.log('paginatedData', res, preparedData);
+    return preparedData;
 });
 
 
-const totalPages = computed(() => Math.ceil(data.value.length / rowsPerPage));
+const totalPages = computed(() => Math.ceil(dialogState.value.length / rowsPerPage));
 
 function toggleColumn(columnKey) {
     if (visibleColumns.value.includes(columnKey)) {
@@ -88,18 +96,15 @@ function toggleColumn(columnKey) {
     }
 }
 
-// Функция для получения метки колонки
 function getColumnLabel(columnKey) {
     const column = allColumns.find(col => col.key === columnKey);
     return column ? column.label : '';
 }
 
-// Функция для сортировки данных по колонке
 function sortByColumn(columnKey) {
-    data.value.sort((a, b) => (a[columnKey] > b[columnKey] ? 1 : -1));
+    dialogState.value.sort((a, b) => (a[columnKey] > b[columnKey] ? 1 : -1));
 }
 
-// Функции для переключения страниц
 function prevPage() {
     if (currentPage.value > 1) {
         currentPage.value--;
@@ -111,14 +116,15 @@ function nextPage() {
         currentPage.value++;
     }
 }
+import useConnectionStore from '@/store/connection.js';
+async function test() {
 
-// // Пример обновления данных в ячейках
-// setTimeout(() => {
-//     data.value = data.value.map(item => ({
-//         ...item,
-//         status: 'Loaded',
-//     }));
-// }, 2000);
+    const connection = useConnectionStore();
+    const client = await connection.getClientByAccountId(null);
+    const res = await client?.getDialogs();
+    dialogStore.setDialogs(res);
+}
+
 </script>
 
 <template>
@@ -147,6 +153,7 @@ function nextPage() {
                         v-for="column in visibleColumns"
                         :key="column"
                         @click="sortByColumn(column)"
+                        :id="column"
                     >
                         {{ getColumnLabel(column) }}
                     </th>
@@ -154,7 +161,7 @@ function nextPage() {
                 </thead>
                 <tbody>
                 <tr v-for="row in paginatedData" :key="row.id">
-                    <td v-for="column in visibleColumns" :key="column">
+                    <td v-for="column in visibleColumns" :key="column" :id="column">
                         {{ row[column] }}
                     </td>
                 </tr>
@@ -164,7 +171,7 @@ function nextPage() {
     </div>
     <div class="pagination">
         <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
-        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <span @click="test">Page {{ currentPage }} of {{ totalPages }}</span>
         <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
     </div>
 </template>
@@ -195,16 +202,23 @@ function nextPage() {
 .styled-table th, .styled-table td {
     border: 1px solid #ddd;
     padding: 8px;
-    text-align: left;
+    text-align: center;
+    color: var(--vt-c-black-soft);
+}
+
+#date, #mute {
+    text-wrap: nowrap;
+    white-space: nowrap
 }
 
 .styled-table th {
     cursor: pointer;
     font-weight: bold;
+    white-space: nowrap;
 }
 
 .styled-table tbody tr{
-    background-color: #ebe7ee;
+    background-color: #e7e5e8;
 }
 
 .table-controls {
