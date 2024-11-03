@@ -5,7 +5,7 @@ import DialogTable from '@/components/table/DialogTable.vue';
 <template>
     <div class="view-container">
         <div class="header-container">
-            <h1>Доступная аналитика</h1>
+            <h1>Аналитика</h1>
             <p>Здесь отображаются доступные данные и аналитика.</p>
         </div>
         <DialogTable />
@@ -26,7 +26,7 @@ import DialogTable from '@/components/table/DialogTable.vue';
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    margin: 20px;
+    margin: 25px;
 }
 
 p,

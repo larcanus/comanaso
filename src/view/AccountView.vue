@@ -81,7 +81,7 @@ async function onClickConnect() {
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    margin: 20px;
+    margin: 25px;
 }
 
 .accounts-container {

@@ -185,11 +185,12 @@ function onMenuClick() {
 .menu-div {
     display: flex;
     position: absolute;
-    margin: 30px 30px 30px 30px;
+    margin: 25px 25px 25px 25px;
     flex-direction: row;
     align-items: flex-end;
     align-content: center;
     justify-content: flex-end;
+    opacity: 0.8;
 }
 
 .menu-cancel-div {
@@ -202,8 +203,8 @@ function onMenuClick() {
 }
 
 .menu-div img {
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
 }
 
 .menu-enter-active {
@@ -219,8 +220,8 @@ function onMenuClick() {
 }
 
 .menu-cancel-div img {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
 }
 
 @media (max-width: 750px) {
