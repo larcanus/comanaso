@@ -19,13 +19,16 @@ export const useDialogStore = defineStore('dialog', () => {
         const preparedDialogs = dialogs?.map((dialog) => {
             const dialogData = toValue(dialog);
             return {
-                title: dialogData.title,
+                title: getTitleDialogLoc(dialogData),
                 archived: getArchivedDialogLoc(dialogData.archived),
                 type: getTypeDialogLoc(dialogData),
-                id: dialogData.id?.value,
+                id: { value: dialogData.id?.value, loc: dialogData.id?.value },
                 folderId: getFolderIdDialogLoc(dialogData.folderId),
                 pinned: getPinnedDialogLoc(dialogData.pinned),
-                unreadCount: dialogData.unreadCount,
+                unreadCount: {
+                    value: dialogData.unreadCount,
+                    loc: dialogData.unreadCount,
+                },
                 mute: getMuteDialogLoc(dialogData.dialog),
                 date: getDateDialogLoc(dialogData.date),
             };
@@ -37,56 +40,107 @@ export const useDialogStore = defineStore('dialog', () => {
     return { state, $reset, setDialogs, validateDialogs };
 });
 
+function getTitleDialogLoc(dialogData) {
+    const objectData = {};
+    if (dialogData.title && dialogData.title.length > 0) {
+        objectData.value = dialogData.title;
+        objectData.loc = dialogData.title;
+    }
+
+    if (dialogData.name && dialogData.name.length > 0) {
+        objectData.value = dialogData.name;
+        objectData.loc = dialogData.name;
+    }
+
+    if (dialogData.title.length === 0 && dialogData.title.length === 0) {
+        objectData.value = '';
+        objectData.loc = 'Удаленный аккаунт';
+    }
+
+    return objectData;
+}
+
 function getTypeDialogLoc(dialogData) {
+    const objectData = {
+        value: {
+            isChannel: dialogData.isChannel,
+            isGroup: dialogData.isGroup,
+            isUser: dialogData.isUser,
+        },
+    };
+
     if (dialogData.isChannel) {
-        return 'канал';
+        objectData.loc = 'канал';
     }
 
     if (dialogData.isGroup) {
-        return 'групповой';
+        objectData.loc = 'групповой';
     }
 
     if (dialogData.isUser) {
-        return 'юзер';
+        objectData.loc = 'юзер';
     }
+
+    return objectData;
 }
 
 function getFolderIdDialogLoc(folderId) {
+    const objectData = {
+        value: folderId,
+        loc: 'нет',
+    };
     if (folderId) {
-        return folderId;
+        objectData.loc = folderId;
     }
 
-    return 'нет';
+    return objectData;
 }
 
 function getArchivedDialogLoc(archived) {
+    const objectData = {
+        value: archived,
+        loc: 'нет',
+    };
     if (typeof archived === 'boolean') {
-        return archived ? 'да' : 'нет';
+        objectData.loc = archived ? 'да' : 'нет';
     }
 
-    return 'нет';
+    return objectData;
 }
 
 function getPinnedDialogLoc(pinned) {
+    const objectData = {
+        value: pinned,
+        loc: 'нет',
+    };
+
     if (typeof pinned === 'boolean') {
-        return pinned ? 'да' : 'нет';
+        objectData.loc = pinned ? 'да' : 'нет';
     }
 
-    return 'нет';
+    return objectData;
 }
 
 function getMuteDialogLoc(dialog) {
+    const objectData = {
+        value: dialog.notifySettings?.muteUntil,
+        loc: 'нет',
+    };
     if (dialog && dialog.notifySettings?.muteUntil > 1) {
         const currentTimestamp = Date.now();
         const until = currentTimestamp + dialog.notifySettings?.muteUntil;
 
-        return getDateDialogLoc(until);
+        objectData.loc = getDateDialogLoc(until).loc;
     }
 
-    return 'нет';
+    return objectData;
 }
 
 function getDateDialogLoc(timestamp) {
+    const objectData = {
+        value: timestamp,
+        loc: '',
+    };
     const preparedTimestamp =
         String(timestamp).length === 10 ? Number(`${timestamp}000`) : timestamp;
     const date = new Date(preparedTimestamp);
@@ -97,7 +151,9 @@ function getDateDialogLoc(timestamp) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = String(date.getFullYear());
 
-    return `${hours}:${minutes} ${day}-${month}-${year}`;
+    objectData.loc = `${hours}:${minutes} ${day}-${month}-${year}`;
+
+    return objectData;
 }
 
 export default useDialogStore;

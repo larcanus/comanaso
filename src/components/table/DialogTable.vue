@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, toRaw } from 'vue';
+import { ref, computed, onMounted, onUnmounted, toRaw, shallowRef } from 'vue';
 import useDialogStore from '@/store/dialogs.js';
+
 const dialogStore = useDialogStore();
 
 const dialogState = ref(dialogStore.validateDialogs(dialogStore.state));
@@ -28,6 +29,7 @@ function updateDivWidth() {
     mainDivWidth.value =
         window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7);
 }
+
 const appNode = computed(() => document.querySelector('#app'));
 onMounted(() => {
     subscribeEventListeners();
@@ -71,7 +73,7 @@ function toggleColumnMenu() {
 }
 
 const currentPage = ref(1);
-const rowsPerPage = 5;
+const rowsPerPage = 10;
 
 const paginatedData = computed(() => {
     const start = (currentPage.value - 1) * rowsPerPage;
@@ -101,8 +103,39 @@ function getColumnLabel(columnKey) {
     return column ? column.label : '';
 }
 
+const sortState = ref({
+    sortDown: true,
+});
+
 function sortByColumn(columnKey) {
-    dialogState.value.sort((a, b) => (a[columnKey] > b[columnKey] ? 1 : -1));
+    const sortDown = sortState.value.sortDown;
+
+    dialogState.value.sort((a, b) => {
+        const first = toRaw(a[columnKey]);
+        const second = toRaw(b[columnKey]);
+        switch (columnKey) {
+            case 'title': {
+                if (sortDown) {
+                    return first.loc[0] > second.loc[0] ? 1 : -1;
+                }
+                return first.loc[0] < second.loc[0] ? 1 : -1;
+            }
+            case 'date':
+            case 'mute': {
+                if (sortDown) {
+                    return first.value > second.value ? 1 : -1;
+                }
+                return first.value < second.value ? 1 : -1;
+            }
+            default: {
+                if (sortDown) {
+                    return first.value > second.value ? 1 : -1;
+                }
+                return first.value < second.value ? 1 : -1;
+            }
+        }
+    });
+    sortState.value.sortDown = !sortState.value.sortDown;
 }
 
 function prevPage() {
@@ -164,13 +197,13 @@ function nextPage() {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="row in paginatedData" :key="row.id">
+                    <tr v-for="row in paginatedData" :key="row.id.value">
                         <td
                             v-for="column in visibleColumns"
                             :key="column"
                             :id="column"
                         >
-                            {{ row[column] }}
+                            {{ row[column].loc }}
                         </td>
                     </tr>
                 </tbody>
@@ -268,6 +301,7 @@ function nextPage() {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 900;
 }
+
 .column-menu-item {
     display: flex;
     flex-direction: row;
@@ -279,6 +313,7 @@ function nextPage() {
     margin: 0 12px 0 3px;
     cursor: pointer;
 }
+
 .column-menu-item label {
     cursor: pointer;
 }
