@@ -1,5 +1,7 @@
 import { Api, TelegramClient } from 'telegram';
 import { StoreSession, StringSession } from 'telegram/sessions';
+const LOC_TOAST_SUCCESS_DATA_UPDATE = 'Данные успешно обновлены';
+const LOC_TOAST_ERROR_DATA_UPDATE = 'При запросе произошла ошибка. Проверьте подключение клиента';
 
 export async function createClient(apiId, apiHash) {
     const storeSession = new StoreSession(`folder_${apiId}`);
@@ -9,7 +11,7 @@ export async function createClient(apiId, apiHash) {
         requestRetries: 2,
         downloadRetries: 2,
     });
-    client.logger.colors.info = 'color : #56560d'
+    client.logger.colors.info = 'color : #56560d';
 
     storeSession.save();
 
@@ -26,6 +28,25 @@ export async function logOut(client) {
     return client.invoke(
         new Api.auth.LogOut(),
     );
+}
+
+export async function getCommonData(client, store, toast) {
+    if (client && store){
+        try {
+            const dialogData = await client?.getDialogs();
+            await store.setDialogs(dialogData);
+            toast.addToast('ok', LOC_TOAST_SUCCESS_DATA_UPDATE);
+
+            return true;
+        } catch (error) {
+            console.error('getCommonData catch:', error);
+            toast.addToast('error', error.message);
+            return true;
+        }
+    }
+
+    toast.addToast('error', LOC_TOAST_ERROR_DATA_UPDATE);
+    return true;
 }
 
 

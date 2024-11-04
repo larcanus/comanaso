@@ -7,7 +7,13 @@ const props = defineProps({
     },
     isVisible: {
         type: Boolean,
-        required: true
+        required: true,
+        default: false
+    },
+    isInput: {
+        type: Boolean,
+        required: false,
+        default: true,
     }
 });
 
@@ -16,7 +22,12 @@ const emit = defineEmits(['confirm', 'cancel']);
 const inputValue = ref('');
 
 function confirm() {
-    emit('confirm', inputValue.value);
+    if(props.isInput === true)
+    {
+        return emit('confirm', inputValue.value);
+    }
+
+    return emit('confirm', true);
 }
 
 function cancel() {
@@ -29,7 +40,7 @@ function cancel() {
         <div v-if="isVisible" class="modal-overlay">
             <div class="modal-content">
                 <p>{{ message }}</p>
-                <input v-model="inputValue" type="text" placeholder="*****"  maxlength="10" @keyup.enter="confirm"/>
+                <input v-if="isInput" v-model="inputValue" type="text" placeholder="*****"  maxlength="10" @keyup.enter="confirm"/>
                 <div class="modal-buttons">
                     <button @click="cancel" class="cancel">Отмена</button>
                     <button @click="confirm">Отправить</button>

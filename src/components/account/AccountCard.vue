@@ -359,7 +359,7 @@ function handleConfirmCancel() {
             </div>
             <Confirm
                 :message="state.modalConfirmMessage"
-                :isVisible="state.isModalConfirmVisible"
+                :is-visible="state.isModalConfirmVisible"
                 @confirm="handleConfirmOk"
                 @cancel="handleConfirmCancel"
             />

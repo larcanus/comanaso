@@ -36,7 +36,6 @@ onUnmounted(() => {
 })
 
 function subscribeEventListeners() {
-    console.log(appNode);
     window.addEventListener('resize', updateDivWidth);
     appNode.value.addEventListener('click',  hideColumnMenu);
 }
@@ -116,15 +115,6 @@ function nextPage() {
         currentPage.value++;
     }
 }
-import useConnectionStore from '@/store/connection.js';
-async function test() {
-
-    const connection = useConnectionStore();
-    const client = await connection.getClientByAccountId(null);
-    const res = await client?.getDialogs();
-    dialogStore.setDialogs(res);
-}
-
 </script>
 
 <template>
@@ -171,7 +161,7 @@ async function test() {
     </div>
     <div class="pagination">
         <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
-        <span @click="test">Page {{ currentPage }} of {{ totalPages }}</span>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
         <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
     </div>
 </template>
