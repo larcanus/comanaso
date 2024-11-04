@@ -29,7 +29,7 @@ function cancel() {
         <div v-if="isVisible" class="modal-overlay">
             <div class="modal-content">
                 <p>{{ message }}</p>
-                <input v-model="inputValue" type="text" placeholder="*****"  maxlength="10"/>
+                <input v-model="inputValue" type="text" placeholder="*****"  maxlength="10" @keyup.enter="confirm"/>
                 <div class="modal-buttons">
                     <button @click="cancel" class="cancel">Отмена</button>
                     <button @click="confirm">Отправить</button>
