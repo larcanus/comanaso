@@ -6,7 +6,11 @@ import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 import useConnectionStore from '@/store/connection.js';
-import { fullDisconnectClient, getCommonData, logOut } from '@/utils/connection.js';
+import {
+    fullDisconnectClient,
+    getCommonData,
+    logOut,
+} from '@/utils/connection.js';
 import useDialogStore from '@/store/dialogs.js';
 
 const accountStore = useAccountStore();
@@ -46,12 +50,16 @@ onBeforeMount(async () => {
 async function checkClient() {
     const client = await connectionStore.getClientByAccountId(state.id);
 
-    console.log('checkClient client.connected:', client.connected, client.disconnected);
+    console.log(
+        'checkClient client.connected:',
+        client.connected,
+        client.disconnected
+    );
     try {
         if (client) {
             let status = 'offline';
             // check 1
-            if (client.connected && await client.checkAuthorization()) {
+            if (client.connected && (await client.checkAuthorization())) {
                 status = 'online';
             }
             // check 2 try to connect and auth
@@ -81,7 +89,7 @@ accountStore.$onAction(({ name, after }) => {
         }
 
         if (name === 'updateAccountData' && result.id === state.id) {
-            Object.assign(state, result)
+            Object.assign(state, result);
         }
     });
 });
@@ -120,7 +128,7 @@ async function onClickDisconnect() {
     const client = await connectionStore.getClientByAccountId(state.id);
     const resultLogout = await logOut(client);
     console.log('logout --->', resultLogout);
-    await fullDisconnectClient(client)
+    await fullDisconnectClient(client);
     await accountStore.changeStatus(state.id, 'offline');
     connectionStore.setClient(null);
 }
@@ -148,22 +156,24 @@ async function startConnectAccount() {
                 phoneNumber: state.phoneNumber,
                 password: async () => prompt('password!'),
                 phoneCode: async () => {
-                    const res  = await showConfirm();
-                    if (res)
-                    {
+                    const res = await showConfirm();
+                    if (res) {
                         return res;
                     }
 
-                    if(res === false)
-                    {
+                    if (res === false) {
                         location.reload();
                     }
                 },
                 onError: async (err) => {
-                    console.log('start onError', err)
-                    await accountStore.changeStatus(state.id, 'error', prepareErrorMessage(err));
+                    console.log('start onError', err);
+                    await accountStore.changeStatus(
+                        state.id,
+                        'error',
+                        prepareErrorMessage(err)
+                    );
                     toastStore.addToast('error', err.message);
-                }
+                },
             });
 
             client.session.save();
@@ -172,13 +182,19 @@ async function startConnectAccount() {
             await accountStore.changeStatus(state.id, 'online');
             const dialogStore = useDialogStore();
             await getCommonData(client, dialogStore, toastStore);
-            await client.sendMessage('me', { message: 'Hello! Comanaso connected.' });
+            await client.sendMessage('me', {
+                message: 'Hello! Comanaso connected.',
+            });
         }
     } catch (error) {
         console.error('start connection catch:', error);
-        await fullDisconnectClient(client)
+        await fullDisconnectClient(client);
         connectionStore.setClient(null);
-        await accountStore.changeStatus(state.id, 'error', prepareErrorMessage(error));
+        await accountStore.changeStatus(
+            state.id,
+            'error',
+            prepareErrorMessage(error)
+        );
         toastStore.addToast('error', LOC_TOAST_CONNECT_ERROR);
     }
 }
@@ -193,14 +209,14 @@ function prepareErrorMessage(error) {
 
 function prepareDetailMessage() {
     let messageObj = { title: '', desc: '' };
-    if(state.isConnect)
-    {
+    if (state.isConnect) {
         messageObj.title = 'Клиент создан и подключен';
-        messageObj.desc = 'Можно выполнять запросы. После окончания сессии не забудь отключиться!';
-    }
-    else {
+        messageObj.desc =
+            'Можно выполнять запросы. После окончания сессии не забудь отключиться!';
+    } else {
         messageObj.title = `Клиент создан, но не подключен`;
-        messageObj.desc = 'Возможно авторизация уже пройдена, попробуй подключиться снова';
+        messageObj.desc =
+            'Возможно авторизация уже пройдена, попробуй подключиться снова';
     }
 
     return messageObj;
@@ -225,8 +241,7 @@ function isValidConnectData(fields) {
     return result;
 }
 async function showDetail() {
-    if(state.modalPopupInfoMessage === null)
-    {
+    if (state.modalPopupInfoMessage === null) {
         state.modalPopupInfoMessage = prepareDetailMessage();
     }
 
@@ -241,26 +256,26 @@ async function showDetail() {
     //         new Api.account.GetAuthorizations(),
     //     );
     //     console.log('result check GetAuthorizations', result);
-        // const currentSession = result.authorizations.find((auth) => auth.current)
-        // const currentSession = result.authorizations[1]
-        // console.log('currentSession', currentSession);
-        // console.log('currentSession', currentSession.hash);
+    // const currentSession = result.authorizations.find((auth) => auth.current)
+    // const currentSession = result.authorizations[1]
+    // console.log('currentSession', currentSession);
+    // console.log('currentSession', currentSession.hash);
 
-        // const resultReset = await client.invoke(
-        //     new Api.account.ResetAuthorization({hash: currentSession.hash }),
-        // );
-        // console.log('result resultReset', resultReset);
-        // const resultLogout = await client.invoke(
-        //     new Api.auth.LogOut(),
-        // );
-        // console.log('result resultLogout', resultLogout);
+    // const resultReset = await client.invoke(
+    //     new Api.account.ResetAuthorization({hash: currentSession.hash }),
+    // );
+    // console.log('result resultReset', resultReset);
+    // const resultLogout = await client.invoke(
+    //     new Api.auth.LogOut(),
+    // );
+    // console.log('result resultLogout', resultLogout);
 
-        // const res = await client.checkAuthorization()
-        // console.log('result res', res);
-        // const result2 = await client.invoke(
-        //     new Api.account.GetAuthorizations(),
-        // );
-        // console.log('result result2', result2)
+    // const res = await client.checkAuthorization()
+    // console.log('result res', res);
+    // const result2 = await client.invoke(
+    //     new Api.account.GetAuthorizations(),
+    // );
+    // console.log('result result2', result2)
     //
     // } catch (e) {
     //     console.error(e);
@@ -296,7 +311,11 @@ function handleConfirmCancel() {
             <button @click="showDetail" class="button-detail">
                 подробности
             </button>
-            <DetailPopup :message="state.modalPopupInfoMessage" :isVisible="state.isModalPopupInfoVisible" @close="state.isModalPopupInfoVisible = false" />
+            <DetailPopup
+                :message="state.modalPopupInfoMessage"
+                :isVisible="state.isModalPopupInfoVisible"
+                @close="state.isModalPopupInfoVisible = false"
+            />
         </div>
         <div class="product-details">
             <input
@@ -455,10 +474,10 @@ input:disabled {
     border-radius: 2px;
     color: var(--vt-c-white-soft);
     cursor: pointer;
-    background-color:  var(--vt-bt-info-background-color);
+    background-color: var(--vt-bt-info-background-color);
 }
 .button-detail:hover {
-    background-color:  var(--vt-bt-info-background-color-hover);
+    background-color: var(--vt-bt-info-background-color-hover);
 }
 
 @media (max-width: 700px) {

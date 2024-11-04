@@ -6,27 +6,25 @@ import useConnectionStore from '@/store/connection.js';
 import useDialogStore from '@/store/dialogs.js';
 import useToastStore from '@/store/toast.js';
 const state = reactive({
-        isModalConfirmVisible: false,
-        modalConfirmMessage: '',
-        isGettingData: false,
+    isModalConfirmVisible: false,
+    modalConfirmMessage: '',
+    isGettingData: false,
 });
 
 async function onClickContainer() {
-    if(state.isGettingData)
-    {
+    if (state.isGettingData) {
         return;
     }
 
     const resultConfirm = await showConfirm();
-    if(resultConfirm)
-    {
+    if (resultConfirm) {
         state.isGettingData = true;
 
         const connection = useConnectionStore();
         const dialogStore = useDialogStore();
         const toastStore = useToastStore();
         const client = await connection.getClientByAccountId(null);
-        await getCommonData(client, dialogStore, toastStore)
+        await getCommonData(client, dialogStore, toastStore);
 
         state.isGettingData = false;
     }
@@ -34,7 +32,8 @@ async function onClickContainer() {
 
 let resolveConfirmPromise;
 function showConfirm() {
-    state.modalConfirmMessage = 'Вы действительно хотите сделать повторный запрос данных? Текущие будут удалены.';
+    state.modalConfirmMessage =
+        'Вы действительно хотите сделать повторный запрос данных? Текущие будут удалены.';
     state.isModalConfirmVisible = true;
 
     return new Promise((resolve) => {
@@ -55,7 +54,12 @@ function handleConfirmCancel() {
 
 <template>
     <div class="container" @click="onClickContainer">
-        <img src="@/assets/refresh.png" alt="update" class="button-img" :class="{getting: state.isGettingData}"/>
+        <img
+            src="@/assets/refresh.png"
+            alt="update"
+            class="button-img"
+            :class="{ getting: state.isGettingData }"
+        />
     </div>
     <Confirm
         :message="state.modalConfirmMessage"
@@ -77,10 +81,11 @@ function handleConfirmCancel() {
 .button-img {
     width: 50px;
     height: 50px;
-
 }
 @keyframes rotate360 {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .getting {

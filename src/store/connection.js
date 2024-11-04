@@ -8,15 +8,14 @@ export const useConnectionStore = defineStore('connection', () => {
     const state = ref({});
 
     async function getClientByAccountId(id) {
-        if(!client)
-        {
-            client = await tryGetClientByAccountId(id)
+        if (!client) {
+            client = await tryGetClientByAccountId(id);
         }
         return client;
     }
 
     function setClient(newClient) {
-        client = newClient
+        client = newClient;
     }
 
     function $reset() {
@@ -36,7 +35,7 @@ async function tryGetClientByAccountId(accountId) {
         return await createClient(accountData.apiId, accountData.apiHash);
     }
 
-    return null
+    return null;
 }
 
 export default useConnectionStore;

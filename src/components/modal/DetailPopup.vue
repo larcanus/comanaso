@@ -4,12 +4,12 @@ import { defineProps, defineEmits } from 'vue';
 const props = defineProps({
     message: {
         type: [Object, null],
-        required: true
+        required: true,
     },
     isVisible: {
         type: Boolean,
-        required: true
-    }
+        required: true,
+    },
 });
 
 const emit = defineEmits(['close']);
@@ -58,8 +58,7 @@ function closeModal() {
     max-width: 500px;
     text-wrap: wrap;
 }
-.content
-{
+.content {
     margin: 1% 0 4% 0;
     color: #030101;
 }

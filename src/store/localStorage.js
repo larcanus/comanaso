@@ -108,8 +108,7 @@ function clearLocalStorage() {
     localStorage.clear();
 }
 
-function setAccountData(data)
-{
+function setAccountData(data) {
     localStorage.setItem(ACC_KEY, JSON.stringify(data));
 }
 
@@ -130,6 +129,6 @@ const localStorageUtils = {
     clearLocalStorage,
     setAuthToken,
     setUserData,
-    setAccountData
+    setAccountData,
 };
 export default localStorageUtils;

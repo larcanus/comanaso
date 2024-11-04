@@ -4,7 +4,7 @@ import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 const accStore = useAccountStore();
 const toastStore = useToastStore();
-const LIMIT_ACCOUNT_TEXT = 'Сейчас доступно создание только одного аккаунта'
+const LIMIT_ACCOUNT_TEXT = 'Сейчас доступно создание только одного аккаунта';
 function onClickDiv() {
     const ids = accStore.getCollectionId();
     if (ids.length >= 1) {
@@ -22,8 +22,8 @@ function onClickDiv() {
 </script>
 
 <template>
-    <div class="div-image" >
-        <img :src="imagePlusPath" alt="acc" @click="onClickDiv"/>
+    <div class="div-image">
+        <img :src="imagePlusPath" alt="acc" @click="onClickDiv" />
     </div>
 </template>
 

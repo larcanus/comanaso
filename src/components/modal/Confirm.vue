@@ -3,18 +3,18 @@ import { ref } from 'vue';
 const props = defineProps({
     message: {
         type: [String, null],
-        required: true
+        required: true,
     },
     isVisible: {
         type: Boolean,
         required: true,
-        default: false
+        default: false,
     },
     isInput: {
         type: Boolean,
         required: false,
         default: true,
-    }
+    },
 });
 
 const emit = defineEmits(['confirm', 'cancel']);
@@ -22,8 +22,7 @@ const emit = defineEmits(['confirm', 'cancel']);
 const inputValue = ref('');
 
 function confirm() {
-    if(props.isInput === true)
-    {
+    if (props.isInput === true) {
         return emit('confirm', inputValue.value);
     }
 
@@ -40,7 +39,14 @@ function cancel() {
         <div v-if="isVisible" class="modal-overlay">
             <div class="modal-content">
                 <p>{{ message }}</p>
-                <input v-if="isInput" v-model="inputValue" type="text" placeholder="*****"  maxlength="10" @keyup.enter="confirm"/>
+                <input
+                    v-if="isInput"
+                    v-model="inputValue"
+                    type="text"
+                    placeholder="*****"
+                    maxlength="10"
+                    @keyup.enter="confirm"
+                />
                 <div class="modal-buttons">
                     <button @click="cancel" class="cancel">Отмена</button>
                     <button @click="confirm">Отправить</button>
@@ -81,7 +87,7 @@ input {
     width: 70%;
     margin: 20px;
     line-height: 2;
-    text-align:center;
+    text-align: center;
     font-size: 16px;
     --un-placeholder-opacity: 0.3;
 }

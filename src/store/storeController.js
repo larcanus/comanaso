@@ -64,5 +64,4 @@ export async function updateAccountLocalStore(state) {
         console.error(e);
     }
 }
-export async function getAccountsData(userData) {
-}
+export async function getAccountsData(userData) {}

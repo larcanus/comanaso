@@ -13,7 +13,7 @@ export const useToastStore = defineStore('toast', () => {
     function preparedToast(type, text) {
         const toastId = Math.floor(Math.random() * 1000);
         hiddenToastHandler(toastId, state);
-        return { type, text, id: toastId }
+        return { type, text, id: toastId };
     }
 
     function hiddenToastHandler(id, state) {

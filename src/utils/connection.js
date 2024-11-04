@@ -1,7 +1,8 @@
 import { Api, TelegramClient } from 'telegram';
 import { StoreSession, StringSession } from 'telegram/sessions';
 const LOC_TOAST_SUCCESS_DATA_UPDATE = 'Данные успешно получены';
-const LOC_TOAST_ERROR_DATA_UPDATE = 'При запросе произошла ошибка. Проверьте подключение клиента';
+const LOC_TOAST_ERROR_DATA_UPDATE =
+    'При запросе произошла ошибка. Проверьте подключение клиента';
 
 export async function createClient(apiId, apiHash) {
     const storeSession = new StoreSession(`folder_${apiId}`);
@@ -25,13 +26,11 @@ export async function fullDisconnectClient(client) {
 }
 
 export async function logOut(client) {
-    return client?.invoke(
-        new Api.auth.LogOut(),
-    );
+    return client?.invoke(new Api.auth.LogOut());
 }
 
 export async function getCommonData(client, store, toast) {
-    if (client && store){
+    if (client && store) {
         try {
             const dialogData = await client?.getDialogs();
             await store.setDialogs(dialogData);
@@ -48,5 +47,3 @@ export async function getCommonData(client, store, toast) {
     toast.addToast('error', LOC_TOAST_ERROR_DATA_UPDATE);
     return true;
 }
-
-

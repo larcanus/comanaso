@@ -9,20 +9,21 @@ const state = reactive({
 });
 
 toastStore.$subscribe((mutation, store) => {
-    if(mutation.events.type === 'set') {
+    if (mutation.events.type === 'set') {
         state.toasts = store.state;
     }
-})
+});
 
 function getImagePath(type) {
-    switch (type)
-    {
-        case 'ok': return okImagePath
-        case 'error': return errorImagePath
-        default: return errorImagePath
+    switch (type) {
+        case 'ok':
+            return okImagePath;
+        case 'error':
+            return errorImagePath;
+        default:
+            return errorImagePath;
     }
 }
-
 </script>
 
 <template>
@@ -36,7 +37,11 @@ function getImagePath(type) {
                         class="toast"
                         :class="`toast-type-${toast.type}`"
                     >
-                        <img :src="getImagePath(toast.type)" alt="status-icon" class="icon">
+                        <img
+                            :src="getImagePath(toast.type)"
+                            alt="status-icon"
+                            class="icon"
+                        />
                         <span>
                             {{ toast.text }}
                         </span>
@@ -91,16 +96,13 @@ span {
     color: var(--vt-c-white-soft);
 }
 
-.toast-type-error
-{
+.toast-type-error {
     background-color: #d0363e;
 }
-.toast-type-ok
-{
+.toast-type-ok {
     background-color: #42e362;
 }
-.toast-type-info
-{
+.toast-type-info {
     background-color: #d8a600;
 }
 
@@ -109,5 +111,4 @@ span {
     height: 1rem;
     margin: 0.5rem;
 }
-
 </style>

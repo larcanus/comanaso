@@ -9,9 +9,9 @@ import Toast from '@/components/toast/Toast.vue';
 const store = useUserStore();
 const router = useRouter();
 const route = useRoute();
-const currentRouterPath = computed( () => {
+const currentRouterPath = computed(() => {
     return route.name;
-})
+});
 
 const sections = [
     { path: 'account', name: 'АККАУНТЫ' },

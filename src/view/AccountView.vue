@@ -18,14 +18,16 @@ accStore.$onAction(({ name, after }) => {
         }
     });
 });
-
 </script>
 
 <template>
     <div class="view-container">
         <div class="header-container">
             <h1>Аккаунты</h1>
-            <p>Здесь отображается основная информация ваших аккаунтов и их состоянии.</p>
+            <p>
+                Здесь отображается основная информация ваших аккаунтов и их
+                состоянии.
+            </p>
         </div>
 
         <div class="accounts-container">

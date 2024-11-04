@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { deleteAccountLocalStore, setAccountLocalStore, updateAccountLocalStore } from '@/store/storeController.js';
+import {
+    deleteAccountLocalStore,
+    setAccountLocalStore,
+    updateAccountLocalStore,
+} from '@/store/storeController.js';
 
 export const useAccountStore = defineStore('account', () => {
     const defaultStateModel = {
@@ -11,13 +15,13 @@ export const useAccountStore = defineStore('account', () => {
         apiHash: 'ff9d24b00baaa16907c31afdbe318fd7',
         phoneNumber: '+79056002730',
         status: 'offline', // 'offline' 'connect' 'online' 'error'
-        errorMessage: ''
+        errorMessage: '',
     };
 
     const state = ref({});
 
     function setAccountsDataFromLocalStore(accountsData) {
-        if(accountsData) {
+        if (accountsData) {
             this.state = accountsData;
         }
     }
@@ -74,10 +78,10 @@ export const useAccountStore = defineStore('account', () => {
     function validate(fields) {
         const preparedFields = {};
         Object.keys(fields).forEach((key) => {
-            if(key in defaultStateModel) {
+            if (key in defaultStateModel) {
                 preparedFields[key] = fields[key];
             }
-        })
+        });
 
         if (preparedFields.name === null || preparedFields.name.length === 0) {
             preparedFields.name = `${generatePositiveAccountName()} telegram`;

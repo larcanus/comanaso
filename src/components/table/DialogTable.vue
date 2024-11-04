@@ -16,28 +16,30 @@ const allColumns = [
     { key: 'mute', label: 'Заглушен до' },
     { key: 'date', label: 'Дата обновления' },
 ];
-const visibleColumns = ref(allColumns.map(column => column.key));
+const visibleColumns = ref(allColumns.map((column) => column.key));
 const showColumnMenu = ref(false);
 
-
 const isMobileWidth = (width) => width <= 750;
-const mainDivWidth = ref(window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.90 : 0.7));
+const mainDivWidth = ref(
+    window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7)
+);
 
 function updateDivWidth() {
-    mainDivWidth.value = window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7);
+    mainDivWidth.value =
+        window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7);
 }
-const appNode = computed( () => document.querySelector('#app') );
+const appNode = computed(() => document.querySelector('#app'));
 onMounted(() => {
     subscribeEventListeners();
 });
 
 onUnmounted(() => {
     unsubscribeEventListeners();
-})
+});
 
 function subscribeEventListeners() {
     window.addEventListener('resize', updateDivWidth);
-    appNode.value.addEventListener('click',  hideColumnMenu);
+    appNode.value.addEventListener('click', hideColumnMenu);
 }
 
 function unsubscribeEventListeners() {
@@ -48,14 +50,13 @@ function unsubscribeEventListeners() {
 dialogStore.$onAction(({ name, after }) => {
     after((result) => {
         if (name === 'setDialogs') {
-            dialogState.value = dialogStore.validateDialogs(result)
+            dialogState.value = dialogStore.validateDialogs(result);
         }
     });
 });
 
 function hideColumnMenu(e) {
-    if(e.target.id && e.target.id.includes('column'))
-    {
+    if (e.target.id && e.target.id.includes('column')) {
         return;
     }
     showColumnMenu.value = false;
@@ -65,38 +66,38 @@ onUnmounted(() => {
     window.removeEventListener('resize', updateDivWidth);
 });
 
-
 function toggleColumnMenu() {
     showColumnMenu.value = !showColumnMenu.value;
 }
 
-
 const currentPage = ref(1);
 const rowsPerPage = 5;
-
 
 const paginatedData = computed(() => {
     const start = (currentPage.value - 1) * rowsPerPage;
     const end = start + rowsPerPage;
     const res = dialogState.value.slice(start, end);
-    const preparedData = res.map(item => toRaw(item));
+    const preparedData = res.map((item) => toRaw(item));
     console.log('paginatedData', res, preparedData);
     return preparedData;
 });
 
-
-const totalPages = computed(() => Math.ceil(dialogState.value.length / rowsPerPage));
+const totalPages = computed(() =>
+    Math.ceil(dialogState.value.length / rowsPerPage)
+);
 
 function toggleColumn(columnKey) {
     if (visibleColumns.value.includes(columnKey)) {
-        visibleColumns.value = visibleColumns.value.filter(key => key !== columnKey);
+        visibleColumns.value = visibleColumns.value.filter(
+            (key) => key !== columnKey
+        );
     } else {
         visibleColumns.value.push(columnKey);
     }
 }
 
 function getColumnLabel(columnKey) {
-    const column = allColumns.find(col => col.key === columnKey);
+    const column = allColumns.find((col) => col.key === columnKey);
     return column ? column.label : '';
 }
 
@@ -119,16 +120,29 @@ function nextPage() {
 
 <template>
     <div class="table-controls" id="table-controls">
-        <button @click="toggleColumnMenu" id="edit-columns-button" class="edit-columns-button">✏️</button>
+        <button
+            @click="toggleColumnMenu"
+            id="edit-columns-button"
+            class="edit-columns-button"
+        >
+            ✏️
+        </button>
         <div v-if="showColumnMenu" id="column-menu" class="column-menu">
-            <div v-for="column in allColumns" :key="column.key" class="column-menu-item">
+            <div
+                v-for="column in allColumns"
+                :key="column.key"
+                class="column-menu-item"
+            >
                 <input
                     :id="`column-menu-input-${column.key}`"
                     type="checkbox"
                     :checked="visibleColumns.includes(column.key)"
                     @change="toggleColumn(column.key)"
                 />
-                <label :id="`column-menu-input-${column.key}`" :for="`column-menu-input-${column.key}`">
+                <label
+                    :id="`column-menu-input-${column.key}`"
+                    :for="`column-menu-input-${column.key}`"
+                >
                     {{ column.label }}
                 </label>
             </div>
@@ -138,36 +152,43 @@ function nextPage() {
         <div class="table-container">
             <table class="styled-table">
                 <thead>
-                <tr>
-                    <th
-                        v-for="column in visibleColumns"
-                        :key="column"
-                        @click="sortByColumn(column)"
-                        :id="column"
-                    >
-                        {{ getColumnLabel(column) }}
-                    </th>
-                </tr>
+                    <tr>
+                        <th
+                            v-for="column in visibleColumns"
+                            :key="column"
+                            @click="sortByColumn(column)"
+                            :id="column"
+                        >
+                            {{ getColumnLabel(column) }}
+                        </th>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr v-for="row in paginatedData" :key="row.id">
-                    <td v-for="column in visibleColumns" :key="column" :id="column">
-                        {{ row[column] }}
-                    </td>
-                </tr>
+                    <tr v-for="row in paginatedData" :key="row.id">
+                        <td
+                            v-for="column in visibleColumns"
+                            :key="column"
+                            :id="column"
+                        >
+                            {{ row[column] }}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
     <div class="pagination">
-        <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
+        <button @click="prevPage" :disabled="currentPage === 1">
+            Previous
+        </button>
         <span>Page {{ currentPage }} of {{ totalPages }}</span>
-        <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
+        <button @click="nextPage" :disabled="currentPage === totalPages">
+            Next
+        </button>
     </div>
 </template>
 
 <style scoped>
-
 .main-container {
     max-width: 1000px;
     min-width: 100px;
@@ -189,16 +210,18 @@ function nextPage() {
     color: #333;
 }
 
-.styled-table th, .styled-table td {
+.styled-table th,
+.styled-table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: center;
     color: var(--vt-c-black-soft);
 }
 
-#date, #mute {
+#date,
+#mute {
     text-wrap: nowrap;
-    white-space: nowrap
+    white-space: nowrap;
 }
 
 .styled-table th {
@@ -207,7 +230,7 @@ function nextPage() {
     white-space: nowrap;
 }
 
-.styled-table tbody tr{
+.styled-table tbody tr {
     background-color: #e7e5e8;
 }
 
@@ -252,11 +275,11 @@ function nextPage() {
     margin: 2px 0 5px 0;
 }
 
-.column-menu-item input{
+.column-menu-item input {
     margin: 0 12px 0 3px;
     cursor: pointer;
 }
-.column-menu-item label{
+.column-menu-item label {
     cursor: pointer;
 }
 

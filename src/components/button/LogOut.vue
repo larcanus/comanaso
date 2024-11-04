@@ -10,7 +10,7 @@ async function onClickContainer() {
     const client = await connectionStore.getClientByAccountId(null);
     const resultLogout = await logOut(client);
     console.log('logout --->', resultLogout);
-    await fullDisconnectClient(client)
+    await fullDisconnectClient(client);
     logoutAllStore();
     await router.replace({ name: 'home' });
 }
