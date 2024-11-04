@@ -23,7 +23,7 @@ const accountData = accountStore.getById(props.account);
 
 const LOC_TOAST_VALID_ERROR = 'Ошибка данных. Проверьте поля аккаунта';
 const LOC_TOAST_CONNECT_ERROR = 'Ошибка подключения';
-const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент подключен!';
+const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент подключен к аккаунту!';
 
 const state = reactive({
     ...{
@@ -210,11 +210,11 @@ function prepareErrorMessage(error) {
 function prepareDetailMessage() {
     let messageObj = { title: '', desc: '' };
     if (state.isConnect) {
-        messageObj.title = 'Клиент создан и подключен';
+        messageObj.title = 'Клиент создан и подключен к аккаунту';
         messageObj.desc =
             'Можно выполнять запросы. После окончания сессии не забудь отключиться!';
     } else {
-        messageObj.title = `Клиент создан, но не подключен`;
+        messageObj.title = `Клиент создан, но не подключен к аккаунту`;
         messageObj.desc =
             'Возможно авторизация уже пройдена, попробуй подключиться снова';
     }

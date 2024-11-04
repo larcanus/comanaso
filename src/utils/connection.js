@@ -2,7 +2,7 @@ import { Api, TelegramClient } from 'telegram';
 import { StoreSession, StringSession } from 'telegram/sessions';
 const LOC_TOAST_SUCCESS_DATA_UPDATE = 'Данные успешно получены';
 const LOC_TOAST_ERROR_DATA_UPDATE =
-    'При запросе произошла ошибка. Проверьте подключение клиента';
+    'При запросе произошла ошибка. Проверьте состояние подключения к аккаунту';
 
 export async function createClient(apiId, apiHash) {
     const storeSession = new StoreSession(`folder_${apiId}`);
