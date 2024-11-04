@@ -1,11 +1,18 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { logoutAllStore } from '@/store/storeController.js';
+import { fullDisconnectClient, logOut } from '@/utils/connection.js';
+import useConnectionStore from '@/store/connection.js';
 const router = useRouter();
 
-function onClickContainer() {
+async function onClickContainer() {
+    const connectionStore = useConnectionStore();
+    const client = await connectionStore.getClientByAccountId(null);
+    const resultLogout = await logOut(client);
+    console.log('logout --->', resultLogout);
+    await fullDisconnectClient(client)
     logoutAllStore();
-    router.replace({ name: 'home' });
+    await router.replace({ name: 'home' });
 }
 </script>
 

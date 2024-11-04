@@ -25,7 +25,7 @@ export async function fullDisconnectClient(client) {
 }
 
 export async function logOut(client) {
-    return client.invoke(
+    return client?.invoke(
         new Api.auth.LogOut(),
     );
 }
