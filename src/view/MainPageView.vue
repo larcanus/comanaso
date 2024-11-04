@@ -1,6 +1,6 @@
 <script setup>
-import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { computed, ref } from 'vue';
 import FooterSection from '@/components/front-page-section/FooterSection.vue';
 import { useUserStore } from '@/store/user';
 import LogOut from '@/components/button/LogOut.vue';
@@ -8,6 +8,10 @@ import Toast from '@/components/toast/Toast.vue';
 
 const store = useUserStore();
 const router = useRouter();
+const route = useRoute();
+const currentRouterPath = computed( () => {
+    return route.name;
+})
 
 const sections = [
     { path: 'account', name: 'АККАУНТЫ' },
@@ -15,7 +19,7 @@ const sections = [
     { path: 'settings', name: 'НАСТРОЙКИ' },
 ];
 const state = ref({
-    selectedSection: 'account',
+    selectedSection: currentRouterPath.value,
     showSidebar: false,
 });
 
