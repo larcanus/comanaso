@@ -8,19 +8,27 @@ import useToastStore from '@/store/toast.js';
 const state = reactive({
         isModalConfirmVisible: false,
         modalConfirmMessage: '',
+        isGettingData: false,
 });
 
 async function onClickContainer() {
+    if(state.isGettingData)
+    {
+        return;
+    }
+
     const resultConfirm = await showConfirm();
     if(resultConfirm)
     {
+        state.isGettingData = true;
+
         const connection = useConnectionStore();
         const dialogStore = useDialogStore();
         const toastStore = useToastStore();
         const client = await connection.getClientByAccountId(null);
+        await getCommonData(client, dialogStore, toastStore)
 
-        const res = await getCommonData(client, dialogStore, toastStore)
-        console.log('res',res);
+        state.isGettingData = false;
     }
 }
 
@@ -47,7 +55,7 @@ function handleConfirmCancel() {
 
 <template>
     <div class="container" @click="onClickContainer">
-        <img src="@/assets/refresh.png" alt="update" class="button-img" />
+        <img src="@/assets/refresh.png" alt="update" class="button-img" :class="{getting: state.isGettingData}"/>
     </div>
     <Confirm
         :message="state.modalConfirmMessage"
@@ -69,6 +77,14 @@ function handleConfirmCancel() {
 .button-img {
     width: 50px;
     height: 50px;
+
+}
+@keyframes rotate360 {
+    to { transform: rotate(360deg); }
+}
+
+.getting {
+    animation: 2s rotate360 infinite linear;
 }
 
 .button-img:active {
