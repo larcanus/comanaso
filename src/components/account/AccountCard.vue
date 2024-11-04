@@ -6,7 +6,8 @@ import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 import useConnectionStore from '@/store/connection.js';
-import { fullDisconnectClient, logOut } from '@/utils/connection.js';
+import { fullDisconnectClient, getCommonData, logOut } from '@/utils/connection.js';
+import useDialogStore from '@/store/dialogs.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -169,8 +170,8 @@ async function startConnectAccount() {
             connectionStore.setClient(client);
             toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
             await accountStore.changeStatus(state.id, 'online');
-            const result = await client.getDialogs();
-            console.log('result 2 dialog after new connect', result); // prints the result
+            const dialogStore = useDialogStore();
+            await getCommonData(client, dialogStore, toastStore);
             await client.sendMessage('me', { message: 'Hello! Comanaso connected.' });
         }
     } catch (error) {

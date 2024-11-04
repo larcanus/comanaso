@@ -1,6 +1,6 @@
 import { Api, TelegramClient } from 'telegram';
 import { StoreSession, StringSession } from 'telegram/sessions';
-const LOC_TOAST_SUCCESS_DATA_UPDATE = 'Данные успешно обновлены';
+const LOC_TOAST_SUCCESS_DATA_UPDATE = 'Данные успешно получены';
 const LOC_TOAST_ERROR_DATA_UPDATE = 'При запросе произошла ошибка. Проверьте подключение клиента';
 
 export async function createClient(apiId, apiHash) {
