@@ -2,12 +2,12 @@
 import { useRouter } from 'vue-router';
 import { logoutAllStore } from '@/store/storeController.js';
 import { fullDisconnectClient, logOut } from '@/utils/connection.js';
-import useConnectionStore from '@/store/connection.js';
+import useTelegramClientStore from '@/store/telegramClient.js';
 const router = useRouter();
 
 async function onClickContainer() {
-    const connectionStore = useConnectionStore();
-    const client = await connectionStore.getClientByAccountId(null);
+    const tgClientStore = useTelegramClientStore();
+    const client = await tgClientStore.getClientByAccountId(null);
     const resultLogout = await logOut(client);
     console.log('logout --->', resultLogout);
     await fullDisconnectClient(client);

@@ -1,26 +1,24 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { shallowRef, toRaw } from 'vue';
 import { createClient } from '@/utils/connection.js';
 import useAccountStore from '@/store/account.js';
 
-export const useConnectionStore = defineStore('connection', () => {
-    let client = null;
-    const state = ref({});
+export const useTelegramClientStore = defineStore('telegramClient', () => {
+    const state = shallowRef(null);
 
     async function getClientByAccountId(id) {
-        if (!client) {
-            client = await tryGetClientByAccountId(id);
+        if (!state.value) {
+            state.value = await tryGetClientByAccountId(id);
         }
-        return client;
+        return toRaw(state.value);
     }
 
     function setClient(newClient) {
-        client = newClient;
+        state.value = newClient;
     }
 
     function $reset() {
-        this.state = {};
-        client = null;
+        state.value = null;
     }
 
     return { state, $reset, setClient, getClientByAccountId };
@@ -38,4 +36,4 @@ async function tryGetClientByAccountId(accountId) {
     return null;
 }
 
-export default useConnectionStore;
+export default useTelegramClientStore;

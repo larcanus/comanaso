@@ -5,7 +5,7 @@ import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
-import useConnectionStore from '@/store/connection.js';
+import useTelegramClientStore from '@/store/telegramClient.js';
 import {
     fullDisconnectClient,
     getCommonData,
@@ -15,7 +15,7 @@ import useDialogStore from '@/store/dialogs.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
-const connectionStore = useConnectionStore();
+const tgClientStore = useTelegramClientStore();
 const props = defineProps({
     account: String,
 });
@@ -48,7 +48,7 @@ onBeforeMount(async () => {
 });
 
 async function checkClient() {
-    const client = await connectionStore.getClientByAccountId(state.id);
+    const client = await tgClientStore.getClientByAccountId(state.id);
 
     console.log(
         'checkClient client.connected:',
@@ -125,16 +125,16 @@ function onClickStart() {
 }
 
 async function onClickDisconnect() {
-    const client = await connectionStore.getClientByAccountId(state.id);
+    const client = await tgClientStore.getClientByAccountId(state.id);
     const resultLogout = await logOut(client);
     console.log('logout --->', resultLogout);
     await fullDisconnectClient(client);
     await accountStore.changeStatus(state.id, 'offline');
-    connectionStore.setClient(null);
+    tgClientStore.setClient(null);
 }
 
 async function startConnectAccount() {
-    const client = await connectionStore.getClientByAccountId(state.id);
+    const client = await tgClientStore.getClientByAccountId(state.id);
     await client.session.load();
     console.log('startConnectAccount connection', client);
 
@@ -177,7 +177,7 @@ async function startConnectAccount() {
             });
 
             client.session.save();
-            connectionStore.setClient(client);
+            tgClientStore.setClient(client);
             toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
             await accountStore.changeStatus(state.id, 'online');
             const dialogStore = useDialogStore();
@@ -189,7 +189,7 @@ async function startConnectAccount() {
     } catch (error) {
         console.error('start connection catch:', error);
         await fullDisconnectClient(client);
-        connectionStore.setClient(null);
+        tgClientStore.setClient(null);
         await accountStore.changeStatus(
             state.id,
             'error',
@@ -247,7 +247,7 @@ async function showDetail() {
 
     state.isModalPopupInfoVisible = true;
 
-    // const client = await connectionStore.getClientByAccountId(state.id);
+    // const client = await tgClientStore.getClientByAccountId(state.id);
     // console.log('check client', client);
     // try {
     //     // await client.sendMessage('me', { message: 'Hello! check' });

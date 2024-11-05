@@ -1,7 +1,7 @@
 import localStorageUtils from '@/store/localStorage.js';
 import useAuthStore from '@/store/auth';
 import useUserStore from '@/store/user';
-import useConnectionStore from '@/store/connection.js';
+import useTelegramClientStore from '@/store/telegramClient.js';
 import useDialogStore from '@/store/dialogs.js';
 import useAccountStore from '@/store/account.js';
 
@@ -10,13 +10,13 @@ export function logoutAllStore() {
         const userStore = useUserStore();
         const authStore = useAuthStore();
         const accountStore = useAccountStore();
-        const connectionStore = useConnectionStore();
+        const tgClientStore = useTelegramClientStore();
         const dialogStore = useDialogStore();
 
         userStore?.$reset();
         authStore?.$reset();
         accountStore?.$reset();
-        connectionStore?.$reset();
+        tgClientStore?.$reset();
         dialogStore?.$reset();
         localStorageUtils.clearLocalStorage();
     } catch (e) {
