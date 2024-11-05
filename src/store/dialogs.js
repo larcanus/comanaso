@@ -12,7 +12,7 @@ export const useDialogStore = defineStore('dialog', () => {
     }
 
     function $reset() {
-        this.state = {};
+        this.state = [];
     }
 
     function validateDialogs(dialogs = []) {

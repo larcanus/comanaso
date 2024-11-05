@@ -144,9 +144,20 @@ function prevPage() {
     }
 }
 
+function prevPageToStart() {
+    if (currentPage.value > 1) {
+        currentPage.value = 1;
+    }
+}
+
 function nextPage() {
     if (currentPage.value < totalPages.value) {
         currentPage.value++;
+    }
+}
+function nextPageToEnd() {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value = totalPages.value;
     }
 }
 </script>
@@ -211,12 +222,18 @@ function nextPage() {
         </div>
     </div>
     <div class="pagination">
+        <button @click="prevPageToStart" :disabled="currentPage === 1">
+            <<
+        </button>
         <button @click="prevPage" :disabled="currentPage === 1">
-            Previous
+            <
         </button>
         <span>Page {{ currentPage }} of {{ totalPages }}</span>
-        <button @click="nextPage" :disabled="currentPage === totalPages">
-            Next
+        <button @click="nextPage" :disabled="currentPage === totalPages || totalPages === 0">
+            >
+        </button>
+        <button @click="nextPageToEnd" :disabled="currentPage === totalPages || totalPages === 0">
+            >>
         </button>
     </div>
 </template>
