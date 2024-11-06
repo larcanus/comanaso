@@ -87,8 +87,8 @@ function getImagePath(type) {
     margin: 10px;
     text-align: center;
     place-items: center;
-    max-width: 250px;
-    width: 250px;
+    max-width: 350px;
+    width: 50rem;
     white-space: break-spaces;
 }
 

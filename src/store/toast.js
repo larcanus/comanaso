@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-const TOAST_TIME = 3000;
+const TOAST_TIME = 4000;
 
 export const useToastStore = defineStore('toast', () => {
     const state = ref([]);

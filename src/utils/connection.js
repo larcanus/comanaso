@@ -3,6 +3,8 @@ import { StoreSession, StringSession } from 'telegram/sessions';
 const LOC_TOAST_SUCCESS_DATA_UPDATE = 'Данные успешно получены';
 const LOC_TOAST_ERROR_DATA_UPDATE =
     'При запросе произошла ошибка. Проверьте состояние подключения к аккаунту';
+const LOC_TOAST_ERROR_DATA_UPDATE_AUTH =
+    'При запросе произошла ошибка. Ключ авторизация не принят. Проверьте состояние подключения к аккаунту';
 
 export async function createClient(apiId, apiHash) {
     const storeSession = new StoreSession(`folder_${apiId}`);
@@ -39,7 +41,13 @@ export async function getCommonData(client, store, toast) {
             return true;
         } catch (error) {
             console.error('getCommonData catch:', error);
-            toast.addToast('error', error.message);
+            if(error.message.includes('AUTH_KEY_UNREGISTERED'))
+            {
+                toast.addToast('error', LOC_TOAST_ERROR_DATA_UPDATE_AUTH);
+            }
+            else {
+                toast.addToast('error', error.message);
+            }
             return true;
         }
     }
