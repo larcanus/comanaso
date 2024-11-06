@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import FooterSection from '@/components/front-page-section/FooterSection.vue';
 import { useUserStore } from '@/store/user';
 import LogOut from '@/components/button/LogOut.vue';
@@ -24,6 +24,7 @@ const state = ref({
 });
 
 const selectSection = (section) => {
+    state.value.showSidebar = !state.value.showSidebar;
     state.value.selectedSection = section;
     router.push({ path: `/main/${section}` });
 };
@@ -232,7 +233,11 @@ function onMenuClick() {
     .sidebar {
         visibility: hidden;
         opacity: 0;
-        transform: translateX(-20%);
+        transform: translateX(-100%);
+        transition:
+            transform 0.2s,
+            opacity 0.2s,
+            visibility 0.2s ease-out;
         width: 50%;
     }
     .sidebarShow {
