@@ -1,6 +1,7 @@
 <script setup>
 import DialogTable from '@/components/table/DialogTable.vue';
 import UpdateButton from '@/components/button/UpdateButton.vue';
+import DialogPie from '@/components/chart/DialogPie.vue';
 </script>
 
 <template>
@@ -10,6 +11,7 @@ import UpdateButton from '@/components/button/UpdateButton.vue';
             <p>Здесь отображаются доступные данные и аналитика.</p>
         </div>
         <DialogTable />
+        <DialogPie />
         <UpdateButton />
     </div>
 </template>

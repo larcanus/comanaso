@@ -163,6 +163,9 @@ function nextPageToEnd() {
 </script>
 
 <template>
+    <div class="header">
+        <h3>Ваши диалоги</h3>
+    </div>
     <div class="table-controls" id="table-controls">
         <button
             @click="toggleColumnMenu"
@@ -239,6 +242,11 @@ function nextPageToEnd() {
 </template>
 
 <style scoped>
+.header {
+    color: var(--vt-c-white-mute_x2);
+    margin: 10px 0 5px 0;
+}
+
 .main-container {
     max-width: 1000px;
     min-width: 100px;
