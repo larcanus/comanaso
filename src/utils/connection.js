@@ -41,11 +41,9 @@ export async function getCommonData(client, store, toast) {
             return true;
         } catch (error) {
             console.error('getCommonData catch:', error);
-            if(error.message.includes('AUTH_KEY_UNREGISTERED'))
-            {
+            if (error.message.includes('AUTH_KEY_UNREGISTERED')) {
                 toast.addToast('error', LOC_TOAST_ERROR_DATA_UPDATE_AUTH);
-            }
-            else {
+            } else {
                 toast.addToast('error', error.message);
             }
             return true;

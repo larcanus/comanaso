@@ -1,12 +1,29 @@
 <script setup>
 import { Pie } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    ArcElement,
+} from 'chart.js';
 import { computed, onMounted, onUnmounted, onUpdated, ref } from 'vue';
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
-const windowWith = computed( () => {
+ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    ArcElement
+);
+const windowWith = computed(() => {
     return window.innerWidth;
-})
+});
 
 onMounted(() => {
     subscribeEventListeners();
@@ -25,7 +42,7 @@ function unsubscribeEventListeners() {
 }
 const isMobileWidth = (width) => width <= 750;
 function updateDivWidth() {
-   state.value.chartOptions.plugins.legend.position = getPositionLegend();
+    state.value.chartOptions.plugins.legend.position = getPositionLegend();
 }
 
 function getPositionLegend() {
@@ -44,9 +61,9 @@ function getColor() {
         : ['#64adf5', '#cc64f5', '#64f586', '#f5a564'];
 }
 
-onUpdated( () => {
+onUpdated(() => {
     console.log('updated chart');
-})
+});
 
 const state = ref({
     chartData: {
@@ -66,13 +83,12 @@ const state = ref({
                 position: getPositionLegend(),
                 labels: {
                     boxWidth: 14,
-                    boxHeight:14,
-                }
+                    boxHeight: 14,
+                },
             },
         },
     },
 });
-
 </script>
 
 <template>
@@ -85,7 +101,9 @@ const state = ref({
             />
         </div>
         <div class="chart-desc-container">
-                <p class="responsive-text">Тут количество всего и небольшой итог с заметками</p>
+            <p class="responsive-text">
+                Тут количество всего и небольшой итог с заметками
+            </p>
         </div>
     </div>
 </template>
@@ -107,8 +125,8 @@ const state = ref({
     justify-items: center;
     justify-self: center;
     flex: 1.5;
-    height:75vh;
-    width:75vw;
+    height: 75vh;
+    width: 75vw;
     margin-top: 5%;
 }
 
@@ -144,8 +162,8 @@ const state = ref({
         flex-direction: row;
     }
     .chart-pie-container {
-        height:50vh;
-        width:50vw;
+        height: 50vh;
+        width: 50vw;
         margin: 0;
     }
 }
@@ -155,8 +173,8 @@ const state = ref({
         font-size: 0.8rem;
     }
     .chart-pie-container {
-        height:60vh;
-        width:60vw;
+        height: 60vh;
+        width: 60vw;
         margin: 0;
     }
 }

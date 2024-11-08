@@ -228,14 +228,18 @@ function nextPageToEnd() {
         <button @click="prevPageToStart" :disabled="currentPage === 1">
             <<
         </button>
-        <button @click="prevPage" :disabled="currentPage === 1">
-            <
-        </button>
+        <button @click="prevPage" :disabled="currentPage === 1"><</button>
         <span>Page {{ currentPage }} of {{ totalPages }}</span>
-        <button @click="nextPage" :disabled="currentPage === totalPages || totalPages === 0">
+        <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages || totalPages === 0"
+        >
             >
         </button>
-        <button @click="nextPageToEnd" :disabled="currentPage === totalPages || totalPages === 0">
+        <button
+            @click="nextPageToEnd"
+            :disabled="currentPage === totalPages || totalPages === 0"
+        >
             >>
         </button>
     </div>
