@@ -19,7 +19,7 @@ ChartJS.register(
     BarElement,
     CategoryScale,
     LinearScale,
-    ArcElement
+    ArcElement,
 );
 const windowWith = computed(() => {
     return window.innerWidth;
@@ -40,7 +40,9 @@ function subscribeEventListeners() {
 function unsubscribeEventListeners() {
     window.removeEventListener('resize', updateDivWidth);
 }
+
 const isMobileWidth = (width) => width <= 750;
+
 function updateDivWidth() {
     state.value.chartOptions.plugins.legend.position = getPositionLegend();
 }
@@ -70,7 +72,7 @@ const state = ref({
         labels: getLabels(),
         datasets: [
             {
-                data: [40, 20, 10, 12],
+                data: [],
                 backgroundColor: getColor(),
             },
         ],
@@ -89,11 +91,36 @@ const state = ref({
         },
     },
 });
+
+function onClick() {
+    console.log('onClick');
+    state.value.chartData  = {
+        labels: getLabels(),
+        datasets: [
+            {
+                data: [1,1,1,0],
+                backgroundColor: getColor(),
+            },
+        ],
+    };
+
+    setTimeout(() => {
+        state.value.chartData  = {
+            labels: getLabels(),
+            datasets: [
+                {
+                    data: [10,10,10,10],
+                    backgroundColor: getColor(),
+                },
+            ],
+        };
+    }, 3000)
+}
 </script>
 
 <template>
-    <div class="dialog-pie-container">
-        <div class="chart-pie-container">
+    <div class="dialog-pie-container" @click="onClick">
+        <div ref="chart-pie" class="chart-pie-container">
             <Pie
                 id="dialog-pie"
                 :options="state.chartOptions"
@@ -113,7 +140,6 @@ const state = ref({
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 5% 0 5% 0;
 }
 
 .chart-pie-container {
@@ -125,8 +151,8 @@ const state = ref({
     justify-items: center;
     justify-self: center;
     flex: 1.5;
-    height: 75vh;
-    width: 75vw;
+    height: 70vh;
+    width: 70vw;
     margin-top: 5%;
 }
 
@@ -173,8 +199,8 @@ const state = ref({
         font-size: 0.8rem;
     }
     .chart-pie-container {
-        height: 60vh;
-        width: 60vw;
+        height: 45vh;
+        width: 45vw;
         margin: 0;
     }
 }
@@ -182,6 +208,24 @@ const state = ref({
 @media (min-width: 700px) {
     .responsive-text {
         font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 700px) and (orientation: landscape) {
+    .chart-pie-container {
+        height: 90vh;
+        width: 80vw;
+        flex: none;
+        margin-top: 2%;
+    }
+}
+
+@media (min-width: 1200px) and (orientation: landscape) {
+    .chart-pie-container {
+        height: 50vh;
+        width: 50vw;
+        flex: none;
+        margin-top: 0;
     }
 }
 </style>
