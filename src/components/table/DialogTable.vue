@@ -22,7 +22,7 @@ const showColumnMenu = ref(false);
 
 const isMobileWidth = (width) => width <= 750;
 const mainDivWidth = ref(
-    window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7)
+    window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7),
 );
 
 function updateDivWidth() {
@@ -85,13 +85,13 @@ const paginatedData = computed(() => {
 });
 
 const totalPages = computed(() =>
-    Math.ceil(dialogState.value.length / rowsPerPage)
+    Math.ceil(dialogState.value.length / rowsPerPage),
 );
 
 function toggleColumn(columnKey) {
     if (visibleColumns.value.includes(columnKey)) {
         visibleColumns.value = visibleColumns.value.filter(
-            (key) => key !== columnKey
+            (key) => key !== columnKey,
         );
     } else {
         visibleColumns.value.push(columnKey);
@@ -155,6 +155,7 @@ function nextPage() {
         currentPage.value++;
     }
 }
+
 function nextPageToEnd() {
     if (currentPage.value < totalPages.value) {
         currentPage.value = totalPages.value;
@@ -163,42 +164,43 @@ function nextPageToEnd() {
 </script>
 
 <template>
-    <div class="header">
-        <h3>Ваши диалоги</h3>
-    </div>
-    <div class="table-controls" id="table-controls">
-        <button
-            @click="toggleColumnMenu"
-            id="edit-columns-button"
-            class="edit-columns-button"
-        >
-            ✏️
-        </button>
-        <div v-if="showColumnMenu" id="column-menu" class="column-menu">
-            <div
-                v-for="column in allColumns"
-                :key="column.key"
-                class="column-menu-item"
+    <div>
+        <div class="header">
+            <h3>Ваши диалоги</h3>
+        </div>
+        <div class="table-controls" id="table-controls">
+            <button
+                @click="toggleColumnMenu"
+                id="edit-columns-button"
+                class="edit-columns-button"
             >
-                <input
-                    :id="`column-menu-input-${column.key}`"
-                    type="checkbox"
-                    :checked="visibleColumns.includes(column.key)"
-                    @change="toggleColumn(column.key)"
-                />
-                <label
-                    :id="`column-menu-input-${column.key}`"
-                    :for="`column-menu-input-${column.key}`"
+                ✏️
+            </button>
+            <div v-if="showColumnMenu" id="column-menu" class="column-menu">
+                <div
+                    v-for="column in allColumns"
+                    :key="column.key"
+                    class="column-menu-item"
                 >
-                    {{ column.label }}
-                </label>
+                    <input
+                        :id="`column-menu-input-${column.key}`"
+                        type="checkbox"
+                        :checked="visibleColumns.includes(column.key)"
+                        @change="toggleColumn(column.key)"
+                    />
+                    <label
+                        :id="`column-menu-input-${column.key}`"
+                        :for="`column-menu-input-${column.key}`"
+                    >
+                        {{ column.label }}
+                    </label>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="main-container" :style="{ width: mainDivWidth + 'px' }">
-        <div class="table-container">
-            <table class="styled-table">
-                <thead>
+        <div class="main-container" :style="{ width: mainDivWidth + 'px' }">
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead>
                     <tr>
                         <th
                             v-for="column in visibleColumns"
@@ -209,8 +211,8 @@ function nextPageToEnd() {
                             {{ getColumnLabel(column) }}
                         </th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     <tr v-for="row in paginatedData" :key="row.id.value">
                         <td
                             v-for="column in visibleColumns"
@@ -220,28 +222,29 @@ function nextPageToEnd() {
                             {{ row[column].loc }}
                         </td>
                     </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-    <div class="pagination">
-        <button @click="prevPageToStart" :disabled="currentPage === 1">
-            <<
-        </button>
-        <button @click="prevPage" :disabled="currentPage === 1"><</button>
-        <span>Page {{ currentPage }} of {{ totalPages }}</span>
-        <button
-            @click="nextPage"
-            :disabled="currentPage === totalPages || totalPages === 0"
-        >
+        <div class="pagination">
+            <button @click="prevPageToStart" :disabled="currentPage === 1">
+                <<
+            </button>
+            <button @click="prevPage" :disabled="currentPage === 1"><</button>
+            <span>Page {{ currentPage }} of {{ totalPages }}</span>
+            <button
+                @click="nextPage"
+                :disabled="currentPage === totalPages || totalPages === 0"
             >
-        </button>
-        <button
-            @click="nextPageToEnd"
-            :disabled="currentPage === totalPages || totalPages === 0"
-        >
-            >>
-        </button>
+                >
+            </button>
+            <button
+                @click="nextPageToEnd"
+                :disabled="currentPage === totalPages || totalPages === 0"
+            >
+                >>
+            </button>
+        </div>
     </div>
 </template>
 
@@ -356,11 +359,5 @@ function nextPageToEnd() {
 
 .pagination button {
     margin: 0 5px;
-}
-
-@media (max-width: 500px) {
-    .table-controls {
-        margin-right: 10px;
-    }
 }
 </style>
