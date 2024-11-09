@@ -106,7 +106,7 @@ function onMenuClick() {
     position: fixed;
     z-index: 2;
     height: 100%;
-    overflow-y: hidden;
+    overflow-y: auto;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
