@@ -74,11 +74,15 @@ function getTypeDialogLoc(dialogData) {
     }
 
     if (dialogData.isGroup) {
-        objectData.loc = 'групповой';
+        objectData.loc = 'групповой закрытый';
+    }
+
+    if (dialogData.isGroup && dialogData.isChannel && dialogData.entity.broadcast === false) {
+        objectData.loc = 'групповой открытый';
     }
 
     if (dialogData.isUser) {
-        objectData.loc = 'юзер';
+        objectData.loc = 'личный';
     }
 
     return objectData;

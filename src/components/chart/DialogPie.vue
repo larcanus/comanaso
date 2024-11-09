@@ -69,10 +69,10 @@ onUpdated(() => {
 
 const state = ref({
     chartData: {
-        labels: getLabels(),
+        labels: ['пока нет данных'],
         datasets: [
             {
-                data: [],
+                data: [1,0,0,0,0],
                 backgroundColor: getColor(),
             },
         ],
@@ -180,7 +180,7 @@ function onClick() {
     margin: 0;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1100px) {
     .responsive-text {
         font-size: 0.75rem;
     }
@@ -220,7 +220,7 @@ function onClick() {
     }
 }
 
-@media (min-width: 1200px) and (orientation: landscape) {
+@media (min-width: 1100px) and (orientation: landscape) {
     .chart-pie-container {
         height: 50vh;
         width: 50vw;

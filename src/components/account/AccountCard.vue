@@ -490,5 +490,9 @@ input:disabled {
         padding-left: 0;
         width: 100%;
     }
+
+    .button-detail {
+        margin-bottom: 10px;
+    }
 }
 </style>

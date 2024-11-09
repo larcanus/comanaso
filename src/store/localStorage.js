@@ -4,6 +4,8 @@ import router from '@/router/index.js';
 import useAuthStore from '@/store/auth';
 import useUserStore from '@/store/user';
 import useAccountStore from '@/store/account.js';
+import useTelegramClientStore from '@/store/telegramClient.js';
+import { fullDisconnectClient, logOut } from '@/utils/connection.js';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
 const ACC_KEY = 'acc_data';
@@ -23,7 +25,26 @@ async function setAuthTokenToStore() {
         await setUserDataToStore();
         await setAccountDataToStore();
     } else {
-        clearLocalStorage();
+        await setAccountDataToStore();
+        const accStore = useAccountStore();
+        const accountIds = accStore.getCollectionId();
+        for (const accountId of accountIds) {
+            const tgClientStore = useTelegramClientStore();
+            const client = await tgClientStore.getClientByAccountId(accountId);
+            console.info('have client on accountId:', accountId);
+            try {
+                await client.connect();
+                console.info('trying logout');
+                const resultLogout = await logOut(client);
+                console.log('logout --->', resultLogout);
+                await fullDisconnectClient(client);
+            } catch (e) {
+                console.error(e);
+            }
+
+        }
+
+        logoutAllStore();
     }
 }
 
