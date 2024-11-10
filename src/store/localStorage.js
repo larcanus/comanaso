@@ -9,7 +9,7 @@ import { fullDisconnectClient, logOut } from '@/utils/connection.js';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
 const ACC_KEY = 'acc_data';
-const TOKEN_TTL_MS = 3600000; // 1 hour
+const TOKEN_TTL_MS = 3600000 * 2; // 2 hours
 
 async function initLocalStore() {
     await setAuthTokenToStore();

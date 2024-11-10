@@ -5,6 +5,7 @@ import useDialogStore from '@/store/dialogs.js';
 const dialogStore = useDialogStore();
 
 const dialogState = ref(dialogStore.validateDialogs(dialogStore.state));
+const dialogsFiltered = ref(dialogState.value);
 
 const allColumns = [
     { key: 'title', label: 'Наименование' },
@@ -82,14 +83,14 @@ const rowsPerPage = 10;
 const paginatedData = computed(() => {
     const start = (currentPage.value - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    const res = dialogState.value.slice(start, end);
+    const res = dialogsFiltered.value.slice(start, end);
     const preparedData = res.map((item) => toRaw(item));
     console.log('paginatedData', res, preparedData);
     return preparedData;
 });
 
 const totalPages = computed(() =>
-    Math.ceil(dialogState.value.length / rowsPerPage),
+    Math.ceil(dialogsFiltered.value.length / rowsPerPage),
 );
 
 function toggleColumn(columnKey) {
@@ -114,7 +115,7 @@ const sortState = ref({
 function sortByColumn(columnKey) {
     const sortDown = sortState.value.sortDown;
 
-    dialogState.value.sort((a, b) => {
+    dialogsFiltered.value.sort((a, b) => {
         const first = toRaw(a[columnKey]);
         const second = toRaw(b[columnKey]);
         switch (columnKey) {
@@ -187,8 +188,12 @@ function toggleSearch() {
     }
 }
 
-function handleInput() {
-    console.log('Текущий текст поиска:', searchQuery.value);
+function handleSearchInput() {
+    dialogsFiltered.value = dialogState.value.filter((item) => {
+        const itemTitleValue = toRaw(item.title);
+
+        return itemTitleValue.loc.startsWith(searchQuery.value);
+    })
 }
 </script>
 
@@ -208,7 +213,7 @@ function handleInput() {
                         type="text"
                         class="search-input"
                         v-model="searchQuery"
-                        @input="handleInput"
+                        @input="handleSearchInput"
                         placeholder="Введите текст для поиска..."
                     />
                 </Transition>
