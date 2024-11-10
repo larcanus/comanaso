@@ -19,7 +19,7 @@ const allColumns = [
     { key: 'creator', label: 'Вы создатель' },
 ];
 
-const defaultVisibleColumns = allColumns.filter((column) => !['creator'].includes(column.key))
+const defaultVisibleColumns = allColumns.filter((column) => !['creator'].includes(column.key));
 
 const visibleColumns = ref(defaultVisibleColumns.map((column) => column.key));
 const showColumnMenu = ref(false);
@@ -176,12 +176,43 @@ function nextPageToEnd() {
         currentPage.value = totalPages.value;
     }
 }
+
+const showInput = ref(false);
+const searchQuery = ref('');
+
+function toggleSearch() {
+    showInput.value = !showInput.value;
+    if (showInput.value === false) {
+        searchQuery.value = '';
+    }
+}
+
+function handleInput() {
+    console.log('Текущий текст поиска:', searchQuery.value);
+}
 </script>
 
 <template>
     <div>
-        <div class="header">
-            <h3>Ваши диалоги</h3>
+        <div class="header-table-wrapper">
+            <div class="header">
+                <h3>Ваши диалоги</h3>
+            </div>
+            <div class="search-container">
+                <button @click="toggleSearch" class="search-button">
+                    🔍
+                </button>
+                <Transition name="fade">
+                    <input
+                        v-if="showInput"
+                        type="text"
+                        class="search-input"
+                        v-model="searchQuery"
+                        @input="handleInput"
+                        placeholder="Введите текст для поиска..."
+                    />
+                </Transition>
+            </div>
         </div>
         <div class="table-controls" id="table-controls">
             <button
@@ -264,7 +295,16 @@ function nextPageToEnd() {
 </template>
 
 <style scoped>
+.header-table-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
 .header {
+    align-items: center;
+    align-content: center;
+    text-align: center;
+    justify-self: center;
     color: var(--vt-c-white-mute_x2);
     margin: 10px 0 5px 0;
 }
@@ -375,4 +415,42 @@ function nextPageToEnd() {
 .pagination button {
     margin: 0 5px;
 }
+
+.search-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+.search-input {
+    margin-left: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    width: 200px;
+    overflow: hidden;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: width 0.3s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    width: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+    width: 200px;
+}
+
 </style>
