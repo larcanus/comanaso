@@ -16,8 +16,12 @@ const allColumns = [
     { key: 'unreadCount', label: 'Непрочитанные' },
     { key: 'mute', label: 'Заглушен до' },
     { key: 'date', label: 'Дата обновления' },
+    { key: 'creator', label: 'Вы создатель' },
 ];
-const visibleColumns = ref(allColumns.map((column) => column.key));
+
+const defaultVisibleColumns = allColumns.filter((column) => !['creator'].includes(column.key))
+
+const visibleColumns = ref(defaultVisibleColumns.map((column) => column.key));
 const showColumnMenu = ref(false);
 
 const isMobileWidth = (width) => width <= 750;
@@ -114,6 +118,7 @@ function sortByColumn(columnKey) {
         const first = toRaw(a[columnKey]);
         const second = toRaw(b[columnKey]);
         switch (columnKey) {
+            case 'type':
             case 'title': {
                 if (sortDown) {
                     return first.loc[0] > second.loc[0] ? 1 : -1;
@@ -121,11 +126,21 @@ function sortByColumn(columnKey) {
                 return first.loc[0] < second.loc[0] ? 1 : -1;
             }
             case 'date':
-            case 'mute': {
+            case 'mute':
+            case 'unreadCount': {
                 if (sortDown) {
                     return first.value > second.value ? 1 : -1;
                 }
                 return first.value < second.value ? 1 : -1;
+            }
+            /* boolean */
+            case 'creator':
+            case 'archived':
+            case 'pinned': {
+                if (sortDown) {
+                    return first.value ? 1 : -1;
+                }
+                return second.value ? 1 : -1;
             }
             default: {
                 if (sortDown) {

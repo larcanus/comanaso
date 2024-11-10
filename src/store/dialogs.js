@@ -31,6 +31,7 @@ export const useDialogStore = defineStore('dialog', () => {
                 },
                 mute: getMuteDialogLoc(dialogData.dialog),
                 date: getDateDialogLoc(dialogData.date),
+                creator: getCreatorDialogLoc(dialogData.entity.creator),
             };
         });
         console.log('preparedDialogs', preparedDialogs);
@@ -158,6 +159,14 @@ function getDateDialogLoc(timestamp) {
     objectData.loc = `${hours}:${minutes} ${day}-${month}-${year}`;
 
     return objectData;
+}
+
+function getCreatorDialogLoc(creator)
+{
+    return {
+        value: creator,
+        loc: creator ? 'да' : 'нет'
+    };
 }
 
 export default useDialogStore;

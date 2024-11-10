@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 const props = defineProps({
     message: {
         type: [String, null],
@@ -40,6 +40,7 @@ function cancel() {
             <div class="modal-content">
                 <p>{{ message }}</p>
                 <input
+                    autofocus
                     v-if="isInput"
                     v-model="inputValue"
                     type="text"
