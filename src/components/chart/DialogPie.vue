@@ -11,6 +11,7 @@ import {
     ArcElement,
 } from 'chart.js';
 import { computed, onMounted, onUnmounted, onUpdated, ref } from 'vue';
+import useDialogStore from '@/store/dialogs.js';
 
 ChartJS.register(
     Title,
@@ -21,8 +22,62 @@ ChartJS.register(
     LinearScale,
     ArcElement,
 );
+const dialogStore = useDialogStore();
+const dialogState = ref(dialogStore.getPreparedDialogs());
+
+dialogStore.$onAction(({ name, after }) => {
+    after(() => {
+        if (name === 'setDialogs') {
+            dialogState.value = dialogStore.getPreparedDialogs();
+        }
+    });
+});
+
 const windowWith = computed(() => {
     return window.innerWidth;
+});
+
+const chartDatasetsData = computed(() => {
+   if (dialogState.value.length === 0) {
+        return null;
+    }
+
+    const data = {
+        channel: 0,
+        groupOpen: 0,
+        groupClose: 0,
+        user: 0,
+    };
+
+    dialogState.value.forEach((dialog) => {
+        const type = dialog.type.value;
+
+        if (type.isGroup && type.isChannel) {
+            data.groupOpen += 1;
+
+            return;
+        }
+
+        if (type.isChannel) {
+            data.channel += 1;
+
+            return;
+        }
+
+        if (type.isGroup) {
+            data.groupClose += 1;
+
+            return;
+        }
+
+        if (type.isUser) {
+            data.user += 1;
+        }
+    });
+    console.log('data', data);
+    return isMobileWidth(windowWith.value)
+        ? [data.groupOpen, data.channel, data.groupClose, data.user]
+        : [data.channel, data.groupOpen, data.groupClose, data.user];
 });
 
 onMounted(() => {
@@ -52,6 +107,10 @@ function getPositionLegend() {
 }
 
 function getLabels() {
+    if(dialogState.value.length === 0) {
+            return ['пока нет данных']
+    }
+
     return isMobileWidth(windowWith.value)
         ? ['групповые открытые', 'каналы', 'групповые закрытые', 'личные']
         : ['каналы', 'групповые открытые', 'групповые закрытые', 'личные'];
@@ -59,8 +118,8 @@ function getLabels() {
 
 function getColor() {
     return isMobileWidth(windowWith.value)
-        ? ['#cc64f5', '#64adf5', '#64f586', '#f5a564']
-        : ['#64adf5', '#cc64f5', '#64f586', '#f5a564'];
+        ? ['#cc64f5', '#64adf5', '#64f586', '#ec6060']
+        : ['#64adf5', '#cc64f5', '#64f586', '#ec6060'];
 }
 
 onUpdated(() => {
@@ -69,10 +128,10 @@ onUpdated(() => {
 
 const state = ref({
     chartData: {
-        labels: ['пока нет данных'],
+        labels: getLabels(),
         datasets: [
             {
-                data: [1,0,0,0,0],
+                data: chartDatasetsData.value ?? [1, 0, 0, 0, 0],
                 backgroundColor: getColor(),
             },
         ],
@@ -94,27 +153,6 @@ const state = ref({
 
 function onClick() {
     console.log('onClick');
-    state.value.chartData  = {
-        labels: getLabels(),
-        datasets: [
-            {
-                data: [1,1,1,0],
-                backgroundColor: getColor(),
-            },
-        ],
-    };
-
-    setTimeout(() => {
-        state.value.chartData  = {
-            labels: getLabels(),
-            datasets: [
-                {
-                    data: [10,10,10,10],
-                    backgroundColor: getColor(),
-                },
-            ],
-        };
-    }, 3000)
 }
 </script>
 
@@ -184,9 +222,11 @@ function onClick() {
     .responsive-text {
         font-size: 0.75rem;
     }
+
     .dialog-pie-container {
         flex-direction: row;
     }
+
     .chart-pie-container {
         height: 50vh;
         width: 50vw;
@@ -198,6 +238,7 @@ function onClick() {
     .responsive-text {
         font-size: 0.8rem;
     }
+
     .chart-pie-container {
         height: 45vh;
         width: 45vw;

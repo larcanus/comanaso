@@ -11,10 +11,17 @@ export const useDialogStore = defineStore('dialog', () => {
         return this.state;
     }
 
+    function getPreparedDialogs() {
+        return validateDialogs(this.state)
+    }
+
     function $reset() {
         this.state = [];
     }
 
+    /**
+     * @return {Array<object>}
+     */
     function validateDialogs(dialogs = []) {
         const preparedDialogs = dialogs?.map((dialog) => {
             const dialogData = toValue(dialog);
@@ -38,7 +45,7 @@ export const useDialogStore = defineStore('dialog', () => {
         return preparedDialogs;
     }
 
-    return { state, $reset, setDialogs, validateDialogs };
+    return { state, $reset, setDialogs, getPreparedDialogs, validateDialogs };
 });
 
 function getTitleDialogLoc(dialogData) {
@@ -61,6 +68,9 @@ function getTitleDialogLoc(dialogData) {
     return objectData;
 }
 
+/**
+ * @return {object}
+ */
 function getTypeDialogLoc(dialogData) {
     const objectData = {
         value: {

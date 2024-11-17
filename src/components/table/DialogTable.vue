@@ -4,9 +4,15 @@ import useDialogStore from '@/store/dialogs.js';
 
 const dialogStore = useDialogStore();
 
-const dialogState = ref(dialogStore.validateDialogs(dialogStore.state));
+const dialogState = ref(dialogStore.getPreparedDialogs());
 const dialogsFiltered = ref(dialogState.value);
+const tableHeaderLoc = computed(() => {
+    if(dialogState.value.length === 0) {
+        return 'Ваши диалоги';
+    }
 
+    return `Ваши диалоги: ${dialogState.value.length}`;
+});
 const allColumns = [
     { key: 'title', label: 'Наименование' },
     { key: 'archived', label: 'В архиве' },
@@ -55,9 +61,9 @@ function unsubscribeEventListeners() {
 }
 
 dialogStore.$onAction(({ name, after }) => {
-    after((result) => {
+    after(() => {
         if (name === 'setDialogs') {
-            dialogState.value = dialogStore.validateDialogs(result);
+            dialogState.value = dialogStore.getPreparedDialogs();
         }
     });
 });
@@ -201,7 +207,7 @@ function handleSearchInput() {
     <div>
         <div class="header-table-wrapper">
             <div class="header">
-                <h3>Ваши диалоги</h3>
+                <h3>{{tableHeaderLoc}}</h3>
             </div>
             <div class="search-container">
                 <button @click="toggleSearch" class="search-button">
