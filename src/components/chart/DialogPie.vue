@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import { computed, onMounted, onUnmounted, onUpdated, ref } from 'vue';
 import useDialogStore from '@/store/dialogs.js';
+import { getStaticAnalyticsByDialogType } from '@/utils/dialogAnalytics.js';
 
 ChartJS.register(
     Title,
@@ -37,8 +38,12 @@ const windowWith = computed(() => {
     return window.innerWidth;
 });
 
-const chartDatasetsData = computed(() => {
-   if (dialogState.value.length === 0) {
+const analyticsText = computed(() => {
+    return getStaticAnalyticsByDialogType(dialogsAgregateType.value);
+});
+
+const dialogsAgregateType = computed(() => {
+    if (dialogState.value.length === 0) {
         return null;
     }
 
@@ -74,7 +79,15 @@ const chartDatasetsData = computed(() => {
             data.user += 1;
         }
     });
-    console.log('data', data);
+
+    return data;
+});
+const chartDatasetsData = computed(() => {
+    const data = dialogsAgregateType.value;
+    if (!data) {
+        return null;
+    }
+
     return isMobileWidth(windowWith.value)
         ? [data.groupOpen, data.channel, data.groupClose, data.user]
         : [data.channel, data.groupOpen, data.groupClose, data.user];
@@ -107,8 +120,8 @@ function getPositionLegend() {
 }
 
 function getLabels() {
-    if(dialogState.value.length === 0) {
-            return ['пока нет данных']
+    if (dialogState.value.length === 0) {
+        return ['пока нет данных'];
     }
 
     return isMobileWidth(windowWith.value)
@@ -167,7 +180,7 @@ function onClick() {
         </div>
         <div class="chart-desc-container">
             <p class="responsive-text">
-                Тут количество всего и небольшой итог с заметками
+                {{ analyticsText }}
             </p>
         </div>
     </div>
