@@ -15,7 +15,6 @@ const tableHeaderLoc = computed(() => {
 });
 const allColumns = [
     { key: 'title', label: 'Наименование' },
-    { key: 'archived', label: 'В архиве' },
     { key: 'type', label: 'Тип' },
     { key: 'id', label: 'Id' },
     { key: 'folderId', label: 'Папка' },
@@ -24,9 +23,10 @@ const allColumns = [
     { key: 'mute', label: 'Заглушен до' },
     { key: 'date', label: 'Дата обновления' },
     { key: 'creator', label: 'Вы создатель' },
+    { key: 'archived', label: 'В архиве' },
 ];
 
-const defaultVisibleColumns = allColumns.filter((column) => !['creator'].includes(column.key));
+const defaultVisibleColumns = allColumns.filter((column) => !['creator', 'archived'].includes(column.key));
 
 const visibleColumns = ref(defaultVisibleColumns.map((column) => column.key));
 const showColumnMenu = ref(false);
@@ -64,6 +64,7 @@ dialogStore.$onAction(({ name, after }) => {
     after(() => {
         if (name === 'setDialogs') {
             dialogState.value = dialogStore.getPreparedDialogs();
+            dialogsFiltered.value = dialogState.value;
         }
     });
 });

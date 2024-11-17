@@ -29,7 +29,18 @@ const dialogState = ref(dialogStore.getPreparedDialogs());
 dialogStore.$onAction(({ name, after }) => {
     after(() => {
         if (name === 'setDialogs') {
+            console.log('$onAction', name, after);
             dialogState.value = dialogStore.getPreparedDialogs();
+
+            state.value.chartData = {
+                labels: getLabels(),
+                datasets: [
+                    {
+                        data: chartDatasetsData.value ?? [1, 0, 0, 0, 0],
+                        backgroundColor: getColor(),
+                    },
+                ],
+            };
         }
     });
 });

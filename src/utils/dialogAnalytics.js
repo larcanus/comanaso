@@ -1,5 +1,6 @@
 
 export function getStaticAnalyticsByDialogType(dialogTypeCounts) {
+    if(!dialogTypeCounts) return 'Тут аналитика или что-то иное';
     console.log('dialogsAgregateType dialogTypeCounts', dialogTypeCounts);
 
     const scenario = getScenarioByData(dialogTypeCounts);

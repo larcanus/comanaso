@@ -35,6 +35,8 @@ export async function getCommonData(client, store, toast) {
     if (client && store) {
         try {
             const dialogData = await client?.getDialogs();
+            const foldersData = await getFolders(client);
+            store.setFolders(foldersData);
             await store.setDialogs(dialogData);
             toast.addToast('ok', LOC_TOAST_SUCCESS_DATA_UPDATE);
 
@@ -52,4 +54,12 @@ export async function getCommonData(client, store, toast) {
 
     toast.addToast('error', LOC_TOAST_ERROR_DATA_UPDATE);
     return true;
+}
+
+export async function getFolders(client) {
+    return client?.invoke(new Api.messages.GetDialogFilters());
+}
+
+export async function getSuggestedDialogFilters(client) {
+    return client?.invoke(new Api.messages.GetSuggestedDialogFilters());
 }

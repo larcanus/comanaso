@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia';
-import { shallowRef, toValue } from 'vue';
+import { ref, shallowRef, toValue } from 'vue';
 
 export const useDialogStore = defineStore('dialog', () => {
     const state = shallowRef([]);
+    const foldersState = shallowRef({
+        rawFoldersData: [],
+        dialogsIdByFolderId: {},
+    });
 
     function setDialogs(data) {
         console.log('setDialogs', data);
@@ -11,8 +15,27 @@ export const useDialogStore = defineStore('dialog', () => {
         return this.state;
     }
 
+    function setFolders(data) {
+        console.log('setFolders', data);
+        foldersState.value.rawFoldersData = data.filters.filter((filter) => filter.className !== 'DialogFilterDefault');
+        foldersState.value.rawFoldersData.forEach((folder) => {
+            folder.includePeers.forEach((includePeer) => {
+                const entityIds = foldersState.value.dialogsIdByFolderId[folder.id];
+                const entityId = includePeer.channelId?.value ?? includePeer.userId?.value ?? includePeer.chatId?.value;
+                if (entityIds) {
+                    foldersState.value.dialogsIdByFolderId[folder.id].push(entityId);
+                }
+                else {
+                    foldersState.value.dialogsIdByFolderId[folder.id] = [entityId];
+                }
+            })
+        })
+
+        return foldersState.value;
+    }
+
     function getPreparedDialogs() {
-        return validateDialogs(this.state)
+        return validateDialogs(this.state, foldersState)
     }
 
     function $reset() {
@@ -20,9 +43,11 @@ export const useDialogStore = defineStore('dialog', () => {
     }
 
     /**
+     * @param {Array<object>} dialogs
+     * @param {object} foldersState
      * @return {Array<object>}
      */
-    function validateDialogs(dialogs = []) {
+    function validateDialogs(dialogs = [], foldersState) {
         const preparedDialogs = dialogs?.map((dialog) => {
             const dialogData = toValue(dialog);
             return {
@@ -30,7 +55,7 @@ export const useDialogStore = defineStore('dialog', () => {
                 archived: getArchivedDialogLoc(dialogData.archived),
                 type: getTypeDialogLoc(dialogData),
                 id: { value: dialogData.id?.value, loc: dialogData.id?.value },
-                folderId: getFolderIdDialogLoc(dialogData.folderId),
+                folderId: getFolderIdDialogLoc(dialogData, foldersState),
                 pinned: getPinnedDialogLoc(dialogData.pinned),
                 unreadCount: {
                     value: dialogData.unreadCount,
@@ -45,7 +70,7 @@ export const useDialogStore = defineStore('dialog', () => {
         return preparedDialogs;
     }
 
-    return { state, $reset, setDialogs, getPreparedDialogs, validateDialogs };
+    return { state, $reset, setDialogs, getPreparedDialogs, setFolders, validateDialogs };
 });
 
 function getTitleDialogLoc(dialogData) {
@@ -99,13 +124,35 @@ function getTypeDialogLoc(dialogData) {
     return objectData;
 }
 
-function getFolderIdDialogLoc(folderId) {
-    const objectData = {
-        value: folderId,
-        loc: 'нет',
+function getFolderIdDialogLoc(dialogData, foldersState) {
+   const objectData = {
+        value: [],
+        loc: '',
     };
-    if (folderId) {
-        objectData.loc = folderId;
+    if (dialogData.folderId === 1)
+    {
+        objectData.value.push(1);
+        objectData.loc = 'Архив';
+
+        return objectData;
+    }
+
+    const entityId = dialogData.entity?.id?.value;
+    Object.keys(foldersState.value.dialogsIdByFolderId).forEach((folderId) => {
+       if(foldersState.value.dialogsIdByFolderId[folderId].includes(entityId)) {
+            objectData.value.push(folderId);
+            const title = foldersState.value.rawFoldersData.find((folderData) =>
+            {
+                return folderData.id === Number(folderId)
+            })?.title || '';
+
+           objectData.loc.length > 0 ? objectData.loc += `, '${title}'` : objectData.loc = `'${title}'`;
+        }
+    })
+
+    if (objectData.loc.length === 0)
+    {
+        objectData.loc = 'нет';
     }
 
     return objectData;
