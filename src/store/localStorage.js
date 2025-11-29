@@ -4,8 +4,6 @@ import router from '@/router/index.js';
 import useAuthStore from '@/store/auth';
 import useUserStore from '@/store/user';
 import useAccountStore from '@/store/account.js';
-import useTelegramClientStore from '@/store/telegramClient.js';
-import { fullDisconnectClient, logOut } from '@/utils/connection.js';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
 const ACC_KEY = 'acc_data';
@@ -26,23 +24,11 @@ async function setAuthTokenToStore() {
         await setAccountDataToStore();
     } else {
         await setAccountDataToStore();
+
+        // TODO: Здесь будет запрос на сервер для отключения всех аккаунтов
         const accStore = useAccountStore();
         const accountIds = accStore.getCollectionId();
-        for (const accountId of accountIds) {
-            const tgClientStore = useTelegramClientStore();
-            const client = await tgClientStore.getClientByAccountId(accountId);
-            console.info('have client on accountId:', accountId);
-            try {
-                await client.connect();
-                console.info('trying logout');
-                const resultLogout = await logOut(client);
-                console.log('logout --->', resultLogout);
-                await fullDisconnectClient(client);
-            } catch (e) {
-                console.error(e);
-            }
-
-        }
+        console.log('Accounts to disconnect:', accountIds);
 
         logoutAllStore();
     }
@@ -94,15 +80,8 @@ function setAuthToken(access_token) {
 }
 
 async function getAuthToken() {
-    let result = null;
-    try {
-        const token = localStorage.getItem(TOKEN_KEY);
-        token && (result = await JSON.parse(token));
-    } catch (error) {
-        console.error(error);
-    }
-
-    return result;
+    const token = localStorage.getItem(TOKEN_KEY);
+    return token ? JSON.parse(token) : null;
 }
 
 function setUserData(data) {
@@ -110,15 +89,8 @@ function setUserData(data) {
 }
 
 async function getUserData() {
-    let result = null;
-    try {
-        const userData = localStorage.getItem(USER_KEY);
-        userData && (result = await JSON.parse(userData));
-    } catch (error) {
-        console.error(error);
-    }
-
-    return result;
+    const data = localStorage.getItem(USER_KEY);
+    return data ? JSON.parse(data) : null;
 }
 
 function removeAuthToken() {
@@ -126,7 +98,9 @@ function removeAuthToken() {
 }
 
 function clearLocalStorage() {
-    localStorage.clear();
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(ACC_KEY);
 }
 
 function setAccountData(data) {
@@ -134,22 +108,19 @@ function setAccountData(data) {
 }
 
 async function getAccountData() {
-    let result = null;
-    try {
-        const accData = localStorage.getItem(ACC_KEY);
-        accData && (result = await JSON.parse(accData));
-    } catch (error) {
-        console.error(error);
-    }
-
-    return result;
+    const data = localStorage.getItem(ACC_KEY);
+    return data ? JSON.parse(data) : [];
 }
 
 const localStorageUtils = {
     initLocalStore,
-    clearLocalStorage,
+    getAuthToken,
+    getUserData,
+    getAccountData,
     setAuthToken,
     setUserData,
     setAccountData,
+    clearLocalStorage
 };
+
 export default localStorageUtils;

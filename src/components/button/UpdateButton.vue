@@ -2,9 +2,6 @@
 import Confirm from '@/components/modal/Confirm.vue';
 import { reactive } from 'vue';
 import { getCommonData } from '@/utils/connection.js';
-import useTelegramClientStore from '@/store/telegramClient.js';
-import useDialogStore from '@/store/dialogs.js';
-import useToastStore from '@/store/toast.js';
 const state = reactive({
     isModalConfirmVisible: false,
     modalConfirmMessage: '',
@@ -20,11 +17,7 @@ async function onClickContainer() {
     if (resultConfirm) {
         state.isGettingData = true;
 
-        const connection = useTelegramClientStore();
-        const dialogStore = useDialogStore();
-        const toastStore = useToastStore();
-        const client = await connection.getClientByAccountId(null);
-        await getCommonData(client, dialogStore, toastStore);
+        await getCommonData(null, dialogStore, toastStore);
 
         state.isGettingData = false;
     }

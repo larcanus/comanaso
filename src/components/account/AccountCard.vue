@@ -1,21 +1,18 @@
 <script setup>
-import { defineProps, reactive, onBeforeMount } from 'vue';
+import { defineProps, reactive } from 'vue';
 import AccountStatus from '@/components/account/elements/AccountStatus.vue';
 import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
-import useTelegramClientStore from '@/store/telegramClient.js';
 import {
     fullDisconnectClient,
     getCommonData,
-    logOut,
 } from '@/utils/connection.js';
 import useDialogStore from '@/store/dialogs.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
-const tgClientStore = useTelegramClientStore();
 const props = defineProps({
     account: String,
 });
@@ -24,6 +21,8 @@ const accountData = accountStore.getById(props.account);
 const LOC_TOAST_VALID_ERROR = 'Ошибка данных. Проверьте поля аккаунта';
 const LOC_TOAST_CONNECT_ERROR = 'Ошибка подключения';
 const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент подключен к аккаунту!';
+const LOC_TOAST_SUCCESS_CONNECT = 'Аккаунт успешно подключен!';
+const LOC_TOAST_SUCCESS_DISCONNECT = 'Аккаунт отключен';
 
 const state = reactive({
     ...{
@@ -48,36 +47,7 @@ onBeforeMount(async () => {
 });
 
 async function checkClient() {
-    const client = await tgClientStore.getClientByAccountId(state.id);
-
-    console.log(
-        'checkClient client.connected:',
-        client.connected,
-        client.disconnected
-    );
-    try {
-        if (client) {
-            let status = 'offline';
-            // check 1
-            if (client.connected && (await client.checkAuthorization())) {
-                status = 'online';
-            }
-            // check 2 try to connect and auth
-            const connectResult = await client.connect();
-            console.log('checkClient connectResult', connectResult);
-            const authResult = await client.checkAuthorization();
-            console.log('checkClient authResult', authResult);
-            if (connectResult && authResult) {
-                status = 'online';
-            }
-
-            await accountStore.changeStatus(state.id, status);
-        } else {
-            await accountStore.changeStatus(state.id, 'offline');
-        }
-    } catch (error) {
-        console.error('checkClient catch:', error);
-    }
+    console.log('checkClient client.connected:',);
 }
 
 accountStore.$onAction(({ name, after }) => {
@@ -108,95 +78,41 @@ function onClickDelete() {
     accountStore.deleteAccountData(state.id);
 }
 
-function onClickStart() {
-    if (!isValidConnectData({ apiId: state.apiId, apiHash: state.apiHash })) {
+async function onClickStart() {
+    if (!isValidConnectData({ apiId: state.apiId, apiHash: state.apiHash, phoneNumber: state.phoneNumber })) {
         toastStore.addToast('error', LOC_TOAST_VALID_ERROR);
-
         return;
     }
 
     accountStore.changeStatus(state.id, 'connect');
+
+    // TODO: Здесь будет запрос на сервер для подключения аккаунта
     try {
-        startConnectAccount();
+        // Заглушка - имитация успешного подключения
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await accountStore.changeStatus(state.id, 'online');
+        toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
     } catch (error) {
-        console.error(error);
-        accountStore.changeStatus(state.id, 'error');
+        console.error('Connection error:', error);
+        await accountStore.changeStatus(state.id, 'error', {
+            title: 'Ошибка подключения',
+            desc: error.message
+        });
     }
 }
 
 async function onClickDisconnect() {
-    const client = await tgClientStore.getClientByAccountId(state.id);
-    const resultLogout = await logOut(client);
-    console.log('logout --->', resultLogout);
-    await fullDisconnectClient(client);
-    await accountStore.changeStatus(state.id, 'offline');
-    tgClientStore.setClient(null);
+    // TODO: Здесь будет запрос на сервер для отключения аккаунта
+    try {
+        await accountStore.changeStatus(state.id, 'offline');
+        toastStore.addToast('ok', LOC_TOAST_SUCCESS_DISCONNECT);
+    } catch (error) {
+        console.error('Disconnect error:', error);
+    }
 }
 
 async function startConnectAccount() {
-    const client = await tgClientStore.getClientByAccountId(state.id);
-    await client.session.load();
-    console.log('startConnectAccount connection', client);
-
-    try {
-        if (client.disconnect === true && client.connect === undefined) {
-            const resConnect = await client?.connect();
-            console.log('try connect:', resConnect);
-        }
-
-        const authResult = await client.checkAuthorization();
-        console.log('check authorization:', authResult);
-        if (authResult) {
-            const result = await client.getDialogs();
-            console.log('result 1 dialog after auth', result); // prints the result
-            await accountStore.changeStatus(state.id, 'online');
-        } else {
-            console.log('create new connect');
-            await client.start({
-                phoneNumber: state.phoneNumber,
-                password: async () => prompt('password!'),
-                phoneCode: async () => {
-                    const res = await showConfirm();
-                    if (res) {
-                        return res;
-                    }
-
-                    if (res === false) {
-                        location.reload();
-                    }
-                },
-                onError: async (err) => {
-                    console.log('start onError', err);
-                    await accountStore.changeStatus(
-                        state.id,
-                        'error',
-                        prepareErrorMessage(err)
-                    );
-                    toastStore.addToast('error', err.message);
-                },
-            });
-
-            client.session.save();
-            tgClientStore.setClient(client);
-            toastStore.addToast('ok', LOC_TOAST_SUCCESS_CREATE_CLIENT);
-            await accountStore.changeStatus(state.id, 'online');
-            const dialogStore = useDialogStore();
-            await getCommonData(client, dialogStore, toastStore);
-            await client.sendMessage('me', {
-                message: 'Hello! Comanaso connected.',
-            });
-        }
-    } catch (error) {
-        console.error('start connection catch:', error);
-        await fullDisconnectClient(client);
-        tgClientStore.setClient(null);
-        await accountStore.changeStatus(
-            state.id,
-            'error',
-            prepareErrorMessage(error)
-        );
-        toastStore.addToast('error', LOC_TOAST_CONNECT_ERROR);
-    }
+    console.log('startConnectAccount connection');
 }
 
 function prepareErrorMessage(error) {
@@ -210,76 +126,27 @@ function prepareErrorMessage(error) {
 function prepareDetailMessage() {
     let messageObj = { title: '', desc: '' };
     if (state.isConnect) {
-        messageObj.title = 'Клиент создан и подключен к аккаунту';
-        messageObj.desc =
-            'Можно выполнять запросы. После окончания сессии не забудь отключиться!';
+        messageObj.title = 'Аккаунт подключен';
+        messageObj.desc = 'Можно выполнять операции с аккаунтом';
     } else {
-        messageObj.title = `Клиент создан, но не подключен к аккаунту`;
-        messageObj.desc =
-            'Возможно авторизация уже пройдена, попробуй подключиться снова';
+        messageObj.title = 'Аккаунт не подключен';
+        messageObj.desc = 'Для работы необходимо подключить аккаунт';
     }
-
     return messageObj;
 }
 
 function isValidConnectData(fields) {
-    let result = true;
-    Object.keys(fields).forEach((field) => {
-        if (!fields[field]) {
-            result = false;
-        }
-
-        if (typeof fields[field] === 'string' && fields[field].length === 0) {
-            result = false;
-        }
-
-        if (typeof fields[field] === 'string' && fields[field].length === 0) {
-            result = false;
-        }
-    });
-
-    return result;
+    return Object.values(fields).every(value =>
+        value && (typeof value !== 'string' || value.length > 0)
+    );
 }
+
 async function showDetail() {
     if (state.modalPopupInfoMessage === null) {
         state.modalPopupInfoMessage = prepareDetailMessage();
     }
 
     state.isModalPopupInfoVisible = true;
-
-    // const client = await tgClientStore.getClientByAccountId(state.id);
-    // console.log('check client', client);
-    // try {
-    //     // await client.sendMessage('me', { message: 'Hello! check' });
-    //     // client.session.save();
-    //     const result = await client.invoke(
-    //         new Api.account.GetAuthorizations(),
-    //     );
-    //     console.log('result check GetAuthorizations', result);
-    // const currentSession = result.authorizations.find((auth) => auth.current)
-    // const currentSession = result.authorizations[1]
-    // console.log('currentSession', currentSession);
-    // console.log('currentSession', currentSession.hash);
-
-    // const resultReset = await client.invoke(
-    //     new Api.account.ResetAuthorization({hash: currentSession.hash }),
-    // );
-    // console.log('result resultReset', resultReset);
-    // const resultLogout = await client.invoke(
-    //     new Api.auth.LogOut(),
-    // );
-    // console.log('result resultLogout', resultLogout);
-
-    // const res = await client.checkAuthorization()
-    // console.log('result res', res);
-    // const result2 = await client.invoke(
-    //     new Api.account.GetAuthorizations(),
-    // );
-    // console.log('result result2', result2)
-    //
-    // } catch (e) {
-    //     console.error(e);
-    // }
 }
 
 let resolveConfirmPromise;

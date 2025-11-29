@@ -1,5 +1,3 @@
-import { Api, TelegramClient } from 'telegram';
-import { StoreSession, StringSession } from 'telegram/sessions';
 const LOC_TOAST_SUCCESS_DATA_UPDATE = 'Данные успешно получены';
 const LOC_TOAST_ERROR_DATA_UPDATE =
     'При запросе произошла ошибка. Проверьте состояние подключения к аккаунту';
@@ -7,59 +5,49 @@ const LOC_TOAST_ERROR_DATA_UPDATE_AUTH =
     'При запросе произошла ошибка. Ключ авторизация не принят. Проверьте состояние подключения к аккаунту';
 
 export async function createClient(apiId, apiHash) {
-    const storeSession = new StoreSession(`folder_${apiId}`);
-    // const stringSession = new StringSession('');
-    const client = new TelegramClient(storeSession, apiId, apiHash, {
-        connectionRetries: 1,
-        requestRetries: 2,
-        downloadRetries: 2,
-    });
-    client.logger.colors.info = 'color : #56560d';
-
-    storeSession.save();
-
-    return client;
+   return {};
 }
 
-export async function fullDisconnectClient(client) {
-    await client?.disconnect();
-    await client?.session.delete();
-    await client?.destroy();
+export async function fullDisconnectClient() {
+    return {};
 }
 
-export async function logOut(client) {
-    return client?.invoke(new Api.auth.LogOut());
+export async function logOut() {
+    return true;
 }
 
-export async function getCommonData(client, store, toast) {
-    if (client && store) {
+export async function getCommonData(accountId, store, toast) {
+    console.log('getCommonData', accountId, store, toast)
+    if (accountId && store) {
         try {
-            const dialogData = await client?.getDialogs();
-            const foldersData = await getFolders(client);
-            store.setFolders(foldersData);
-            await store.setDialogs(dialogData);
-            toast.addToast('ok', LOC_TOAST_SUCCESS_DATA_UPDATE);
+            // Заглушка для получения данных с сервера
+            // const response = await fetch(`/api/accounts/${accountId}/dialogs`);
+            // const data = await response.json();
 
+            console.log('getCommonData: будет реализовано через серверные запросы');
+            toast.addToast('ok', LOC_TOAST_SUCCESS_DATA_UPDATE);
             return true;
         } catch (error) {
-            console.error('getCommonData catch:', error);
-            if (error.message.includes('AUTH_KEY_UNREGISTERED')) {
-                toast.addToast('error', LOC_TOAST_ERROR_DATA_UPDATE_AUTH);
-            } else {
-                toast.addToast('error', error.message);
-            }
-            return true;
+            console.error('getCommonData error:', error);
+            toast.addToast('error', error.message || LOC_TOAST_ERROR_DATA_UPDATE);
+            return false;
         }
     }
 
     toast.addToast('error', LOC_TOAST_ERROR_DATA_UPDATE);
-    return true;
+    return false;
 }
 
-export async function getFolders(client) {
-    return client?.invoke(new Api.messages.GetDialogFilters());
+export async function getFolders(accountId) {
+    console.log('getFolders: будет реализовано через серверные запросы');
+    // const response = await fetch(`/api/accounts/${accountId}/folders`);
+    // return response.json();
+    return [];
 }
 
-export async function getSuggestedDialogFilters(client) {
-    return client?.invoke(new Api.messages.GetSuggestedDialogFilters());
+export async function getSuggestedDialogFilters(accountId) {
+    console.log('getSuggestedDialogFilters: будет реализовано через серверные запросы');
+    // const response = await fetch(`/api/accounts/${accountId}/suggested-filters`);
+    // return response.json();
+    return [];
 }
