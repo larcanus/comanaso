@@ -4,10 +4,67 @@ import router from '@/router/index.js';
 import useAuthStore from '@/store/auth';
 import useUserStore from '@/store/user';
 import useAccountStore from '@/store/account.js';
+
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
 const ACC_KEY = 'acc_data';
 const TOKEN_TTL_MS = 3600000 * 2; // 2 hours
+
+// Проверка доступности localStorage
+function isLocalStorageAvailable() {
+    try {
+        const test = '__localStorage_test__';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+    } catch (e) {
+        console.error('localStorage недоступен:', e);
+        return false;
+    }
+}
+
+// Безопасное получение данных из localStorage
+function safeGetItem(key) {
+    if (!isLocalStorageAvailable()) {
+        console.warn('localStorage недоступен, используются данные из памяти');
+        return null;
+    }
+    try {
+        return localStorage.getItem(key);
+    } catch (e) {
+        console.error(`Ошибка чтения ${key} из localStorage:`, e);
+        return null;
+    }
+}
+
+// Безопасная запись данных в localStorage
+function safeSetItem(key, value) {
+    if (!isLocalStorageAvailable()) {
+        console.warn('localStorage недоступен, данные не сохранены');
+        return false;
+    }
+    try {
+        localStorage.setItem(key, value);
+        return true;
+    } catch (e) {
+        console.error(`Ошибка записи ${key} в localStorage:`, e);
+        return false;
+    }
+}
+
+// Безопасное удаление данных из localStorage
+function safeRemoveItem(key) {
+    if (!isLocalStorageAvailable()) {
+        return false;
+    }
+    try {
+        localStorage.removeItem(key);
+        return true;
+    } catch (e) {
+        console.error(`Ошибка удаления ${key} из localStorage:`, e);
+        return false;
+    }
+}
 
 async function initLocalStore() {
     await setAuthTokenToStore();
@@ -36,16 +93,18 @@ async function setAuthTokenToStore() {
 
 async function setUserDataToStore() {
     const userData = await getUserData();
-    const userStore = useUserStore();
-
-    userStore.setUserData(userData);
+    if (userData) {
+        const userStore = useUserStore();
+        userStore.setUserData(userData);
+    }
 }
 
 async function setAccountDataToStore() {
     const accData = await getAccountData();
-    const accStore = useAccountStore();
-
-    accStore.setAccountsDataFromLocalStore(accData);
+    if (accData) {
+        const accStore = useAccountStore();
+        accStore.setAccountsDataFromLocalStore(accData);
+    }
 }
 
 function bindListener() {
@@ -62,57 +121,52 @@ function bindListener() {
 
 const isTokenExpired = (timeStamp) => {
     if (!timeStamp) return false;
-
     const now = new Date().getTime();
     const diff = now - timeStamp;
-
     return diff > TOKEN_TTL_MS;
 };
 
-function setAuthToken(access_token) {
-    localStorage.setItem(
+// Экспорт функций для использования в других модулях
+async function getAuthToken() {
+    const token = safeGetItem(TOKEN_KEY);
+    return token ? JSON.parse(token) : null;
+}
+
+async function getUserData() {
+    const data = safeGetItem(USER_KEY);
+    return data ? JSON.parse(data) : null;
+}
+
+async function getAccountData() {
+    const data = safeGetItem(ACC_KEY);
+    return data ? JSON.parse(data) : [];
+}
+
+function setAuthToken(token) {
+    safeSetItem(
         TOKEN_KEY,
         JSON.stringify({
-            value: access_token,
+            value: token,
             timeStamp: new Date().getTime(),
         })
     );
 }
 
-async function getAuthToken() {
-    const token = localStorage.getItem(TOKEN_KEY);
-    return token ? JSON.parse(token) : null;
+function setUserData(userData) {
+    safeSetItem(USER_KEY, JSON.stringify(userData));
 }
 
-function setUserData(data) {
-    localStorage.setItem(USER_KEY, JSON.stringify(data));
-}
-
-async function getUserData() {
-    const data = localStorage.getItem(USER_KEY);
-    return data ? JSON.parse(data) : null;
-}
-
-function removeAuthToken() {
-    localStorage.removeItem(TOKEN_KEY);
+function setAccountData(accountData) {
+    safeSetItem(ACC_KEY, JSON.stringify(accountData));
 }
 
 function clearLocalStorage() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(ACC_KEY);
+    safeRemoveItem(TOKEN_KEY);
+    safeRemoveItem(USER_KEY);
+    safeRemoveItem(ACC_KEY);
 }
 
-function setAccountData(data) {
-    localStorage.setItem(ACC_KEY, JSON.stringify(data));
-}
-
-async function getAccountData() {
-    const data = localStorage.getItem(ACC_KEY);
-    return data ? JSON.parse(data) : [];
-}
-
-const localStorageUtils = {
+export default {
     initLocalStore,
     getAuthToken,
     getUserData,
@@ -120,7 +174,6 @@ const localStorageUtils = {
     setAuthToken,
     setUserData,
     setAccountData,
-    clearLocalStorage
+    clearLocalStorage,
+    isLocalStorageAvailable,
 };
-
-export default localStorageUtils;

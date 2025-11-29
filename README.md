@@ -1,18 +1,15 @@
-# comanaso
+# Comanaso
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 приложение для управления аккаунтами.
 
-## Recommended IDE Setup
+## Требования
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Node.js >= 18.x
+- npm >= 9.x
 
-## Customize configuration
+## Установка
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
+```bash
 npm install
 ```
 
@@ -33,3 +30,10 @@ npm run build
 ```sh
 npm run lint
 ```
+```
+localStorage недоступен в Chrome
+Chrome блокирует localStorage для небезопасных контекстов (HTTP). Решения:
+Рекомендуется: Используйте npm run dev:https с самоподписанными сертификатами
+Откройте Chrome с флагом: chrome.exe --unsafely-treat-insecure-origin-as-secure="http://localhost:5173"
+```
+# В настройках Chrome: chrome://flags/#unsafely-treat-insecure-origin-as-secure

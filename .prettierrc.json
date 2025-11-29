@@ -1,6 +1,12 @@
 {
-  "trailingComma": "es5",
-  "tabWidth": 4,
+  "$schema": "https://json.schemastore.org/prettierrc",
   "semi": true,
-  "singleQuote": true
+  "tabWidth": 4,
+  "singleQuote": true,
+  "printWidth": 100,
+  "trailingComma": "es5",
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "bracketSpacing": true,
+  "vueIndentScriptAndStyle": false
 }
