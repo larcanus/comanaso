@@ -9,9 +9,7 @@
                 <p>v1.0.0</p>
             </div>
             <p>Связь со мной:</p>
-            <a href="mailto:larcanus@yandex.ru" class="footer-email"
-                >larcanus@yandex.ru</a
-            >
+            <a href="mailto:larcanus@yandex.ru" class="footer-email">larcanus@yandex.ru</a>
         </div>
     </footer>
 </template>

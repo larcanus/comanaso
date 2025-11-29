@@ -32,11 +32,7 @@ const infoItems = ref([
         <div>
             <h2>Конфиденциальность и безопасность данных</h2>
             <div class="info-grid">
-                <div
-                    class="info-row"
-                    v-for="(item, index) in infoItems"
-                    :key="index"
-                >
+                <div class="info-row" v-for="(item, index) in infoItems" :key="index">
                     <SecurityInfoSlot>
                         <template #icon>
                             <SecurityIcon :path-icon="item.icon" />

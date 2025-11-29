@@ -37,27 +37,16 @@ function onMenuClick() {
 <template>
     <div class="container">
         <Transition name="menu" mode="out-in">
-            <div
-                class="menu-div"
-                v-if="!state.showSidebar"
-                @click="onMenuClick"
-            >
+            <div class="menu-div" v-if="!state.showSidebar" @click="onMenuClick">
                 <img src="@/assets/menu.png" alt="menu" />
             </div>
         </Transition>
         <aside class="sidebar" :class="{ sidebarShow: state.showSidebar }">
-            <div
-                class="menu-cancel-div"
-                @click="state.showSidebar = !state.showSidebar"
-            >
+            <div class="menu-cancel-div" @click="state.showSidebar = !state.showSidebar">
                 <img src="@/assets/cancel-sq.png" alt="cancel-menu" />
             </div>
             <div class="user-info">
-                <img
-                    src="@/assets/empty-avatar.png"
-                    alt="User Avatar"
-                    class="avatar"
-                />
+                <img src="@/assets/empty-avatar.png" alt="User Avatar" class="avatar" />
                 <h2 class="user-name">{{ store.state.fullName }}</h2>
             </div>
             <nav class="navigation">
@@ -91,15 +80,9 @@ function onMenuClick() {
 
 .sidebar {
     width: 25%;
-    background: linear-gradient(
-            rgba(135, 60, 255, 0.4),
-            rgba(135, 60, 255, 0) 80%
-        ),
-        linear-gradient(
-            -45deg,
-            rgba(120, 155, 255, 0.9) 25%,
-            rgba(255, 160, 65, 0.9) 75%
-        );
+    background:
+        linear-gradient(rgba(135, 60, 255, 0.4), rgba(135, 60, 255, 0) 80%),
+        linear-gradient(-45deg, rgba(120, 155, 255, 0.9) 25%, rgba(255, 160, 65, 0.9) 75%);
     background-color: #412e85;
     padding: 20px 24px 20px 20px;
     box-sizing: border-box;

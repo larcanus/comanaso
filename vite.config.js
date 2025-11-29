@@ -11,11 +11,11 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
     const isDev = mode === 'development';
 
-    // Генерация самоподписанного сертификата для HTTPS в dev-режиме
-    const httpsConfig = isDev ? {
-        key: generateDevCert().key,
-        cert: generateDevCert().cert,
-    } : false;
+    // Проверяем, нужно ли использовать HTTPS (только если явно указано)
+    const useHttps = process.env.VITE_USE_HTTPS === 'true';
+
+    // Получаем конфигурацию HTTPS если нужно
+    const httpsConfig = useHttps && isDev ? getHttpsConfig() : false;
 
     return {
         plugins: [
@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
         server: {
             port: 5173,
             host: true,
-            https: process.argv.includes('--https') ? httpsConfig : false,
+            https: httpsConfig,
             open: false,
             cors: true,
             proxy: {
@@ -78,32 +78,36 @@ export default defineConfig(({ mode }) => {
     };
 });
 
-// Функция для генерации самоподписанного сертификата
-function generateDevCert() {
+// Функция для получения конфигурации HTTPS
+function getHttpsConfig() {
     const certPath = path.resolve(process.cwd(), '.cert');
     const keyPath = path.join(certPath, 'key.pem');
     const certFilePath = path.join(certPath, 'cert.pem');
 
     // Проверяем существование сертификатов
     if (fs.existsSync(keyPath) && fs.existsSync(certFilePath)) {
+        console.log('✅ HTTPS сертификаты найдены, запуск с HTTPS...\n');
         return {
             key: fs.readFileSync(keyPath),
             cert: fs.readFileSync(certFilePath),
         };
     }
 
-    // Если сертификатов нет, создаём директорию и возвращаем false
-    // Пользователь должен будет сгенерировать сертификаты вручную
-    if (!fs.existsSync(certPath)) {
-        fs.mkdirSync(certPath, { recursive: true });
-    }
-
+    // Если сертификатов нет, показываем предупреждение и возвращаем false
     console.warn('\n⚠️  HTTPS сертификаты не найдены!');
-    console.warn('Для работы с HTTPS в dev-режиме выполните:');
-    console.warn('\nWindows (PowerShell):');
-    console.warn('  New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\\LocalMachine\\My"');
-    console.warn('\nLinux/Mac:');
-    console.warn('  openssl req -x509 -newkey rsa:4096 -keyout .cert/key.pem -out .cert/cert.pem -days 365 -nodes -subj "/CN=localhost"\n');
+    console.warn('📁 Ожидаемое расположение: .cert/key.pem и .cert/cert.pem\n');
+    console.warn('Для генерации сертификатов выполните:');
+    console.warn('  npm run cert:generate\n');
+    console.warn('Или вручную:');
+    console.warn('\n🪟 Windows (PowerShell от администратора):');
+    console.warn('  $cert = New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\\CurrentUser\\My"');
+    console.warn('  $pwd = ConvertTo-SecureString -String "password" -Force -AsPlainText');
+    console.warn('  Export-PfxCertificate -Cert $cert -FilePath "$PWD\\.cert\\cert.pfx" -Password $pwd');
+    console.warn('  # Затем конвертируйте PFX в PEM с помощью OpenSSL');
+    console.warn('\n🐧 Linux/Mac:');
+    console.warn('  npm run cert:generate\n');
+    console.warn('⚠️  Запуск без HTTPS. Используйте npm run dev:https для HTTPS.\n');
 
-    return { key: '', cert: '' };
+    // Возвращаем false, чтобы использовать HTTP
+    return false;
 }

@@ -45,17 +45,13 @@
 
     /* Стили для ползунка (thumb) */
     ::-webkit-scrollbar-thumb {
-        background-color: var(
-            --wb-kit-scrollbar-thumb-background-color
-        ); /* Цвет ползунка */
+        background-color: var(--wb-kit-scrollbar-thumb-background-color); /* Цвет ползунка */
         border-radius: 0; /* Убираем закругленные углы */
     }
 
     /* Стили для трека (track) */
     ::-webkit-scrollbar-track {
-        background-color: var(
-            --wb-kit-scrollbar-track-background-color
-        ); /* Цвет трека */
+        background-color: var(--wb-kit-scrollbar-track-background-color); /* Цвет трека */
     }
 }
 

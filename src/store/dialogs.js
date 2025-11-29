@@ -17,25 +17,29 @@ export const useDialogStore = defineStore('dialog', () => {
 
     function setFolders(data) {
         console.log('setFolders', data);
-        foldersState.value.rawFoldersData = data.filters.filter((filter) => filter.className !== 'DialogFilterDefault');
+        foldersState.value.rawFoldersData = data.filters.filter(
+            (filter) => filter.className !== 'DialogFilterDefault'
+        );
         foldersState.value.rawFoldersData.forEach((folder) => {
             folder.includePeers.forEach((includePeer) => {
                 const entityIds = foldersState.value.dialogsIdByFolderId[folder.id];
-                const entityId = includePeer.channelId?.value ?? includePeer.userId?.value ?? includePeer.chatId?.value;
+                const entityId =
+                    includePeer.channelId?.value ??
+                    includePeer.userId?.value ??
+                    includePeer.chatId?.value;
                 if (entityIds) {
                     foldersState.value.dialogsIdByFolderId[folder.id].push(entityId);
-                }
-                else {
+                } else {
                     foldersState.value.dialogsIdByFolderId[folder.id] = [entityId];
                 }
-            })
-        })
+            });
+        });
 
         return foldersState.value;
     }
 
     function getPreparedDialogs() {
-        return validateDialogs(this.state, foldersState)
+        return validateDialogs(this.state, foldersState);
     }
 
     function $reset() {
@@ -125,12 +129,11 @@ function getTypeDialogLoc(dialogData) {
 }
 
 function getFolderIdDialogLoc(dialogData, foldersState) {
-   const objectData = {
+    const objectData = {
         value: [],
         loc: '',
     };
-    if (dialogData.folderId === 1)
-    {
+    if (dialogData.folderId === 1) {
         objectData.value.push(1);
         objectData.loc = 'Архив';
 
@@ -139,19 +142,20 @@ function getFolderIdDialogLoc(dialogData, foldersState) {
 
     const entityId = dialogData.entity?.id?.value;
     Object.keys(foldersState.value.dialogsIdByFolderId).forEach((folderId) => {
-       if(foldersState.value.dialogsIdByFolderId[folderId].includes(entityId)) {
+        if (foldersState.value.dialogsIdByFolderId[folderId].includes(entityId)) {
             objectData.value.push(folderId);
-            const title = foldersState.value.rawFoldersData.find((folderData) =>
-            {
-                return folderData.id === Number(folderId)
-            })?.title || '';
+            const title =
+                foldersState.value.rawFoldersData.find((folderData) => {
+                    return folderData.id === Number(folderId);
+                })?.title || '';
 
-           objectData.loc.length > 0 ? objectData.loc += `, '${title}'` : objectData.loc = `'${title}'`;
+            objectData.loc.length > 0
+                ? (objectData.loc += `, '${title}'`)
+                : (objectData.loc = `'${title}'`);
         }
-    })
+    });
 
-    if (objectData.loc.length === 0)
-    {
+    if (objectData.loc.length === 0) {
         objectData.loc = 'нет';
     }
 
@@ -218,11 +222,10 @@ function getDateDialogLoc(timestamp) {
     return objectData;
 }
 
-function getCreatorDialogLoc(creator)
-{
+function getCreatorDialogLoc(creator) {
     return {
         value: creator,
-        loc: creator ? 'да' : 'нет'
+        loc: creator ? 'да' : 'нет',
     };
 }
 

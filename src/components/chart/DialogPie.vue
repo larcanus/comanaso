@@ -14,15 +14,7 @@ import { computed, onMounted, onUnmounted, onUpdated, ref } from 'vue';
 import useDialogStore from '@/store/dialogs.js';
 import { getStaticAnalyticsByDialogType } from '@/utils/dialogAnalytics.js';
 
-ChartJS.register(
-    Title,
-    Tooltip,
-    Legend,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-    ArcElement,
-);
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
 const dialogStore = useDialogStore();
 const dialogState = ref(dialogStore.getPreparedDialogs());
 
@@ -183,11 +175,7 @@ function onClick() {
 <template>
     <div class="dialog-pie-container" @click="onClick">
         <div ref="chart-pie" class="chart-pie-container">
-            <Pie
-                id="dialog-pie"
-                :options="state.chartOptions"
-                :data="state.chartData"
-            />
+            <Pie id="dialog-pie" :options="state.chartOptions" :data="state.chartData" />
         </div>
         <div class="chart-desc-container">
             <p class="responsive-text">

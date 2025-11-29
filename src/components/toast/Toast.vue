@@ -37,11 +37,7 @@ function getImagePath(type) {
                         class="toast"
                         :class="`toast-type-${toast.type}`"
                     >
-                        <img
-                            :src="getImagePath(toast.type)"
-                            alt="status-icon"
-                            class="icon"
-                        />
+                        <img :src="getImagePath(toast.type)" alt="status-icon" class="icon" />
                         <span>
                             {{ toast.text }}
                         </span>

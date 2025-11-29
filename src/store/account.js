@@ -120,8 +120,7 @@ function generatePositiveAccountName() {
 
     const noun = 'аккаунт';
 
-    const randomAdjective =
-        adjectives[Math.floor(Math.random() * adjectives.length)];
+    const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
 
     return `${randomAdjective} ${noun}`;
 }

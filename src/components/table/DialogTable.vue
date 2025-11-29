@@ -7,7 +7,7 @@ const dialogStore = useDialogStore();
 const dialogState = ref(dialogStore.getPreparedDialogs());
 const dialogsFiltered = ref(dialogState.value);
 const tableHeaderLoc = computed(() => {
-    if(dialogState.value.length === 0) {
+    if (dialogState.value.length === 0) {
         return 'Ваши диалоги';
     }
 
@@ -26,19 +26,18 @@ const allColumns = [
     { key: 'archived', label: 'В архиве' },
 ];
 
-const defaultVisibleColumns = allColumns.filter((column) => !['creator', 'archived'].includes(column.key));
+const defaultVisibleColumns = allColumns.filter(
+    (column) => !['creator', 'archived'].includes(column.key)
+);
 
 const visibleColumns = ref(defaultVisibleColumns.map((column) => column.key));
 const showColumnMenu = ref(false);
 
 const isMobileWidth = (width) => width <= 750;
-const mainDivWidth = ref(
-    window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7),
-);
+const mainDivWidth = ref(window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7));
 
 function updateDivWidth() {
-    mainDivWidth.value =
-        window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7);
+    mainDivWidth.value = window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7);
 }
 
 const appNode = computed(() => document.querySelector('#app'));
@@ -96,15 +95,11 @@ const paginatedData = computed(() => {
     return preparedData;
 });
 
-const totalPages = computed(() =>
-    Math.ceil(dialogsFiltered.value.length / rowsPerPage),
-);
+const totalPages = computed(() => Math.ceil(dialogsFiltered.value.length / rowsPerPage));
 
 function toggleColumn(columnKey) {
     if (visibleColumns.value.includes(columnKey)) {
-        visibleColumns.value = visibleColumns.value.filter(
-            (key) => key !== columnKey,
-        );
+        visibleColumns.value = visibleColumns.value.filter((key) => key !== columnKey);
     } else {
         visibleColumns.value.push(columnKey);
     }
@@ -200,7 +195,7 @@ function handleSearchInput() {
         const itemTitleValue = toRaw(item.title);
 
         return itemTitleValue.loc.startsWith(searchQuery.value);
-    })
+    });
 }
 </script>
 
@@ -208,12 +203,10 @@ function handleSearchInput() {
     <div>
         <div class="header-table-wrapper">
             <div class="header">
-                <h3>{{tableHeaderLoc}}</h3>
+                <h3>{{ tableHeaderLoc }}</h3>
             </div>
             <div class="search-container">
-                <button @click="toggleSearch" class="search-button">
-                    🔍
-                </button>
+                <button @click="toggleSearch" class="search-button">🔍</button>
                 <Transition name="fade">
                     <input
                         v-if="showInput"
@@ -227,19 +220,11 @@ function handleSearchInput() {
             </div>
         </div>
         <div class="table-controls" id="table-controls">
-            <button
-                @click="toggleColumnMenu"
-                id="edit-columns-button"
-                class="edit-columns-button"
-            >
+            <button @click="toggleColumnMenu" id="edit-columns-button" class="edit-columns-button">
                 ✏️
             </button>
             <div v-if="showColumnMenu" id="column-menu" class="column-menu">
-                <div
-                    v-for="column in allColumns"
-                    :key="column.key"
-                    class="column-menu-item"
-                >
+                <div v-for="column in allColumns" :key="column.key" class="column-menu-item">
                     <input
                         :id="`column-menu-input-${column.key}`"
                         type="checkbox"
@@ -259,41 +244,32 @@ function handleSearchInput() {
             <div class="table-container">
                 <table class="styled-table">
                     <thead>
-                    <tr>
-                        <th
-                            v-for="column in visibleColumns"
-                            :key="column"
-                            @click="sortByColumn(column)"
-                            :id="column"
-                        >
-                            {{ getColumnLabel(column) }}
-                        </th>
-                    </tr>
+                        <tr>
+                            <th
+                                v-for="column in visibleColumns"
+                                :key="column"
+                                @click="sortByColumn(column)"
+                                :id="column"
+                            >
+                                {{ getColumnLabel(column) }}
+                            </th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="row in paginatedData" :key="row.id.value">
-                        <td
-                            v-for="column in visibleColumns"
-                            :key="column"
-                            :id="column"
-                        >
-                            {{ row[column].loc }}
-                        </td>
-                    </tr>
+                        <tr v-for="row in paginatedData" :key="row.id.value">
+                            <td v-for="column in visibleColumns" :key="column" :id="column">
+                                {{ row[column].loc }}
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
         <div class="pagination">
-            <button @click="prevPageToStart" :disabled="currentPage === 1">
-                <<
-            </button>
+            <button @click="prevPageToStart" :disabled="currentPage === 1"><<</button>
             <button @click="prevPage" :disabled="currentPage === 1"><</button>
             <span>Page {{ currentPage }} of {{ totalPages }}</span>
-            <button
-                @click="nextPage"
-                :disabled="currentPage === totalPages || totalPages === 0"
-            >
+            <button @click="nextPage" :disabled="currentPage === totalPages || totalPages === 0">
                 >
             </button>
             <button
@@ -464,5 +440,4 @@ function handleSearchInput() {
 .fade-leave-from {
     width: 200px;
 }
-
 </style>

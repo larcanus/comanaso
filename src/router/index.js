@@ -57,19 +57,11 @@ const router = createRouter({
 router.beforeEach(async (to) => {
     const authStore = useAuthStore();
 
-    if (
-        to.meta.requiresAuth &&
-        !authStore.state.isAuthenticated &&
-        to.name !== 'home'
-    ) {
+    if (to.meta.requiresAuth && !authStore.state.isAuthenticated && to.name !== 'home') {
         return { name: 'home' };
     }
 
-    if (
-        to.meta.requiresAuth &&
-        authStore.state.isAuthenticated &&
-        to.name === 'main'
-    ) {
+    if (to.meta.requiresAuth && authStore.state.isAuthenticated && to.name === 'main') {
         return { name: 'account' };
     }
 

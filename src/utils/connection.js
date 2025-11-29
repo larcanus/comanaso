@@ -5,7 +5,7 @@ const LOC_TOAST_ERROR_DATA_UPDATE_AUTH =
     'При запросе произошла ошибка. Ключ авторизация не принят. Проверьте состояние подключения к аккаунту';
 
 export async function createClient(apiId, apiHash) {
-   return {};
+    return {};
 }
 
 export async function fullDisconnectClient() {
@@ -17,7 +17,7 @@ export async function logOut() {
 }
 
 export async function getCommonData(accountId, store, toast) {
-    console.log('getCommonData', accountId, store, toast)
+    console.log('getCommonData', accountId, store, toast);
     if (accountId && store) {
         try {
             // Заглушка для получения данных с сервера

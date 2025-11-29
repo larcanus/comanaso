@@ -52,8 +52,7 @@ const props = defineProps({
     },
     messageLoginError: {
         type: String,
-        default:
-            'Error in login or password.\n Are you sure you entered the correct data?',
+        default: 'Error in login or password.\n Are you sure you entered the correct data?',
     },
     messageRegistrationError: {
         type: String,
@@ -86,9 +85,7 @@ const loginInputRef = useTemplateRef('inputLogin');
 
 async function onClickOk() {
     if (checkValidInputs()) {
-        state.value.isRegister
-            ? await onClickCreateAccount()
-            : await onClickSignIn();
+        state.value.isRegister ? await onClickCreateAccount() : await onClickSignIn();
     }
 
     hiddenTooltip();
@@ -169,12 +166,10 @@ async function onClickTooltipBig() {
 
 function checkValidInputs() {
     if (!/^[а-яА-ЯёЁa-zA-Z0-9]+$/.test(state.value.loginValue)) {
-        state.value.messageInputLoginValidError =
-            'Login must include letters or numbers';
+        state.value.messageInputLoginValidError = 'Login must include letters or numbers';
         state.value.isErrorValidInputLogin = true;
     } else if (state.value.loginValue.length < 5) {
-        state.value.messageInputLoginValidError =
-            'Login should be greater than 5 symbols';
+        state.value.messageInputLoginValidError = 'Login should be greater than 5 symbols';
         state.value.isErrorValidInputLogin = true;
     } else {
         state.value.messageInputLoginValidError = '';
@@ -182,12 +177,10 @@ function checkValidInputs() {
     }
 
     if (!/^[a-zA-Z0-9]*$/.test(state.value.passwordValue)) {
-        state.value.messageInputPSWValidError =
-            'Password must include only letters and numbers';
+        state.value.messageInputPSWValidError = 'Password must include only letters and numbers';
         state.value.isErrorValidInputPsw = true;
     } else if (state.value.passwordValue.length < 5) {
-        state.value.messageInputPSWValidError =
-            'Password should be greater than 5 symbols';
+        state.value.messageInputPSWValidError = 'Password should be greater than 5 symbols';
         state.value.isErrorValidInputPsw = true;
     } else {
         state.value.messageInputPSWValidError = '';
@@ -196,12 +189,10 @@ function checkValidInputs() {
 
     if (state.value.isRegister) {
         if (!/^[а-яА-ЯёЁa-zA-Z0-9]+$/.test(state.value.nameValue)) {
-            state.value.messageInputNameValidError =
-                'Name must include letters or numbers';
+            state.value.messageInputNameValidError = 'Name must include letters or numbers';
             state.value.isErrorValidInputName = true;
         } else if (state.value.nameValue.length < 3) {
-            state.value.messageInputNameValidError =
-                'Name should be greater than 3 symbols';
+            state.value.messageInputNameValidError = 'Name should be greater than 3 symbols';
             state.value.isErrorValidInputName = true;
         } else {
             state.value.messageInputNameValidError = '';
@@ -215,9 +206,7 @@ function checkValidInputs() {
         );
     }
 
-    return !(
-        state.value.isErrorValidInputLogin || state.value.isErrorValidInputPsw
-    );
+    return !(state.value.isErrorValidInputLogin || state.value.isErrorValidInputPsw);
 }
 
 function hiddenTooltip() {
@@ -241,11 +230,7 @@ function hiddenTooltip() {
         <div class="form-container">
             <form>
                 <div class="header-container">
-                    <p
-                        class="sign"
-                        v-if="state.isRegister"
-                        @click="state.isRegister = false"
-                    >
+                    <p class="sign" v-if="state.isRegister" @click="state.isRegister = false">
                         {{ props.signParagraph }}
                     </p>
                     <h2>{{ state.isRegister ? h2RegLoc : h2LoginLoc }}</h2>
@@ -261,10 +246,7 @@ function hiddenTooltip() {
                         :disabled="state.isAllDisabled"
                         required
                     />
-                    <div
-                        class="tooltip"
-                        :class="{ invalid: state.isErrorValidInputName }"
-                    >
+                    <div class="tooltip" :class="{ invalid: state.isErrorValidInputName }">
                         {{ state.messageInputNameValidError }}
                     </div>
                     <div
@@ -286,10 +268,7 @@ function hiddenTooltip() {
                         :disabled="state.isAllDisabled"
                         required
                     />
-                    <div
-                        class="tooltip"
-                        :class="{ invalid: state.isErrorValidInputLogin }"
-                    >
+                    <div class="tooltip" :class="{ invalid: state.isErrorValidInputLogin }">
                         {{ state.messageInputLoginValidError }}
                     </div>
                 </div>
@@ -305,10 +284,7 @@ function hiddenTooltip() {
                         autocomplete="on"
                         required
                     />
-                    <div
-                        class="tooltip"
-                        :class="{ invalid: state.isErrorValidInputPsw }"
-                    >
+                    <div class="tooltip" :class="{ invalid: state.isErrorValidInputPsw }">
                         {{ state.messageInputPSWValidError }}
                     </div>
                     <div

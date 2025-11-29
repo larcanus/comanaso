@@ -5,10 +5,7 @@ import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
-import {
-    fullDisconnectClient,
-    getCommonData,
-} from '@/utils/connection.js';
+import { fullDisconnectClient, getCommonData } from '@/utils/connection.js';
 import useDialogStore from '@/store/dialogs.js';
 
 const accountStore = useAccountStore();
@@ -47,7 +44,7 @@ onBeforeMount(async () => {
 });
 
 async function checkClient() {
-    console.log('checkClient client.connected:',);
+    console.log('checkClient client.connected:');
 }
 
 accountStore.$onAction(({ name, after }) => {
@@ -79,7 +76,13 @@ function onClickDelete() {
 }
 
 async function onClickStart() {
-    if (!isValidConnectData({ apiId: state.apiId, apiHash: state.apiHash, phoneNumber: state.phoneNumber })) {
+    if (
+        !isValidConnectData({
+            apiId: state.apiId,
+            apiHash: state.apiHash,
+            phoneNumber: state.phoneNumber,
+        })
+    ) {
         toastStore.addToast('error', LOC_TOAST_VALID_ERROR);
         return;
     }
@@ -89,14 +92,14 @@ async function onClickStart() {
     // TODO: Здесь будет запрос на сервер для подключения аккаунта
     try {
         // Заглушка - имитация успешного подключения
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         await accountStore.changeStatus(state.id, 'online');
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
     } catch (error) {
         console.error('Connection error:', error);
         await accountStore.changeStatus(state.id, 'error', {
             title: 'Ошибка подключения',
-            desc: error.message
+            desc: error.message,
         });
     }
 }
@@ -136,8 +139,8 @@ function prepareDetailMessage() {
 }
 
 function isValidConnectData(fields) {
-    return Object.values(fields).every(value =>
-        value && (typeof value !== 'string' || value.length > 0)
+    return Object.values(fields).every(
+        (value) => value && (typeof value !== 'string' || value.length > 0)
     );
 }
 
@@ -175,9 +178,7 @@ function handleConfirmCancel() {
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
             <AccountStatus v-bind="{ status: state.status }" />
-            <button @click="showDetail" class="button-detail">
-                подробности
-            </button>
+            <button @click="showDetail" class="button-detail">подробности</button>
             <DetailPopup
                 :message="state.modalPopupInfoMessage"
                 :isVisible="state.isModalPopupInfoVisible"
@@ -210,14 +211,8 @@ function handleConfirmCancel() {
                 v-model="state.phoneNumber"
             />
             <div class="buttons">
-                <button v-if="state.isEdit" @click="onClickSave">
-                    Сохранить
-                </button>
-                <button
-                    v-if="!state.isEdit"
-                    :disabled="state.isConnect"
-                    @click="onClickEdit"
-                >
+                <button v-if="state.isEdit" @click="onClickSave">Сохранить</button>
+                <button v-if="!state.isEdit" :disabled="state.isConnect" @click="onClickEdit">
                     Редактировать
                 </button>
                 <button
