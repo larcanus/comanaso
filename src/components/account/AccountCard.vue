@@ -5,8 +5,6 @@ import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
-import { fullDisconnectClient, getCommonData } from '@/utils/connection.js';
-import useDialogStore from '@/store/dialogs.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -39,13 +37,13 @@ const state = reactive({
     ...accountData,
 });
 
-onBeforeMount(async () => {
-    await checkClient();
-});
+// onBeforeMount(async () => {
+//     await checkClient();
+// });
 
-async function checkClient() {
-    console.log('checkClient client.connected:');
-}
+// async function checkClient() {
+//     console.log('checkClient client.connected:');
+// }
 
 accountStore.$onAction(({ name, after }) => {
     after((result) => {
@@ -178,37 +176,37 @@ function handleConfirmCancel() {
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
             <AccountStatus v-bind="{ status: state.status }" />
-            <button @click="showDetail" class="button-detail">подробности</button>
+            <button class="button-detail" @click="showDetail">подробности</button>
             <DetailPopup
                 :message="state.modalPopupInfoMessage"
-                :isVisible="state.isModalPopupInfoVisible"
+                :is-visible="state.isModalPopupInfoVisible"
                 @close="state.isModalPopupInfoVisible = false"
             />
         </div>
         <div class="product-details">
             <input
+                v-model="state.name"
                 type="text"
                 :disabled="!state.isEdit"
                 placeholder="Название"
-                v-model="state.name"
             />
             <input
+                v-model="state.apiId"
                 type="text"
                 :disabled="!state.isEdit"
                 placeholder="App api_id"
-                v-model="state.apiId"
             />
             <input
+                v-model="state.apiHash"
                 type="text"
                 :disabled="!state.isEdit"
                 placeholder="App api_hash"
-                v-model="state.apiHash"
             />
             <input
+                v-model="state.phoneNumber"
                 type="text"
                 :disabled="!state.isEdit"
                 placeholder="Номер телефона"
-                v-model="state.phoneNumber"
             />
             <div class="buttons">
                 <button v-if="state.isEdit" @click="onClickSave">Сохранить</button>
@@ -218,8 +216,8 @@ function handleConfirmCancel() {
                 <button
                     v-if="state.isEdit"
                     :disabled="state.isConnect"
-                    @click="onClickDelete"
                     class="button-cancel"
+                    @click="onClickDelete"
                 >
                     Удалить аккаунт
                 </button>
@@ -233,8 +231,8 @@ function handleConfirmCancel() {
                 <button
                     v-if="!state.isEdit && state.isConnect"
                     :disabled="!state.isConnect"
-                    @click="onClickDisconnect"
                     class="button-cancel"
+                    @click="onClickDisconnect"
                 >
                     Отключить
                 </button>

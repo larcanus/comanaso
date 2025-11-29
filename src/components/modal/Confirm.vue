@@ -40,16 +40,16 @@ function cancel() {
             <div class="modal-content">
                 <p>{{ message }}</p>
                 <input
-                    autofocus
                     v-if="isInput"
                     v-model="inputValue"
+                    autofocus
                     type="text"
                     placeholder="*****"
                     maxlength="10"
                     @keyup.enter="confirm"
                 />
                 <div class="modal-buttons">
-                    <button @click="cancel" class="cancel">Отмена</button>
+                    <button class="cancel" @click="cancel">Отмена</button>
                     <button @click="confirm">Отправить</button>
                 </div>
             </div>

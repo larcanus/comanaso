@@ -100,9 +100,13 @@ function getHttpsConfig() {
     console.warn('  npm run cert:generate\n');
     console.warn('Или вручную:');
     console.warn('\n🪟 Windows (PowerShell от администратора):');
-    console.warn('  $cert = New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\\CurrentUser\\My"');
+    console.warn(
+        '  $cert = New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\\CurrentUser\\My"'
+    );
     console.warn('  $pwd = ConvertTo-SecureString -String "password" -Force -AsPlainText');
-    console.warn('  Export-PfxCertificate -Cert $cert -FilePath "$PWD\\.cert\\cert.pfx" -Password $pwd');
+    console.warn(
+        '  Export-PfxCertificate -Cert $cert -FilePath "$PWD\\.cert\\cert.pfx" -Password $pwd'
+    );
     console.warn('  # Затем конвертируйте PFX в PEM с помощью OpenSSL');
     console.warn('\n🐧 Linux/Mac:');
     console.warn('  npm run cert:generate\n');

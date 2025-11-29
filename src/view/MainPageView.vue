@@ -37,7 +37,7 @@ function onMenuClick() {
 <template>
     <div class="container">
         <Transition name="menu" mode="out-in">
-            <div class="menu-div" v-if="!state.showSidebar" @click="onMenuClick">
+            <div v-if="!state.showSidebar" class="menu-div" @click="onMenuClick">
                 <img src="@/assets/menu.png" alt="menu" />
             </div>
         </Transition>
@@ -53,9 +53,9 @@ function onMenuClick() {
                 <button
                     v-for="section in sections"
                     :key="section"
-                    @click="selectSection(section.path)"
                     :class="{ active: state.selectedSection === section.path }"
                     class="nav-button"
+                    @click="selectSection(section.path)"
                 >
                     {{ section.name }}
                 </button>

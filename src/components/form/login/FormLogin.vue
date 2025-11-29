@@ -230,18 +230,18 @@ function hiddenTooltip() {
         <div class="form-container">
             <form>
                 <div class="header-container">
-                    <p class="sign" v-if="state.isRegister" @click="state.isRegister = false">
+                    <p v-if="state.isRegister" class="sign" @click="state.isRegister = false">
                         {{ props.signParagraph }}
                     </p>
                     <h2>{{ state.isRegister ? h2RegLoc : h2LoginLoc }}</h2>
                 </div>
-                <div class="input-container" v-if="state.isRegister">
+                <div v-if="state.isRegister" class="input-container">
                     <label for="inputName">{{ props.labelNameLoc }}</label>
                     <input
-                        ref="inputName"
                         id="inputName"
-                        type="text"
+                        ref="inputName"
                         v-model="state.nameValue"
+                        type="text"
                         :placeholder="props.placeholderNameLoc"
                         :disabled="state.isAllDisabled"
                         required
@@ -260,10 +260,10 @@ function hiddenTooltip() {
                 <div class="input-container">
                     <label for="inputLogin">{{ props.labelLoginLoc }}</label>
                     <input
-                        ref="inputLogin"
                         id="inputLogin"
-                        type="text"
+                        ref="inputLogin"
                         v-model="state.loginValue"
+                        type="text"
                         :placeholder="props.placeholderLoginLoc"
                         :disabled="state.isAllDisabled"
                         required
@@ -275,10 +275,10 @@ function hiddenTooltip() {
                 <div class="input-container">
                     <label for="inputPsw">{{ props.labelPswLoc }}</label>
                     <input
-                        ref="inputPsw"
                         id="inputPsw"
-                        type="password"
+                        ref="inputPsw"
                         v-model="state.passwordValue"
+                        type="password"
                         :placeholder="props.placeholderPasswordLoc"
                         :disabled="state.isAllDisabled"
                         autocomplete="on"
@@ -303,18 +303,18 @@ function hiddenTooltip() {
                 </div>
                 <button
                     class="ok-btn"
-                    @click.prevent="onClickOk"
                     :disabled="state.isAllDisabled"
                     :class="{ disabled: state.isAllDisabled }"
+                    @click.prevent="onClickOk"
                 >
                     {{ state.isRegister ? buttonRegisterLoc : buttonLoginLoc }}
                 </button>
                 <button
+                    v-if="!state.isRegister"
                     class="sub-btn"
-                    @click.prevent="state.isRegister = true"
                     :disabled="state.isAllDisabled"
                     :class="{ disabled: state.isAllDisabled }"
-                    v-if="!state.isRegister"
+                    @click.prevent="state.isRegister = true"
                 >
                     {{ props.buttonRegisterLoc }}
                 </button>

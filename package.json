@@ -9,7 +9,7 @@
     "build": "vite build",
     "build:prod": "cross-env NODE_ENV=production vite build",
     "preview": "vite preview --port 8084 --host",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "lint": "eslint . --fix",
     "format": "prettier --write src/",
     "type-check": "vue-tsc --noEmit",
     "cert:generate": "node scripts/generate-cert.js"

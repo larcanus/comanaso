@@ -206,21 +206,21 @@ function handleSearchInput() {
                 <h3>{{ tableHeaderLoc }}</h3>
             </div>
             <div class="search-container">
-                <button @click="toggleSearch" class="search-button">🔍</button>
+                <button class="search-button" @click="toggleSearch">🔍</button>
                 <Transition name="fade">
                     <input
                         v-if="showInput"
+                        v-model="searchQuery"
                         type="text"
                         class="search-input"
-                        v-model="searchQuery"
-                        @input="handleSearchInput"
                         placeholder="Введите текст для поиска..."
+                        @input="handleSearchInput"
                     />
                 </Transition>
             </div>
         </div>
-        <div class="table-controls" id="table-controls">
-            <button @click="toggleColumnMenu" id="edit-columns-button" class="edit-columns-button">
+        <div id="table-controls" class="table-controls">
+            <button id="edit-columns-button" class="edit-columns-button" @click="toggleColumnMenu">
                 ✏️
             </button>
             <div v-if="showColumnMenu" id="column-menu" class="column-menu">
@@ -247,9 +247,9 @@ function handleSearchInput() {
                         <tr>
                             <th
                                 v-for="column in visibleColumns"
+                                :id="column"
                                 :key="column"
                                 @click="sortByColumn(column)"
-                                :id="column"
                             >
                                 {{ getColumnLabel(column) }}
                             </th>
@@ -257,7 +257,7 @@ function handleSearchInput() {
                     </thead>
                     <tbody>
                         <tr v-for="row in paginatedData" :key="row.id.value">
-                            <td v-for="column in visibleColumns" :key="column" :id="column">
+                            <td v-for="column in visibleColumns" :id="column" :key="column">
                                 {{ row[column].loc }}
                             </td>
                         </tr>
@@ -266,15 +266,15 @@ function handleSearchInput() {
             </div>
         </div>
         <div class="pagination">
-            <button @click="prevPageToStart" :disabled="currentPage === 1"><<</button>
-            <button @click="prevPage" :disabled="currentPage === 1"><</button>
+            <button :disabled="currentPage === 1" @click="prevPageToStart"><<</button>
+            <button :disabled="currentPage === 1" @click="prevPage"><</button>
             <span>Page {{ currentPage }} of {{ totalPages }}</span>
-            <button @click="nextPage" :disabled="currentPage === totalPages || totalPages === 0">
+            <button :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
                 >
             </button>
             <button
-                @click="nextPageToEnd"
                 :disabled="currentPage === totalPages || totalPages === 0"
+                @click="nextPageToEnd"
             >
                 >>
             </button>

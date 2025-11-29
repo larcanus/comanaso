@@ -115,8 +115,13 @@ IP.2 = ::1
 
     // Проверяем созданные файлы
     console.log('4️⃣  Проверка сертификатов...');
-    const keyInfo = execSync(`${opensslCmd} rsa -in "${keyPath}" -check -noout`, { encoding: 'utf8' });
-    const certInfo = execSync(`${opensslCmd} x509 -in "${certPath}" -text -noout | findstr "Subject:"`, { encoding: 'utf8', shell: 'cmd.exe' });
+    const keyInfo = execSync(`${opensslCmd} rsa -in "${keyPath}" -check -noout`, {
+        encoding: 'utf8',
+    });
+    const certInfo = execSync(
+        `${opensslCmd} x509 -in "${certPath}" -text -noout | findstr "Subject:"`,
+        { encoding: 'utf8', shell: 'cmd.exe' }
+    );
 
     console.log('   ✅ Ключ валиден');
     console.log('   ✅ Сертификат валиден\n');
@@ -137,13 +142,14 @@ IP.2 = ::1
     console.log('   6. Завершите установку\n');
     console.log('🚀 Теперь можно запустить: npm run dev:https\n');
     console.log('═══════════════════════════════════════════════════════════\n');
-
 } catch (error) {
     console.error('\n❌ Ошибка при генерации сертификатов:', error.message);
     console.error('\n💡 Попробуйте создать сертификаты вручную:\n');
     console.error('   1. Генерация ключа:');
     console.error(`      openssl genrsa -out "${keyPath}" 2048\n`);
     console.error('   2. Генерация сертификата:');
-    console.error(`      openssl req -new -x509 -key "${keyPath}" -out "${certPath}" -days 365 -subj "/CN=localhost"\n`);
+    console.error(
+        `      openssl req -new -x509 -key "${keyPath}" -out "${certPath}" -days 365 -subj "/CN=localhost"\n`
+    );
     process.exit(1);
 }

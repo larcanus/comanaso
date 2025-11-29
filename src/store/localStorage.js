@@ -43,7 +43,9 @@ function isSessionStorageAvailable() {
         console.error('sessionStorage также недоступен:', e);
         storageType = 'memory';
         storage = createMemoryStorage();
-        console.warn('⚠️  Используется хранилище в памяти (данные будут потеряны при перезагрузке)');
+        console.warn(
+            '⚠️  Используется хранилище в памяти (данные будут потеряны при перезагрузке)'
+        );
         return false;
     }
 }

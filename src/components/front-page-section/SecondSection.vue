@@ -22,7 +22,7 @@ const steps = ref([
 
 <template>
     <section class="section second">
-        <div class="card-container" v-for="(step, index) in steps" :key="index">
+        <div v-for="(step, index) in steps" :key="index" class="card-container">
             <div class="card-image">
                 <img :src="step.imagePath" alt="Step Image" class="image" />
                 <p class="card-text">{{ step.text }}</p>
