@@ -5,6 +5,7 @@ import useToastStore from '@/store/toast.js';
 const accStore = useAccountStore();
 const toastStore = useToastStore();
 const LIMIT_ACCOUNT_TEXT = 'Сейчас доступно создание только одного аккаунта';
+
 function onClickDiv() {
     const ids = accStore.getCollectionId();
     if (ids.length >= 1) {

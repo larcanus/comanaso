@@ -5,6 +5,7 @@ import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
+import { connectAccount, verifyCode, verifyPassword } from '@/utils/connection.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -87,18 +88,52 @@ async function onClickStart() {
 
     accountStore.changeStatus(state.id, 'connect');
 
-    // TODO: Здесь будет запрос на сервер для подключения аккаунта
     try {
-        // Заглушка - имитация успешного подключения
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await accountStore.changeStatus(state.id, 'online');
-        toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
+        // Шаг 1: Начать подключение
+        const connectResult = await connectAccount(state.id);
+
+        if (connectResult.status === 'code_required') {
+            // Шаг 2: Запросить код у пользователя
+            const code = await showConfirm('Введите код из Telegram');
+
+            if (!code) {
+                await accountStore.changeStatus(state.id, 'offline');
+                return;
+            }
+
+            // Шаг 3: Отправить код
+            const verifyResult = await verifyCode(state.id, code, connectResult.phoneCodeHash);
+
+            if (verifyResult.status === 'connected') {
+                await accountStore.changeStatus(state.id, 'online');
+                toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
+            }
+        }
     } catch (error) {
         console.error('Connection error:', error);
-        await accountStore.changeStatus(state.id, 'error', {
-            title: 'Ошибка подключения',
-            desc: error.message,
-        });
+
+        // Если требуется 2FA
+        if (error.message.includes('PASSWORD_REQUIRED')) {
+            const password = await showConfirm('Введите пароль 2FA');
+
+            if (password) {
+                try {
+                    await verifyPassword(state.id, password);
+                    await accountStore.changeStatus(state.id, 'online');
+                    toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
+                } catch (err) {
+                    await accountStore.changeStatus(state.id, 'error', {
+                        title: 'Ошибка 2FA',
+                        desc: err.message,
+                    });
+                }
+            }
+        } else {
+            await accountStore.changeStatus(state.id, 'error', {
+                title: 'Ошибка подключения',
+                desc: error.message,
+            });
+        }
     }
 }
 
