@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', {
             localStorage.setItem('auth_user', JSON.stringify(data.user));
 
             // Устанавливаем токен в сервисе
-            authService.setAuthToken(data.token);
+            authService.setToken(data.token);
         },
 
         /**

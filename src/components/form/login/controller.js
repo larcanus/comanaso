@@ -1,5 +1,6 @@
 import { logInAllStore } from '@/store/storeController.js';
 import { authService } from '@/services/auth.service.js';
+import { popScopeId } from 'vue';
 
 export class Controller {
     /**
@@ -11,6 +12,7 @@ export class Controller {
      */
     async sendRestAuthentication({ login, password }) {
         try {
+            console.log('sendRestAuthentication 1', login, password);
             const data = await authService.login({ login, password });
             console.log('sendRestAuthentication data', data);
             // Сохраняем данные пользователя в store
@@ -79,11 +81,6 @@ export class Controller {
         };
 
         await logInAllStore(userData);
-
-        // Сохраняем токен в localStorage через authService
-        if (responseData.token) {
-            authService.setAuthToken(responseData.token);
-        }
     }
 
     /**

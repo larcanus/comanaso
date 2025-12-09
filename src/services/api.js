@@ -41,9 +41,9 @@ class ApiService {
                 ...mergedOptions,
                 signal: controller.signal,
             });
-
+            console.log('request response',response);
             clearTimeout(timeoutId);
-            console.log('response',response);
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({
                     error: 'UNKNOWN_ERROR',

@@ -13,8 +13,14 @@ export async function logInAllStore(userData) {
     const toastStore = useToastStore();
 
     try {
+        console.log('authStore', authStore);
+        console.log('userData', userData); // Добавьте для отладки
+
         // Устанавливаем данные аутентификации
-        authStore.setAuthData(userData);
+        authStore.setAuthData({
+            token: userData.token,
+            user: userData.user,
+        });
 
         // Устанавливаем данные пользователя
         if (userData.user) {
@@ -78,29 +84,6 @@ export async function logoutAllStore() {
         return false;
     }
 }
-
-// /**
-//  * Инициализация всех stores при запуске приложения
-//  */
-// export function initializeStores() {
-//     const authStore = useAuthStore();
-//     const localStorageStore = useLocalStorageStore();
-//
-//     // Проверяем аутентификацию при запуске
-//     authStore.checkAuth();
-//
-//     // Инициализируем localStorage store
-//     localStorageStore.initialize();
-//
-//     return {
-//         authStore,
-//         userStore: useUserStore(),
-//         accountStore: useAccountStore(),
-//         dialogsStore: useDialogStore(),
-//         toastStore: useToastStore(),
-//         localStorageStore,
-//     };
-// }
 
 /**
  * Получение токена для API запросов

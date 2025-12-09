@@ -57,7 +57,7 @@ export class AuthService {
                 method: 'POST',
                 body: JSON.stringify({ login, password }),
             });
-
+            console.log('login',data);
             // Сохраняем токен в сервисе
             if (data.token) {
                 apiService.setAuthToken(data.token);
@@ -65,6 +65,7 @@ export class AuthService {
 
             return data;
         } catch (error) {
+            console.error('login error', error);
             if (error.error === 'INVALID_CREDENTIALS') {
                 throw {
                     ...error,
@@ -115,6 +116,14 @@ export class AuthService {
      */
     getToken() {
         return apiService.authToken;
+    }
+
+    /**
+     * Получение текущего токена
+     * @param {string|null} token
+     */
+    setToken(token) {
+        return apiService.setAuthToken(token);
     }
 }
 
