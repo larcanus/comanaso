@@ -51,7 +51,7 @@ const useDialogStore = defineStore('dialog', () => {
         $reset,
         setDialogs,
         getPreparedDialogs,
-        setFolders
+        setFolders,
     };
 });
 

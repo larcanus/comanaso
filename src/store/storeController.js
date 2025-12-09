@@ -8,19 +8,33 @@ import { useToastStore } from '@/store/toast.js';
  * Контроллер для инициализации и управления всеми stores
  */
 export async function logInAllStore(userData) {
-    const authStore = useAuthStore();
-    const userStore = useUserStore();
-    const toastStore = useToastStore();
-
     try {
-        console.log('authStore', authStore);
-        console.log('userData', userData); // Добавьте для отладки
+        console.log('=== logInAllStore START ===');
+
+        const authStore = useAuthStore();
+        const userStore = useUserStore();
+        const toastStore = useToastStore();
+
+        console.log('authStore object:', authStore);
+        console.log('authStore methods:', Object.keys(authStore));
+        console.log('setAuthData exists?', 'setAuthData' in authStore);
+        console.log('setAuthData in _p?', authStore._p?.setAuthData);
+        console.log('setAuthData type:', typeof authStore.setAuthData);
+
+        // Проверяем структуру userData
+        console.log('userData:', userData);
+        console.log('userData.token:', userData?.token);
+        console.log('userData.user:', userData?.user);
 
         // Устанавливаем данные аутентификации
-        authStore.setAuthData({
-            token: userData.token,
-            user: userData.user,
-        });
+        if (typeof authStore.setAuthData === 'function') {
+            authStore.setAuthData({
+                token: userData.token,
+                user: userData.user,
+            });
+        } else {
+            throw new Error('setAuthData is not a function in authStore');
+        }
 
         // Устанавливаем данные пользователя
         if (userData.user) {
@@ -40,10 +54,14 @@ export async function logInAllStore(userData) {
             duration: 3000,
         });
 
+        console.log('=== logInAllStore SUCCESS ===');
         return true;
     } catch (error) {
         console.error('Ошибка при входе в систему:', error);
+        console.error('Error stack:', error.stack);
 
+        // Показываем уведомление об ошибке
+        const toastStore = useToastStore();
         toastStore.addToast({
             message: 'Ошибка при входе в систему',
             type: 'error',
