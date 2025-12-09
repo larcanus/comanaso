@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import { ref, shallowRef, toValue } from 'vue';
+import { shallowRef, toValue } from 'vue';
 
-export const useDialogStore = defineStore('dialog', () => {
+const useDialogStore = defineStore('dialog', () => {
     const state = shallowRef([]);
     const foldersState = shallowRef({
         rawFoldersData: [],
@@ -10,9 +10,8 @@ export const useDialogStore = defineStore('dialog', () => {
 
     function setDialogs(data) {
         console.log('setDialogs', data);
-        this.state = data;
-
-        return this.state;
+        state.value = data;
+        return state.value;
     }
 
     function setFolders(data) {
@@ -39,43 +38,50 @@ export const useDialogStore = defineStore('dialog', () => {
     }
 
     function getPreparedDialogs() {
-        return validateDialogs(this.state, foldersState);
+        return validateDialogs(state.value, foldersState);
     }
 
     function $reset() {
-        this.state = [];
+        state.value = [];
     }
 
-    /**
-     * @param {Array<object>} dialogs
-     * @param {object} foldersState
-     * @return {Array<object>}
-     */
-    function validateDialogs(dialogs = [], foldersState) {
-        const preparedDialogs = dialogs?.map((dialog) => {
-            const dialogData = toValue(dialog);
-            return {
-                title: getTitleDialogLoc(dialogData),
-                archived: getArchivedDialogLoc(dialogData.archived),
-                type: getTypeDialogLoc(dialogData),
-                id: { value: dialogData.id?.value, loc: dialogData.id?.value },
-                folderId: getFolderIdDialogLoc(dialogData, foldersState),
-                pinned: getPinnedDialogLoc(dialogData.pinned),
-                unreadCount: {
-                    value: dialogData.unreadCount,
-                    loc: dialogData.unreadCount,
-                },
-                mute: getMuteDialogLoc(dialogData.dialog),
-                date: getDateDialogLoc(dialogData.date),
-                creator: getCreatorDialogLoc(dialogData.entity.creator),
-            };
-        });
-        console.log('preparedDialogs', preparedDialogs);
-        return preparedDialogs;
-    }
-
-    return { state, $reset, setDialogs, getPreparedDialogs, setFolders, validateDialogs };
+    return {
+        state,
+        foldersState,
+        $reset,
+        setDialogs,
+        getPreparedDialogs,
+        setFolders
+    };
 });
+
+/**
+ * @param {Array<object>} dialogs
+ * @param {object} foldersState
+ * @return {Array<object>}
+ */
+function validateDialogs(dialogs = [], foldersState) {
+    const preparedDialogs = dialogs?.map((dialog) => {
+        const dialogData = toValue(dialog);
+        return {
+            title: getTitleDialogLoc(dialogData),
+            archived: getArchivedDialogLoc(dialogData.archived),
+            type: getTypeDialogLoc(dialogData),
+            id: { value: dialogData.id?.value, loc: dialogData.id?.value },
+            folderId: getFolderIdDialogLoc(dialogData, foldersState),
+            pinned: getPinnedDialogLoc(dialogData.pinned),
+            unreadCount: {
+                value: dialogData.unreadCount,
+                loc: dialogData.unreadCount,
+            },
+            mute: getMuteDialogLoc(dialogData.dialog),
+            date: getDateDialogLoc(dialogData.date),
+            creator: getCreatorDialogLoc(dialogData.entity.creator),
+        };
+    });
+    console.log('preparedDialogs', preparedDialogs);
+    return preparedDialogs;
+}
 
 function getTitleDialogLoc(dialogData) {
     const objectData = {};
@@ -229,4 +235,6 @@ function getCreatorDialogLoc(creator) {
     };
 }
 
+// Экспортируем как именованный экспорт и как default
+export { useDialogStore };
 export default useDialogStore;

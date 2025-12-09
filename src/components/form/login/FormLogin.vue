@@ -2,9 +2,10 @@
 import { nextTick, ref, useTemplateRef } from 'vue';
 import { Controller } from '@/components/form/login/controller.js';
 import { useRouter } from 'vue-router';
-const controller = new Controller();
 
+const controller = new Controller();
 const router = useRouter();
+
 const props = defineProps({
     h2LoginLoc: {
         type: String,
@@ -74,11 +75,14 @@ const state = ref({
     isErrorValidInputLogin: false,
     isErrorValidInputPsw: false,
     isErrorLogin: false,
+    isErrorRegistration: false,
     messageInputLoginValidError: '',
     messageInputPSWValidError: '',
+    messageInputNameValidError: '',
     isAllDisabled: false,
     tooltipTimeout: null,
     tooltipBigTimeout: null,
+    apiErrorMessage: '', // Для отображения ошибок API
 });
 
 const loginInputRef = useTemplateRef('inputLogin');
@@ -93,31 +97,43 @@ async function onClickOk() {
 
 async function onClickSignIn() {
     state.value.isAllDisabled = true;
+    state.value.apiErrorMessage = '';
+
     const res = await controller.sendRestAuthentication({
-        email: state.value.loginValue,
+        login: state.value.loginValue,
         password: state.value.passwordValue,
     });
-    if (res.ok && [200, 201, 202].includes(res.status)) {
-        await controller.setStoreUserData(res);
+
+    if (res.ok) {
         await router.push('/main');
     } else {
+        // Используем сообщение об ошибке от API
+        state.value.messageLoginError = res.error || props.messageLoginError;
         showLoginError();
     }
+
+    state.value.isAllDisabled = false;
 }
 
 async function onClickCreateAccount() {
     state.value.isAllDisabled = true;
+    state.value.apiErrorMessage = '';
+
     const res = await controller.sendRestRegistration({
         name: state.value.nameValue,
-        email: state.value.loginValue,
+        login: state.value.loginValue,
         password: state.value.passwordValue,
     });
-    if (res.ok && [200, 201, 202].includes(res.status)) {
+
+    if (res.ok) {
         showRegistrationSuccessful();
-        await controller.setStoreUserData(res);
     } else {
+        // Используем сообщение об ошибке от API
+        state.value.messageRegistrationError = res.error || props.messageRegistrationError;
         showRegistrationError();
     }
+
+    state.value.isAllDisabled = false;
 }
 
 function showLoginError() {
@@ -126,7 +142,6 @@ function showLoginError() {
     clearTimeout(state.value.tooltipBigTimeout);
     state.value.tooltipBigTimeout = setTimeout(() => {
         state.value.isErrorLogin = false;
-        state.value.isAllDisabled = false;
     }, 3000);
 }
 
@@ -136,9 +151,8 @@ function showRegistrationError() {
     clearTimeout(state.value.tooltipBigTimeout);
     state.value.tooltipBigTimeout = setTimeout(async () => {
         state.value.isErrorRegistration = false;
-        state.value.isAllDisabled = false;
         await nextTick();
-        loginInputRef.value.focus();
+        loginInputRef.value?.focus();
     }, 3000);
 }
 
@@ -151,7 +165,10 @@ function showRegistrationSuccessful() {
         state.value.isErrorLogin = false;
         state.value.isErrorRegistration = false;
         state.value.isRegister = false;
-        state.value.isAllDisabled = false;
+        // Очищаем поля после успешной регистрации
+        state.value.nameValue = '';
+        state.value.loginValue = '';
+        state.value.passwordValue = '';
     }, 2000);
 }
 
@@ -159,40 +176,45 @@ async function onClickTooltipBig() {
     clearTimeout(state.value.tooltipBigTimeout);
     state.value.isErrorLogin = false;
     state.value.isErrorRegistration = false;
-    state.value.isAllDisabled = false;
     await nextTick();
-    loginInputRef.value.focus();
+    loginInputRef.value?.focus();
 }
 
 function checkValidInputs() {
+    // Валидация логина
     if (!/^[а-яА-ЯёЁa-zA-Z0-9]+$/.test(state.value.loginValue)) {
         state.value.messageInputLoginValidError = 'Login must include letters or numbers';
         state.value.isErrorValidInputLogin = true;
-    } else if (state.value.loginValue.length < 5) {
-        state.value.messageInputLoginValidError = 'Login should be greater than 5 symbols';
+    } else if (state.value.loginValue.length < 3) {
+        state.value.messageInputLoginValidError = 'Login should be at least 3 symbols';
+        state.value.isErrorValidInputLogin = true;
+    } else if (state.value.loginValue.length > 50) {
+        state.value.messageInputLoginValidError = 'Login should be maximum 50 symbols';
         state.value.isErrorValidInputLogin = true;
     } else {
         state.value.messageInputLoginValidError = '';
         state.value.isErrorValidInputLogin = false;
     }
 
+    // Валидация пароля (минимум 6 символов по новому API)
     if (!/^[a-zA-Z0-9]*$/.test(state.value.passwordValue)) {
         state.value.messageInputPSWValidError = 'Password must include only letters and numbers';
         state.value.isErrorValidInputPsw = true;
-    } else if (state.value.passwordValue.length < 5) {
-        state.value.messageInputPSWValidError = 'Password should be greater than 5 symbols';
+    } else if (state.value.passwordValue.length < 6) {
+        state.value.messageInputPSWValidError = 'Password should be at least 6 symbols';
         state.value.isErrorValidInputPsw = true;
     } else {
         state.value.messageInputPSWValidError = '';
         state.value.isErrorValidInputPsw = false;
     }
 
+    // Валидация имени (только для регистрации)
     if (state.value.isRegister) {
-        if (!/^[а-яА-ЯёЁa-zA-Z0-9]+$/.test(state.value.nameValue)) {
-            state.value.messageInputNameValidError = 'Name must include letters or numbers';
+        if (!/^[а-яА-ЯёЁa-zA-Z0-9\s]+$/.test(state.value.nameValue)) {
+            state.value.messageInputNameValidError = 'Name must include letters, numbers or spaces';
             state.value.isErrorValidInputName = true;
-        } else if (state.value.nameValue.length < 3) {
-            state.value.messageInputNameValidError = 'Name should be greater than 3 symbols';
+        } else if (state.value.nameValue.length < 2) {
+            state.value.messageInputNameValidError = 'Name should be at least 2 symbols';
             state.value.isErrorValidInputName = true;
         } else {
             state.value.messageInputNameValidError = '';
@@ -254,7 +276,7 @@ function hiddenTooltip() {
                         :class="{ invalid: state.isErrorRegistration }"
                         @click.prevent="onClickTooltipBig"
                     >
-                        {{ props.messageRegistrationError }}
+                        {{ state.messageRegistrationError }}
                     </div>
                 </div>
                 <div class="input-container">
@@ -292,7 +314,7 @@ function hiddenTooltip() {
                         :class="{ invalid: state.isErrorLogin }"
                         @click.prevent="onClickTooltipBig"
                     >
-                        {{ props.messageLoginError }}
+                        {{ state.messageLoginError }}
                     </div>
                     <div
                         class="tooltip tooltipBig"
@@ -324,6 +346,7 @@ function hiddenTooltip() {
 </template>
 
 <style scoped>
+/* Стили остаются без изменений */
 .background-container {
     position: fixed;
     background-color: rgba(47, 46, 46, 0.7);

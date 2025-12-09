@@ -4,7 +4,7 @@ import MainPageView from '@/view/MainPageView.vue';
 import AccountView from '@/view/AccountView.vue';
 import AnalyticsView from '@/view/AnalyticsView.vue';
 import SettingsView from '@/view/SettingsView.vue';
-import useAuthStore from '@/store/auth';
+import { useAuthStore } from '@/store/auth.js';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,20 +54,35 @@ const router = createRouter({
     ],
 });
 
-router.beforeEach(async (to) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
 
-    if (to.meta.requiresAuth && !authStore.state.isAuthenticated && to.name !== 'home') {
-        return { name: 'home' };
+    // Проверяем аутентификацию при каждом переходе
+    const isAuthenticated = authStore.isAuth;
+
+    // Если маршрут требует аутентификации и пользователь не аутентифицирован
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        // Перенаправляем на домашнюю страницу
+        next({ name: 'home' });
+        return;
     }
 
-    if (to.meta.requiresAuth && authStore.state.isAuthenticated && to.name === 'main') {
-        return { name: 'account' };
+    // Если пользователь аутентифицирован и пытается зайти на домашнюю страницу
+    if (isAuthenticated && to.name === 'home') {
+        // Перенаправляем на аккаунт
+        next({ name: 'account' });
+        return;
     }
 
-    if (authStore.state.isAuthenticated && to.name === 'home') {
-        return { name: 'account' };
+    // Если пользователь на главной странице (/main) и аутентифицирован
+    if (to.name === 'main' && isAuthenticated) {
+        // Перенаправляем на аккаунт (первый дочерний маршрут)
+        next({ name: 'account' });
+        return;
     }
+
+    // Во всех остальных случаях разрешаем переход
+    next();
 });
 
 export default router;
