@@ -122,10 +122,7 @@ export class AuthService {
                 message: 'Успешный выход из системы',
             };
         } catch (error) {
-            // Даже если сервер вернул ошибку, очищаем токен локально
             apiService.clearAuthToken();
-
-            console.error('Ошибка при выходе из системы:', error);
 
             return {
                 ok: false,
