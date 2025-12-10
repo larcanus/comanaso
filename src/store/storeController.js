@@ -1,8 +1,9 @@
-import { useAuthStore } from '@/store/auth.js';
-import { useUserStore } from '@/store/user.js';
+import useAuthStore from '@/store/auth.js';
+import useUserStore from '@/store/user.js';
 import { useAccountStore } from '@/store/account.js';
 import { useDialogStore } from '@/store/dialogs.js';
 import { useToastStore } from '@/store/toast.js';
+import localStorageUtils from '@/store/localStorage.js';
 
 /**
  * Контроллер для инициализации и управления всеми stores
@@ -19,18 +20,22 @@ export async function logInAllStore(userData) {
             throw new Error('Неверный формат данных пользователя');
         }
 
-        // Устанавливаем данные пользователя
+        // Устанавливаем данные аутентификации в store
+        authStore.setAuthData({
+            token: userData.token,
+            user: userData.user,
+        });
+
+        // Устанавливаем данные пользователя в store
         userStore.setUserData({
             id: userData.user.id,
             fullName: userData.user.name || userData.user.login,
             avatar: userData.user.avatar || '',
         });
 
-        // Устанавливаем данные аутентификации
-        authStore.setAuthData({
-            token: userData.token,
-            user: userData.user,
-        });
+        // Сохраняем в localStorage
+        localStorageUtils.setAuthToken(userData.token);
+        localStorageUtils.setUserData(userData.user);
 
         // Показываем уведомление об успешном входе
         toastStore.addToast({
@@ -73,6 +78,9 @@ export async function logoutAllStore() {
         userStore.clearUser();
         accountStore.clearAccounts();
         dialogsStore.$reset();
+
+        // Очищаем localStorage
+        localStorageUtils.clearLocalStorage();
 
         // Показываем уведомление
         toastStore.addToast({

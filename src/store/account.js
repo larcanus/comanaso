@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { isRef, ref } from 'vue';
+import { ref, computed } from 'vue';
 import {
     deleteAccountLocalStore,
     setAccountLocalStore,
@@ -18,63 +18,64 @@ export const useAccountStore = defineStore('account', () => {
         errorMessage: '',
     };
 
+    // State
     const state = ref({});
 
+    // Actions
     function setAccountsDataFromLocalStore(accountsData) {
         if (accountsData) {
-            this.state = accountsData;
+            state.value = accountsData;
         }
     }
 
     async function setAccountData(accountData) {
-        this.state[accountData.id] = validate({
+        state.value[accountData.id] = validate({
             ...defaultStateModel,
             ...accountData,
         });
-        await setAccountLocalStore(this.state);
+        await setAccountLocalStore(state.value);
 
-        return { ...this.state[accountData.id] };
+        return { ...state.value[accountData.id] };
     }
 
     async function deleteAccountData(id) {
-        delete this.state[id];
-        await deleteAccountLocalStore(this.state);
+        delete state.value[id];
+        await deleteAccountLocalStore(state.value);
 
-        return { ...this.state };
+        return { ...state.value };
     }
 
     async function updateAccountData(accountData) {
-        const existingAccountData = state[accountData.id];
-        this.state[accountData.id] = validate({
+        const existingAccountData = state.value[accountData.id];
+        state.value[accountData.id] = validate({
             ...defaultStateModel,
             ...existingAccountData,
             ...accountData,
         });
-        await updateAccountLocalStore(this.state);
+        await updateAccountLocalStore(state.value);
 
-        return { ...this.state[accountData.id] };
-    }
-
-    function getCollectionId() {
-        return Object.keys(this.state);
-    }
-
-    function getById(id) {
-        return { ...this.state[id] };
+        return { ...state.value[accountData.id] };
     }
 
     async function changeStatus(id, status, errorMessage = null) {
-        this.state[id].status = status;
-        this.state[id].errorMessage = errorMessage;
-        await updateAccountLocalStore(this.state);
+        if (state.value[id]) {
+            state.value[id].status = status;
+            state.value[id].errorMessage = errorMessage;
+            await updateAccountLocalStore(state.value);
+        }
 
         return { id, status, errorMessage };
     }
 
-    function $reset() {
-        this.state = {};
+    function getById(id) {
+        return state.value[id] ? { ...state.value[id] } : null;
     }
 
+    function clearAccounts() {
+        state.value = {};
+    }
+
+    // Вспомогательная функция для валидации полей аккаунта
     function validate(fields) {
         const preparedFields = {};
         Object.keys(fields).forEach((key) => {
@@ -90,16 +91,38 @@ export const useAccountStore = defineStore('account', () => {
         return preparedFields;
     }
 
+    // Getters (computed)
+    const accountIds = computed(() => Object.keys(state.value));
+    const accounts = computed(() => Object.values(state.value));
+    const accountsCount = computed(() => Object.keys(state.value).length);
+    const hasAccounts = computed(() => Object.keys(state.value).length > 0);
+    const onlineAccounts = computed(() =>
+        Object.values(state.value).filter(acc => acc.status === 'online')
+    );
+    const offlineAccounts = computed(() =>
+        Object.values(state.value).filter(acc => acc.status === 'offline')
+    );
+
     return {
+        // State
         state,
-        $reset,
-        getCollectionId,
+
+        // Actions
         setAccountsDataFromLocalStore,
         setAccountData,
         deleteAccountData,
         updateAccountData,
-        getById,
         changeStatus,
+        getById,
+        clearAccounts,
+
+        // Getters
+        accountIds,
+        accounts,
+        accountsCount,
+        hasAccounts,
+        onlineAccounts,
+        offlineAccounts,
     };
 });
 

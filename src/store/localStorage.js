@@ -131,7 +131,7 @@ async function setAuthTokenToStore() {
 
         // TODO: Здесь будет запрос на сервер для отключения всех аккаунтов
         const accStore = useAccountStore();
-        const accountIds = accStore.getCollectionId();
+        const accountIds = accStore.accountIds;
         console.log('Accounts to disconnect:', accountIds);
 
         await logoutAllStore();

@@ -1,32 +1,57 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
-    const defaultStateModel = {
-        id: 0,
-        fullName: 'Name',
-        avatar: '',
-    };
+    // State
+    const id = ref(null);
+    const fullName = ref('');
+    const avatar = ref('');
 
-    const state = ref(defaultStateModel);
-
-    function setUserData(user) {
-        this.state = user;
+    // Actions
+    function setUserData(userData) {
+        if (userData.id !== undefined) id.value = userData.id;
+        if (userData.fullName !== undefined) fullName.value = userData.fullName;
+        if (userData.avatar !== undefined) avatar.value = userData.avatar;
     }
 
     function updateUserFullName(name) {
-        this.state.fullName = name;
+        fullName.value = name;
     }
 
-    function setAvatar(avatar) {
-        this.state.avatar = avatar;
+    function setAvatar(avatarUrl) {
+        avatar.value = avatarUrl;
     }
 
-    function $reset() {
-        this.state = defaultStateModel;
+    function clearUser() {
+        id.value = null;
+        fullName.value = '';
+        avatar.value = '';
     }
 
-    return { state, $reset, setUserData, setAvatar, updateUserFullName };
+    // Getters (computed)
+    const userId = computed(() => id.value);
+    const userName = computed(() => fullName.value);
+    const userAvatar = computed(() => avatar.value);
+    const hasUser = computed(() => id.value !== null);
+
+    return {
+        // State
+        id,
+        fullName,
+        avatar,
+
+        // Actions
+        setUserData,
+        updateUserFullName,
+        setAvatar,
+        clearUser,
+
+        // Getters
+        userId,
+        userName,
+        userAvatar,
+        hasUser,
+    };
 });
 
 export default useUserStore;
