@@ -70,7 +70,6 @@ export async function logoutAllStore() {
     const userStore = useUserStore();
     const accountStore = useAccountStore();
     const dialogsStore = useDialogStore();
-    const toastStore = useToastStore();
 
     try {
         // Очищаем все stores
@@ -82,16 +81,17 @@ export async function logoutAllStore() {
         // Очищаем localStorage
         localStorageUtils.clearLocalStorage();
 
-        // Показываем уведомление
-        toastStore.addToast({
-            message: 'Вы вышли из системы',
-            type: 'info',
-            duration: 3000,
-        });
+        console.log('=== logoutAllStore: все данные очищены ===');
 
         return true;
     } catch (error) {
-        console.error('Ошибка при выходе из системы:', error);
+        // В случае ошибки всё равно пытаемся очистить localStorage
+        try {
+            localStorageUtils.clearLocalStorage();
+        } catch (e) {
+            console.error('Не удалось очистить localStorage:', e, error);
+        }
+
         return false;
     }
 }

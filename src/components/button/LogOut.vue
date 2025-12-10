@@ -1,15 +1,28 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { logoutAllStore } from '@/store/storeController.js';
-import { fullDisconnectClient, logOut } from '@/utils/connection.js';
+import { authService } from '@/services/auth.service.js';
+
 const router = useRouter();
 
 async function onClickContainer() {
-    const resultLogout = await logOut();
-    console.log('logout --->', resultLogout);
-    // await fullDisconnectClient();
-    logoutAllStore();
-    await router.replace({ name: 'home' });
+    try {
+        // Выполняем выход на сервере
+        const result = await authService.logout();
+        console.log('logout result:', result);
+
+        // Очищаем все stores и localStorage
+        await logoutAllStore();
+
+        // Перенаправляем на главную страницу
+        await router.replace({ name: 'home' });
+    } catch (error) {
+        console.error('Ошибка при выходе:', error);
+
+        // Даже при ошибке очищаем локальные данные
+        await logoutAllStore();
+        await router.replace({ name: 'home' });
+    }
 }
 </script>
 

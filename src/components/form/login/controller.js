@@ -11,9 +11,7 @@ export class Controller {
      */
     async sendRestAuthentication({ login, password }) {
         try {
-            console.log('sendRestAuthentication 1', login, password);
             const data = await authService.login({ login, password });
-            console.log('sendRestAuthentication data', data);
             // Сохраняем данные пользователя в store
             await this.setStoreUserData(data);
 

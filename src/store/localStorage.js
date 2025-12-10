@@ -211,6 +211,7 @@ function setAccountData(accountData) {
 }
 
 function clearLocalStorage() {
+    console.log('clearLocalStorage');
     safeRemoveItem(TOKEN_KEY);
     safeRemoveItem(USER_KEY);
     safeRemoveItem(ACC_KEY);

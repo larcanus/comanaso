@@ -105,9 +105,33 @@ export class AuthService {
 
     /**
      * Выход из системы
+     * @returns {Promise<Object>} Результат выхода
      */
-    logout() {
-        apiService.clearAuthToken();
+    async logout() {
+        try {
+            // Отправляем запрос на сервер для инвалидации токена
+            await apiService.authRequest('/auth/logout', {
+                method: 'POST',
+            });
+
+            // Очищаем токен локально
+            apiService.clearAuthToken();
+
+            return {
+                ok: true,
+                message: 'Успешный выход из системы',
+            };
+        } catch (error) {
+            // Даже если сервер вернул ошибку, очищаем токен локально
+            apiService.clearAuthToken();
+
+            console.error('Ошибка при выходе из системы:', error);
+
+            return {
+                ok: false,
+                error: error.message || 'Ошибка при выходе из системы',
+            };
+        }
     }
 
     /**
