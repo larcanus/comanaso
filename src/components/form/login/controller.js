@@ -1,6 +1,5 @@
 import { logInAllStore } from '@/store/storeController.js';
 import { authService } from '@/services/auth.service.js';
-import { popScopeId } from 'vue';
 
 export class Controller {
     /**

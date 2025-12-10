@@ -47,7 +47,7 @@ function onMenuClick() {
             </div>
             <div class="user-info">
                 <img src="@/assets/empty-avatar.png" alt="User Avatar" class="avatar" />
-                <h2 class="user-name">{{ store.state.fullName }}</h2>
+                <h2 class="user-name">{{ store.fullName }}</h2>
             </div>
             <nav class="navigation">
                 <button

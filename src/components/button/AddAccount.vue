@@ -7,7 +7,7 @@ const toastStore = useToastStore();
 const LIMIT_ACCOUNT_TEXT = 'Сейчас доступно создание только одного аккаунта';
 
 function onClickDiv() {
-    const ids = accStore.getCollectionId();
+    const ids = accStore.accountIds;
     if (ids.length >= 1) {
         toastStore.addToast('error', LIMIT_ACCOUNT_TEXT);
         return;

@@ -5,7 +5,7 @@ import AccountCard from '@/components/account/AccountCard.vue';
 import useAccountStore from '@/store/account.js';
 
 const accStore = useAccountStore();
-const accountIds = accStore.getCollectionId();
+const accountIds = accStore.accountIds;
 const state = reactive({
     valueInput: '',
     accounts: accountIds || [],
@@ -14,7 +14,7 @@ const state = reactive({
 accStore.$onAction(({ name, after }) => {
     after(() => {
         if (name === 'setAccountData' || name === 'deleteAccountData') {
-            state.accounts = accStore.getCollectionId();
+            state.accounts = accStore.accountIds;
         }
     });
 });
