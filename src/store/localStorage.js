@@ -1,8 +1,8 @@
 import { logoutAllStore } from '@/store/storeController.js';
 import router from '@/router/index.js';
 
-import useAuthStore from '@/store/auth';
-import useUserStore from '@/store/user';
+import { useAuthStore } from '@/store/auth';
+import { useUserStore } from '@/store/user';
 import useAccountStore from '@/store/account.js';
 
 const TOKEN_KEY = 'auth_token';
@@ -134,7 +134,7 @@ async function setAuthTokenToStore() {
         const accountIds = accStore.getCollectionId();
         console.log('Accounts to disconnect:', accountIds);
 
-        logoutAllStore();
+        await logoutAllStore();
     }
 }
 

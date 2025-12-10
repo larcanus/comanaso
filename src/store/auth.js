@@ -3,10 +3,31 @@ import { authService } from '@/services/auth.service.js';
 import { ref, computed } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
+    // Безопасное чтение из localStorage
+    const getFromLocalStorage = (key, defaultValue = null) => {
+        try {
+            const value = localStorage.getItem(key);
+            return value || defaultValue;
+        } catch (e) {
+            console.warn(`localStorage недоступен для ключа ${key}:`, e);
+            return defaultValue;
+        }
+    };
+
+    const getJsonFromLocalStorage = (key, defaultValue = null) => {
+        try {
+            const value = localStorage.getItem(key);
+            return value ? JSON.parse(value) : defaultValue;
+        } catch (e) {
+            console.warn(`localStorage недоступен для ключа ${key}:`, e);
+            return defaultValue;
+        }
+    };
+
     // State
-    const token = ref(localStorage.getItem('auth_token') || null);
-    const isAuth = ref(!!localStorage.getItem('auth_token'));
-    const user = ref(JSON.parse(localStorage.getItem('auth_user') || 'null'));
+    const token = ref(getFromLocalStorage('auth_token', null));
+    const isAuth = ref(!!getFromLocalStorage('auth_token'));
+    const user = ref(getJsonFromLocalStorage('auth_user', null));
     const isLoading = ref(false);
     const error = ref(null);
 
@@ -18,8 +39,12 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null;
 
         // Сохраняем в localStorage
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('auth_user', JSON.stringify(data.user));
+        try {
+            localStorage.setItem('auth_token', data.token);
+            localStorage.setItem('auth_user', JSON.stringify(data.user));
+        } catch (e) {
+            console.warn('Не удалось сохранить данные в localStorage:', e);
+        }
 
         // Устанавливаем токен в сервисе
         authService.setToken(data.token);
@@ -32,8 +57,12 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null;
 
         // Очищаем localStorage
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_user');
+        try {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+        } catch (e) {
+            console.warn('Не удалось очистить localStorage:', e);
+        }
 
         // Очищаем токен в сервисе
         authService.logout();
@@ -54,7 +83,11 @@ export const useAuthStore = defineStore('auth', () => {
                 // Обновляем данные пользователя если нужно
                 if (result.user && result.user.id !== user.value?.id) {
                     user.value = { ...user.value, ...result.user };
-                    localStorage.setItem('auth_user', JSON.stringify(user.value));
+                    try {
+                        localStorage.setItem('auth_user', JSON.stringify(user.value));
+                    } catch (e) {
+                        console.warn('Не удалось обновить данные пользователя в localStorage:', e);
+                    }
                 }
 
                 isAuth.value = true;

@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import { computed, nextTick, ref } from 'vue';
+import { computed, ref } from 'vue';
 import FooterSection from '@/components/front-page-section/FooterSection.vue';
 import { useUserStore } from '@/store/user';
 import LogOut from '@/components/button/LogOut.vue';

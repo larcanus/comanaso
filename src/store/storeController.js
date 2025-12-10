@@ -9,43 +9,28 @@ import { useToastStore } from '@/store/toast.js';
  */
 export async function logInAllStore(userData) {
     try {
-        console.log('=== logInAllStore START ===');
+        console.log('=== logInAllStore START ===', userData);
 
         const authStore = useAuthStore();
         const userStore = useUserStore();
         const toastStore = useToastStore();
 
-        console.log('authStore object:', authStore);
-        console.log('authStore methods:', Object.keys(authStore));
-        console.log('setAuthData exists?', 'setAuthData' in authStore);
-        console.log('setAuthData in _p?', authStore._p?.setAuthData);
-        console.log('setAuthData type:', typeof authStore.setAuthData);
-
-        // Проверяем структуру userData
-        console.log('userData:', userData);
-        console.log('userData.token:', userData?.token);
-        console.log('userData.user:', userData?.user);
-
-        // Устанавливаем данные аутентификации
-        if (typeof authStore.setAuthData === 'function') {
-            authStore.setAuthData({
-                token: userData.token,
-                user: userData.user,
-            });
-        } else {
-            throw new Error('setAuthData is not a function in authStore');
+        if (!userData?.token || !userData?.user) {
+            throw new Error('Неверный формат данных пользователя');
         }
 
         // Устанавливаем данные пользователя
-        if (userData.user) {
-            userStore.setUser({
-                id: userData.user.id,
-                username: userData.user.login,
-                email: userData.user.login, // Для совместимости
-                name: userData.user.login,
-                createdAt: userData.user.createdAt,
-            });
-        }
+        userStore.setUserData({
+            id: userData.user.id,
+            fullName: userData.user.name || userData.user.login,
+            avatar: userData.user.avatar || '',
+        });
+
+        // Устанавливаем данные аутентификации
+        authStore.setAuthData({
+            token: userData.token,
+            user: userData.user,
+        });
 
         // Показываем уведомление об успешном входе
         toastStore.addToast({
