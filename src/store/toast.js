@@ -16,6 +16,10 @@ export const useToastStore = defineStore('toast', () => {
         return { type, text, id: toastId };
     }
 
+    function removeToast(toast) {
+        state.value = state.value.filter((item) => item.id !== toast.id);
+    }
+
     function hiddenToastHandler(id, state) {
         setTimeout(() => {
             state.value = state.value.filter((item) => {
@@ -24,7 +28,7 @@ export const useToastStore = defineStore('toast', () => {
         }, TOAST_TIME);
     }
 
-    return { state, addToast };
+    return { state, addToast, removeToast };
 });
 
 export default useToastStore;

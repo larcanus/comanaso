@@ -33,7 +33,7 @@ function getImagePath(type) {
                 <TransitionGroup name="toast" tag="ul">
                     <li
                         v-for="toast in state.toasts"
-                        :key="toast.text"
+                        :key="toast.id"
                         class="toast"
                         :class="`toast-type-${toast.type}`"
                     >
