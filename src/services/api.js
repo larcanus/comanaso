@@ -58,6 +58,20 @@ class ApiService {
                 };
             }
 
+            // Обработка ответов без тела (204 No Content, 205 Reset Content)
+            if (response.status === 204 || response.status === 205) {
+                return null;
+            }
+
+            // Проверка наличия контента в ответе
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // Если ответ не JSON, но статус успешный
+                if (response.status >= 200 && response.status < 300) {
+                    return null;
+                }
+            }
+
             return await response.json();
         } catch (error) {
             if (error.name === 'AbortError') {
