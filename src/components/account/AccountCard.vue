@@ -19,6 +19,8 @@ const LOC_TOAST_CONNECT_ERROR = 'Ошибка подключения';
 const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент подключен к аккаунту!';
 const LOC_TOAST_SUCCESS_CONNECT = 'Аккаунт успешно подключен!';
 const LOC_TOAST_SUCCESS_DISCONNECT = 'Аккаунт отключен';
+const LOC_TOAST_SUCCESS_UPDATE = 'Данные аккаунта обновлены';
+const LOC_TOAST_SUCCESS_DELETE = 'Аккаунт удален';
 
 const state = reactive({
     ...{
@@ -38,14 +40,6 @@ const state = reactive({
     ...accountData,
 });
 
-// onBeforeMount(async () => {
-//     await checkClient();
-// });
-
-// async function checkClient() {
-//     console.log('checkClient client.connected:');
-// }
-
 accountStore.$onAction(({ name, after }) => {
     after((result) => {
         if (name === 'changeStatus' && result.id === state.id) {
@@ -60,18 +54,37 @@ accountStore.$onAction(({ name, after }) => {
     });
 });
 
-function onClickSave() {
-    state.isEdit = !state.isEdit;
-    const newStateAccount = { ...state };
-    accountStore.updateAccountData(newStateAccount);
+async function onClickSave() {
+    try {
+        // Сохраняем изменения на сервере
+        await accountStore.updateAccountData({
+            id: state.id,
+            name: state.name,
+            apiId: state.apiId,
+            apiHash: state.apiHash,
+        });
+
+        state.isEdit = false;
+        toastStore.addToast('ok', LOC_TOAST_SUCCESS_UPDATE);
+    } catch (error) {
+        console.error('Update account error:', error);
+        toastStore.addToast('error', error.userMessage || 'Ошибка обновления аккаунта');
+    }
 }
 
 function onClickEdit() {
     state.isEdit = !state.isEdit;
 }
 
-function onClickDelete() {
-    accountStore.deleteAccountData(state.id);
+async function onClickDelete() {
+    try {
+        // Удаляем аккаунт на сервере
+        await accountStore.deleteAccountData(state.id);
+        toastStore.addToast('ok', LOC_TOAST_SUCCESS_DELETE);
+    } catch (error) {
+        console.error('Delete account error:', error);
+        toastStore.addToast('error', error.userMessage || 'Ошибка удаления аккаунта');
+    }
 }
 
 async function onClickStart() {
@@ -138,7 +151,6 @@ async function onClickStart() {
 }
 
 async function onClickDisconnect() {
-    // TODO: Здесь будет запрос на сервер для отключения аккаунта
     try {
         await accountStore.changeStatus(state.id, 'offline');
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_DISCONNECT);

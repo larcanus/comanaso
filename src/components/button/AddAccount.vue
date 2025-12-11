@@ -2,23 +2,28 @@
 import imagePlusPath from '@/assets/plus.png';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
+
 const accStore = useAccountStore();
 const toastStore = useToastStore();
+
 const LIMIT_ACCOUNT_TEXT = 'Сейчас доступно создание только одного аккаунта';
 
-function onClickDiv() {
+async function onClickDiv() {
     const ids = accStore.accountIds;
     if (ids.length >= 1) {
         toastStore.addToast('error', LIMIT_ACCOUNT_TEXT);
         return;
     }
 
-    let id = 1;
-    if (ids.length > 0) {
-        id = ++ids.sort()[ids.length - 1];
-    }
+    try {
+        // Создаем аккаунт с базовыми данными
+        await accStore.setAccountData();
 
-    accStore.setAccountData({ id });
+        toastStore.addToast('ok', 'Аккаунт создан. Заполните данные для подключения');
+    } catch (error) {
+        console.error('Create account error:', error);
+        toastStore.addToast('error', error.userMessage || 'Ошибка создания аккаунта');
+    }
 }
 </script>
 

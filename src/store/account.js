@@ -5,21 +5,26 @@ import {
     setAccountLocalStore,
     updateAccountLocalStore,
 } from '@/store/storeController.js';
+import { accountService } from '@/services/account.service.js';
 
 export const useAccountStore = defineStore('account', () => {
     const defaultStateModel = {
         id: 0,
         name: '',
         entity: '',
-        apiId: 27151307,
-        apiHash: 'ff9d24b00baaa16907c31afdbe318fd7',
-        phoneNumber: '+79056002730',
+        apiId: 11111111,
+        apiHash: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        phoneNumber: '+79001002020',
         status: 'offline', // 'offline' 'connect' 'online' 'error'
         errorMessage: '',
+        createdAt: '',
+        updatedAt: '',
     };
 
     // State
     const state = ref({});
+    const isLoading = ref(false);
+    const error = ref(null);
 
     // Actions
     function setAccountsDataFromLocalStore(accountsData) {
@@ -28,35 +33,136 @@ export const useAccountStore = defineStore('account', () => {
         }
     }
 
+    /**
+     * Загрузить все аккаунты с сервера
+     */
+    async function loadAccountsFromServer() {
+        isLoading.value = true;
+        error.value = null;
+
+        try {
+            const accounts = await accountService.getAccounts();
+
+            // Преобразуем массив в объект с ключами по id
+            const accountsObject = {};
+            accounts.forEach((account) => {
+                accountsObject[account.id] = validate({
+                    ...defaultStateModel,
+                    ...account,
+                });
+            });
+
+            state.value = accountsObject;
+            await setAccountLocalStore(state.value);
+
+            return accountsObject;
+        } catch (err) {
+            error.value = err.userMessage || err.message;
+            throw err;
+        } finally {
+            isLoading.value = false;
+        }
+    }
+
+    /**
+     * Создать новый аккаунт на сервере
+     */
     async function setAccountData(accountData) {
-        state.value[accountData.id] = validate({
+        isLoading.value = true;
+        error.value = null;
+
+        const newAccData = validate({
             ...defaultStateModel,
             ...accountData,
         });
-        await setAccountLocalStore(state.value);
 
-        return { ...state.value[accountData.id] };
+        try {
+            // Отправляем на сервер
+            const createdAccount = await accountService.createAccount(newAccData);
+
+            // Сохраняем в локальное состояние
+            state.value[createdAccount.id] = validate({
+                ...defaultStateModel,
+                ...createdAccount,
+            });
+
+            await setAccountLocalStore(state.value);
+
+            return { ...state.value[createdAccount.id] };
+        } catch (err) {
+            error.value = err.userMessage || err.message;
+            throw err;
+        } finally {
+            isLoading.value = false;
+        }
     }
 
+    /**
+     * Удалить аккаунт на сервере
+     */
     async function deleteAccountData(id) {
-        delete state.value[id];
-        await deleteAccountLocalStore(state.value);
+        isLoading.value = true;
+        error.value = null;
 
-        return { ...state.value };
+        try {
+            // Удаляем на сервере
+            await accountService.deleteAccount(id);
+
+            // Удаляем из локального состояния
+            delete state.value[id];
+            await deleteAccountLocalStore(state.value);
+
+            return { ...state.value };
+        } catch (err) {
+            error.value = err.userMessage || err.message;
+            throw err;
+        } finally {
+            isLoading.value = false;
+        }
     }
 
+    /**
+     * Обновить данные аккаунта на сервере
+     */
     async function updateAccountData(accountData) {
-        const existingAccountData = state.value[accountData.id];
-        state.value[accountData.id] = validate({
-            ...defaultStateModel,
-            ...existingAccountData,
-            ...accountData,
-        });
-        await updateAccountLocalStore(state.value);
+        isLoading.value = true;
+        error.value = null;
 
-        return { ...state.value[accountData.id] };
+        try {
+            // Подготавливаем данные для обновления (только измененные поля)
+            const updateData = {};
+            if (accountData.name !== undefined) updateData.name = accountData.name;
+            if (accountData.apiId !== undefined) updateData.apiId = accountData.apiId;
+            if (accountData.apiHash !== undefined) updateData.apiHash = accountData.apiHash;
+
+            // Отправляем на сервер
+            const updatedAccount = await accountService.updateAccount(
+                accountData.id,
+                updateData
+            );
+
+            // Обновляем локальное состояние
+            const existingAccountData = state.value[accountData.id];
+            state.value[accountData.id] = validate({
+                ...defaultStateModel,
+                ...existingAccountData,
+                ...updatedAccount,
+            });
+
+            await updateAccountLocalStore(state.value);
+
+            return { ...state.value[accountData.id] };
+        } catch (err) {
+            error.value = err.userMessage || err.message;
+            throw err;
+        } finally {
+            isLoading.value = false;
+        }
     }
 
+    /**
+     * Изменить статус аккаунта (только локально, без сервера)
+     */
     async function changeStatus(id, status, errorMessage = null) {
         if (state.value[id]) {
             state.value[id].status = status;
@@ -97,18 +203,21 @@ export const useAccountStore = defineStore('account', () => {
     const accountsCount = computed(() => Object.keys(state.value).length);
     const hasAccounts = computed(() => Object.keys(state.value).length > 0);
     const onlineAccounts = computed(() =>
-        Object.values(state.value).filter(acc => acc.status === 'online')
+        Object.values(state.value).filter((acc) => acc.status === 'online')
     );
     const offlineAccounts = computed(() =>
-        Object.values(state.value).filter(acc => acc.status === 'offline')
+        Object.values(state.value).filter((acc) => acc.status === 'offline')
     );
 
     return {
         // State
         state,
+        isLoading,
+        error,
 
         // Actions
         setAccountsDataFromLocalStore,
+        loadAccountsFromServer,
         setAccountData,
         deleteAccountData,
         updateAccountData,
