@@ -62,6 +62,7 @@ async function onClickSave() {
             name: state.name,
             apiId: state.apiId,
             apiHash: state.apiHash,
+            phoneNumber: state.phoneNumber,
         });
 
         state.isEdit = false;

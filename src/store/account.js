@@ -136,11 +136,12 @@ export const useAccountStore = defineStore('account', () => {
         error.value = null;
 
         try {
-            // Подготавливаем данные для обновления (только измененные поля)
             const updateData = {};
             if (accountData.name !== undefined) updateData.name = accountData.name;
             if (accountData.apiId !== undefined) updateData.apiId = accountData.apiId;
             if (accountData.apiHash !== undefined) updateData.apiHash = accountData.apiHash;
+            if (accountData.phoneNumber !== undefined)
+                updateData.phoneNumber = accountData.phoneNumber;
 
             // Отправляем на сервер
             const updatedAccount = await accountService.updateAccount(accountData.id, updateData);
