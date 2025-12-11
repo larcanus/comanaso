@@ -10,11 +10,11 @@ export class AccountService {
      */
     async getAccounts() {
         try {
-            const accounts = await apiService.authRequest('/accounts', {
+            const response = await apiService.authRequest('/accounts', {
                 method: 'GET',
             });
 
-            return accounts;
+            return response?.accounts;
         } catch (error) {
             console.error('Get accounts error:', error);
 

@@ -1,19 +1,38 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, onMounted } from 'vue';
 import AddAccount from '@/components/button/AddAccount.vue';
 import AccountCard from '@/components/account/AccountCard.vue';
 import useAccountStore from '@/store/account.js';
+import useToastStore from '@/store/toast.js';
+import Toast from '@/components/toast/Toast.vue';
 
 const accStore = useAccountStore();
+const toastStore = useToastStore();
 const accountIds = accStore.accountIds;
 const state = reactive({
     valueInput: '',
     accounts: accountIds || [],
+    isInitialLoad: true,
+});
+
+// Загружаем данные при монтировании компонента
+onMounted(async () => {
+    if (state.isInitialLoad) {
+        state.isInitialLoad = false;
+        try {
+            console.log('account onMounted');
+            await accStore.loadAccountsFromServer();
+            state.accounts = accStore.accountIds;
+        } catch (error) {
+            console.error('Failed to load accounts on mount:', error);
+            toastStore.addToast('error', error.userMessage || 'Не удалось загрузить аккаунты');
+        }
+    }
 });
 
 accStore.$onAction(({ name, after }) => {
     after(() => {
-        if (name === 'setAccountData' || name === 'deleteAccountData') {
+        if (name === 'setAccountData' || name === 'deleteAccountData' || name === 'loadAccountsFromServer') {
             state.accounts = accStore.accountIds;
         }
     });
@@ -27,13 +46,18 @@ accStore.$onAction(({ name, after }) => {
             <p>Здесь отображается основная информация ваших аккаунтов и их состоянии.</p>
         </div>
 
-        <div class="accounts-container">
+        <div v-if="accStore.isLoading" class="loading-container">
+            <p>Загрузка аккаунтов...</p>
+        </div>
+
+        <div v-else class="accounts-container">
             <div v-for="account of state.accounts" :key="account">
                 <AccountCard v-bind="{ account }" />
             </div>
             <AddAccount />
         </div>
     </div>
+    <Toast />
 </template>
 
 <style scoped>
@@ -60,5 +84,14 @@ accStore.$onAction(({ name, after }) => {
 p,
 h1 {
     color: #e3e2e2;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    color: #e3e2e2;
+    font-size: 18px;
 }
 </style>

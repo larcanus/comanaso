@@ -35,14 +35,21 @@ export const useAccountStore = defineStore('account', () => {
 
     /**
      * Загрузить все аккаунты с сервера
+     * @param {boolean} force - Принудительная загрузка даже если уже идет запрос
      */
-    async function loadAccountsFromServer() {
+    async function loadAccountsFromServer(force = false) {
+        // Если уже загружаем и не форсируем - пропускаем
+        if (isLoading.value && !force) {
+            console.log('Accounts are already loading, skipping...');
+            return state.value;
+        }
+
         isLoading.value = true;
         error.value = null;
 
         try {
             const accounts = await accountService.getAccounts();
-
+            console.log('accounts',accounts);
             // Преобразуем массив в объект с ключами по id
             const accountsObject = {};
             accounts.forEach((account) => {
