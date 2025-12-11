@@ -49,7 +49,7 @@ export const useAccountStore = defineStore('account', () => {
 
         try {
             const accounts = await accountService.getAccounts();
-            console.log('accounts',accounts);
+            console.log('accounts', accounts);
             // Преобразуем массив в объект с ключами по id
             const accountsObject = {};
             accounts.forEach((account) => {
@@ -143,10 +143,7 @@ export const useAccountStore = defineStore('account', () => {
             if (accountData.apiHash !== undefined) updateData.apiHash = accountData.apiHash;
 
             // Отправляем на сервер
-            const updatedAccount = await accountService.updateAccount(
-                accountData.id,
-                updateData
-            );
+            const updatedAccount = await accountService.updateAccount(accountData.id, updateData);
 
             // Обновляем локальное состояние
             const existingAccountData = state.value[accountData.id];

@@ -20,7 +20,6 @@ onMounted(async () => {
     if (state.isInitialLoad) {
         state.isInitialLoad = false;
         try {
-            console.log('account onMounted');
             await accStore.loadAccountsFromServer();
             state.accounts = accStore.accountIds;
         } catch (error) {
@@ -32,7 +31,11 @@ onMounted(async () => {
 
 accStore.$onAction(({ name, after }) => {
     after(() => {
-        if (name === 'setAccountData' || name === 'deleteAccountData' || name === 'loadAccountsFromServer') {
+        if (
+            name === 'setAccountData' ||
+            name === 'deleteAccountData' ||
+            name === 'loadAccountsFromServer'
+        ) {
             state.accounts = accStore.accountIds;
         }
     });

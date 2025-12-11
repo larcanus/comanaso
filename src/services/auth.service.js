@@ -57,7 +57,7 @@ export class AuthService {
                 method: 'POST',
                 body: JSON.stringify({ login, password }),
             });
-            console.log('login',data);
+            console.log('login', data);
             // Сохраняем токен в сервисе
             if (data.token) {
                 apiService.setAuthToken(data.token);
