@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import AddAccount from '@/components/button/AddAccount.vue';
 import AccountCard from '@/components/account/AccountCard.vue';
 import useAccountStore from '@/store/account.js';
@@ -8,37 +8,18 @@ import Toast from '@/components/toast/Toast.vue';
 
 const accStore = useAccountStore();
 const toastStore = useToastStore();
-const accountIds = accStore.accountIds;
-const state = reactive({
-    valueInput: '',
-    accounts: accountIds || [],
-    isInitialLoad: true,
-});
+
+// Используем computed для реактивного отслеживания изменений
+const accountIds = computed(() => accStore.accountIds);
 
 // Загружаем данные при монтировании компонента
 onMounted(async () => {
-    if (state.isInitialLoad) {
-        state.isInitialLoad = false;
-        try {
-            await accStore.loadAccountsFromServer();
-            state.accounts = accStore.accountIds;
-        } catch (error) {
-            console.error('Failed to load accounts on mount:', error);
-            toastStore.addToast('error', error.userMessage || 'Не удалось загрузить аккаунты');
-        }
+    try {
+        await accStore.loadAccountsFromServer();
+    } catch (error) {
+        console.error('Failed to load accounts on mount:', error);
+        toastStore.addToast('error', error.userMessage || 'Не удалось загрузить аккаунты');
     }
-});
-
-accStore.$onAction(({ name, after }) => {
-    after(() => {
-        if (
-            name === 'setAccountData' ||
-            name === 'deleteAccountData' ||
-            name === 'loadAccountsFromServer'
-        ) {
-            state.accounts = accStore.accountIds;
-        }
-    });
 });
 </script>
 
@@ -54,8 +35,8 @@ accStore.$onAction(({ name, after }) => {
         </div>
 
         <div v-else class="accounts-container">
-            <div v-for="account of state.accounts" :key="account">
-                <AccountCard v-bind="{ account }" />
+            <div v-for="accountId of accountIds" :key="accountId">
+                <AccountCard :account="accountId" />
             </div>
             <AddAccount />
         </div>

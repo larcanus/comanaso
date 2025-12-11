@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive } from 'vue';
+import { defineProps, reactive, computed, watch } from 'vue';
 import AccountStatus from '@/components/account/elements/AccountStatus.vue';
 import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
@@ -12,7 +12,6 @@ const toastStore = useToastStore();
 const props = defineProps({
     account: String,
 });
-const accountData = accountStore.getById(props.account);
 
 const LOC_TOAST_VALID_ERROR = 'Ошибка данных. Проверьте поля аккаунта';
 const LOC_TOAST_CONNECT_ERROR = 'Ошибка подключения';
@@ -22,23 +21,42 @@ const LOC_TOAST_SUCCESS_DISCONNECT = 'Аккаунт отключен';
 const LOC_TOAST_SUCCESS_UPDATE = 'Данные аккаунта обновлены';
 const LOC_TOAST_SUCCESS_DELETE = 'Аккаунт удален';
 
+// Используем computed для получения актуальных данных аккаунта
+const accountData = computed(() => accountStore.getById(props.account));
+
+// Проверка существования аккаунта
+const accountExists = computed(() => accountData.value !== null);
+
 const state = reactive({
-    ...{
-        isConnect: accountData.status !== 'offline',
-        isEdit: false,
-        isModalPopupInfoVisible: false,
-        isModalConfirmVisible: false,
-        modalConfirmMessage: null,
-        modalPopupInfoMessage: null,
-        id: 0,
-        name: '',
-        entity: '',
-        apiId: '',
-        apiHash: '',
-        phoneNumber: '',
-    },
-    ...accountData,
+    isConnect: false,
+    isEdit: false,
+    isModalPopupInfoVisible: false,
+    isModalConfirmVisible: false,
+    modalConfirmMessage: null,
+    modalPopupInfoMessage: null,
+    id: 0,
+    name: '',
+    entity: '',
+    apiId: '',
+    apiHash: '',
+    phoneNumber: '',
+    status: 'offline',
+    errorMessage: '',
 });
+
+// Следим за изменениями данных аккаунта
+watch(
+    accountData,
+    (newData) => {
+        if (newData) {
+            Object.assign(state, {
+                ...newData,
+                isConnect: newData.status !== 'offline',
+            });
+        }
+    },
+    { immediate: true }
+);
 
 accountStore.$onAction(({ name, after }) => {
     after((result) => {
@@ -220,7 +238,8 @@ function handleConfirmCancel() {
 </script>
 
 <template>
-    <div class="product-card">
+    <!-- Не рендерим компонент если аккаунт не существует -->
+    <div v-if="accountExists" class="product-card">
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
             <AccountStatus v-bind="{ status: state.status }" />
