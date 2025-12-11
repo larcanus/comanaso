@@ -36,12 +36,14 @@ class ApiService {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+            console.info('API SERVICE request fetch >>>', url, mergedOptions);
 
             const response = await fetch(url, {
                 ...mergedOptions,
                 signal: controller.signal,
             });
-            console.log('request response',response);
+
+            console.info('API SERVICE request response <<<', response);
             clearTimeout(timeoutId);
 
             if (!response.ok) {
