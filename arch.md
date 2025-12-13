@@ -35,8 +35,7 @@
 └──────────────┬──────────────────────┘
                │
 ┌──────────────▼──────────────────────┐
-│   Utils Layer                       │
-│   - connection.js (API заглушки)    │
+│   Utils Layer                       │   │
 │   - dialogAnalytics.js              │
 └─────────────────────────────────────┘
 ```
@@ -200,8 +199,6 @@ beforeEach: проверка токена, редирект
 ```
 
 #### 📁 `/src/utils` - Утилиты
-
-**[connection.js](file://D:/projects/vue/comanaso/src/utils/connection.js)** - API заглушки
 ```javascript
 // Функции для будущего серверного API:
 connectAccount()
@@ -412,7 +409,6 @@ inject('setOverflow')('hidden')
 
 ### Текущее состояние
 - ❌ **gramJS удален** (клиентская библиотека Telegram)
-- ⚠️ **[connection.js](file://D:/projects/vue/comanaso/src/utils/connection.js) содержит заглушки**
 - 🔄 **Планируется серверный API**
 
 ### Будущая архитектура
@@ -426,19 +422,6 @@ Telegram API (через gramJS/Telethon)
 REST/GraphQL API
   ↓
 Frontend (текущий проект)
-```
-
-**Изменения в [connection.js](file://D:/projects/vue/comanaso/src/utils/connection.js):**
-```javascript
-// Вместо заглушек:
-export async function connectAccount(phone) {
-  const response = await fetch('/api/accounts/connect', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ phone })
-  })
-  return response.json()
-}
 ```
 
 **Новые эндпоинты (примерный список):**
@@ -726,8 +709,7 @@ const apiUrl = import.meta.env.VITE_API_URL
 
 1. ✅ Удалить gramJS (выполнено)
 2. 🔄 Реализовать серверный API
-3. 🔄 Подключить реальные эндпоинты в [connection.js](file://D:/projects/vue/comanaso/src/utils/connection.js)
-4. ⏳ Добавить обработку ошибок API
+3. ⏳ Добавить обработку ошибок API
 5. ⏳ Реализовать refresh tokens
 
 ### Среднесрочные задачи

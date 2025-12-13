@@ -5,7 +5,7 @@ import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
-import { connectAccount, verifyCode, verifyPassword } from '@/utils/connection.js';
+import { accountService } from '@/services/account.service.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -129,7 +129,7 @@ async function onClickStart() {
 
     try {
         // Шаг 1: Начать подключение
-        const connectResult = await connectAccount(accountData.value.id);
+        const connectResult = await accountService.connectAccount(accountData.value.id);
 
         if (connectResult.status === 'code_required') {
             // Шаг 2: Запросить код у пользователя
@@ -141,7 +141,7 @@ async function onClickStart() {
             }
 
             // Шаг 3: Отправить код
-            const verifyResult = await verifyCode(
+            const verifyResult = await accountService.verifyCode(
                 accountData.value.id,
                 code,
                 connectResult.phoneCodeHash
@@ -156,26 +156,31 @@ async function onClickStart() {
         console.error('Connection error:', error);
 
         // Если требуется 2FA
-        if (error.message.includes('PASSWORD_REQUIRED')) {
-            const password = await showConfirm('Введите пароль 2FA');
+        if (error.error === 'PASSWORD_REQUIRED') {
+            const passwordHint = error.passwordHint ? `Подсказка: ${error.passwordHint}` : '';
+            const password = await showConfirm(`Введите пароль 2FA\n${passwordHint}`);
 
             if (password) {
                 try {
-                    await verifyPassword(accountData.value.id, password);
+                    await accountService.verifyPassword(accountData.value.id, password);
                     await accountStore.changeStatus(accountData.value.id, 'online');
                     toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
                 } catch (err) {
                     await accountStore.changeStatus(accountData.value.id, 'error', {
                         title: 'Ошибка 2FA',
-                        desc: err.message,
+                        desc: err.userMessage || err.message,
                     });
+                    toastStore.addToast('error', err.userMessage || 'Ошибка 2FA');
                 }
+            } else {
+                await accountStore.changeStatus(accountData.value.id, 'offline');
             }
         } else {
             await accountStore.changeStatus(accountData.value.id, 'error', {
                 title: 'Ошибка подключения',
-                desc: error.message,
+                desc: error.userMessage || error.message,
             });
+            toastStore.addToast('error', error.userMessage || LOC_TOAST_CONNECT_ERROR);
         }
     } finally {
         uiState.isLoading = false;
@@ -188,10 +193,12 @@ async function onClickDisconnect() {
 
     uiState.isLoading = true;
     try {
+        await accountService.disconnectAccount(accountData.value.id);
         await accountStore.changeStatus(accountData.value.id, 'offline');
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_DISCONNECT);
     } catch (error) {
         console.error('Disconnect error:', error);
+        toastStore.addToast('error', error.userMessage || 'Ошибка отключения');
     } finally {
         uiState.isLoading = false;
     }

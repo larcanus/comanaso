@@ -192,6 +192,173 @@ export class AccountService {
             };
         }
     }
+
+    // ==================== TELEGRAM CONNECTION ====================
+
+    /**
+     * Подключить аккаунт (начать авторизацию)
+     * @param {number} accountId - ID аккаунта
+     * @returns {Promise<Object>} Результат с phoneCodeHash для следующего шага
+     */
+    async connectAccount(accountId) {
+        try {
+            const result = await apiService.authRequest(`/accounts/${accountId}/connect`, {
+                method: 'POST',
+            });
+
+            return result;
+        } catch (error) {
+            console.error('Connect account error:', error);
+
+            if (error.error === 'INVALID_API_CREDENTIALS') {
+                throw {
+                    ...error,
+                    userMessage: 'Неверный API ID или API Hash',
+                };
+            }
+
+            if (error.error === 'ALREADY_CONNECTED') {
+                throw {
+                    ...error,
+                    userMessage: 'Аккаунт уже подключен',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Ошибка подключения аккаунта',
+            };
+        }
+    }
+
+    /**
+     * Подтвердить код авторизации
+     * @param {number} accountId - ID аккаунта
+     * @param {string} code - Код из Telegram
+     * @param {string} phoneCodeHash - Хеш из предыдущего шага
+     * @returns {Promise<Object>} Данные подключенного аккаунта
+     */
+    async verifyCode(accountId, code, phoneCodeHash) {
+        try {
+            const result = await apiService.authRequest(`/accounts/${accountId}/verify-code`, {
+                method: 'POST',
+                body: JSON.stringify({ code, phoneCodeHash }),
+            });
+
+            return result;
+        } catch (error) {
+            console.error('Verify code error:', error);
+
+            if (error.error === 'INVALID_CODE') {
+                throw {
+                    ...error,
+                    userMessage: 'Неверный код подтверждения',
+                };
+            }
+
+            if (error.error === 'PASSWORD_REQUIRED') {
+                throw {
+                    ...error,
+                    userMessage: 'Требуется двухфакторная аутентификация',
+                    passwordHint: error.passwordHint,
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Ошибка подтверждения кода',
+            };
+        }
+    }
+
+    /**
+     * Подтвердить 2FA пароль
+     * @param {number} accountId - ID аккаунта
+     * @param {string} password - Пароль 2FA
+     * @returns {Promise<Object>} Данные подключенного аккаунта
+     */
+    async verifyPassword(accountId, password) {
+        try {
+            const result = await apiService.authRequest(`/accounts/${accountId}/verify-password`, {
+                method: 'POST',
+                body: JSON.stringify({ password }),
+            });
+
+            return result;
+        } catch (error) {
+            console.error('Verify password error:', error);
+
+            if (error.error === 'INVALID_PASSWORD') {
+                throw {
+                    ...error,
+                    userMessage: 'Неверный пароль',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Ошибка подтверждения пароля',
+            };
+        }
+    }
+
+    /**
+     * Отключить аккаунт
+     * @param {number} accountId - ID аккаунта
+     * @returns {Promise<Object>} Результат отключения
+     */
+    async disconnectAccount(accountId) {
+        try {
+            const result = await apiService.authRequest(`/accounts/${accountId}/disconnect`, {
+                method: 'POST',
+            });
+
+            return result;
+        } catch (error) {
+            console.error('Disconnect account error:', error);
+
+            if (error.error === 'ACCOUNT_NOT_FOUND') {
+                throw {
+                    ...error,
+                    userMessage: 'Аккаунт не найден',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Ошибка отключения аккаунта',
+            };
+        }
+    }
+
+    /**
+     * Выйти из Telegram (logout)
+     * @param {number} accountId - ID аккаунта
+     * @returns {Promise<Object>} Результат выхода
+     */
+    async logoutAccount(accountId) {
+        try {
+            const result = await apiService.authRequest(`/accounts/${accountId}/logout`, {
+                method: 'POST',
+            });
+
+            return result;
+        } catch (error) {
+            console.error('Logout account error:', error);
+
+            if (error.error === 'ACCOUNT_NOT_CONNECTED') {
+                throw {
+                    ...error,
+                    userMessage: 'Аккаунт не подключен',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Ошибка выхода из аккаунта',
+            };
+        }
+    }
 }
 
 // Экспортируем синглтон экземпляр
