@@ -9,8 +9,12 @@ import { connectAccount, verifyCode, verifyPassword } from '@/utils/connection.j
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
+
 const props = defineProps({
-    account: String,
+    accountId: {
+        type: String,
+        required: true,
+    },
 });
 
 const LOC_TOAST_VALID_ERROR = 'Ошибка данных. Проверьте поля аккаунта';
@@ -21,123 +25,129 @@ const LOC_TOAST_SUCCESS_DISCONNECT = 'Аккаунт отключен';
 const LOC_TOAST_SUCCESS_UPDATE = 'Данные аккаунта обновлены';
 const LOC_TOAST_SUCCESS_DELETE = 'Аккаунт удален';
 
-// Используем computed для получения актуальных данных аккаунта
-const accountData = computed(() => accountStore.getById(props.account));
+// Используем computed для получения актуальных данных аккаунта из store
+const accountData = computed(() => accountStore.getById(props.accountId));
 
 // Проверка существования аккаунта
 const accountExists = computed(() => accountData.value !== null);
 
-const state = reactive({
-    isConnect: false,
+// Computed свойства из store
+const isConnect = computed(() => accountData.value?.status !== 'offline');
+
+// Локальное состояние только для UI
+const uiState = reactive({
     isEdit: false,
     isModalPopupInfoVisible: false,
     isModalConfirmVisible: false,
+    isLoading: false,
     modalConfirmMessage: null,
     modalPopupInfoMessage: null,
-    id: 0,
+});
+
+// Редактируемые поля (только для режима редактирования)
+const editableData = reactive({
     name: '',
-    entity: '',
     apiId: '',
     apiHash: '',
     phoneNumber: '',
-    status: 'offline',
-    errorMessage: '',
 });
 
-// Следим за изменениями данных аккаунта
+// Инициализация редактируемых полей при открытии режима редактирования
 watch(
-    accountData,
-    (newData) => {
-        if (newData) {
-            Object.assign(state, {
-                ...newData,
-                isConnect: newData.status !== 'offline',
+    () => uiState.isEdit,
+    (isEdit) => {
+        if (isEdit && accountData.value) {
+            Object.assign(editableData, {
+                name: accountData.value.name,
+                apiId: accountData.value.apiId,
+                apiHash: accountData.value.apiHash,
+                phoneNumber: accountData.value.phoneNumber,
             });
         }
-    },
-    { immediate: true }
+    }
 );
 
-accountStore.$onAction(({ name, after }) => {
-    after((result) => {
-        if (name === 'changeStatus' && result.id === state.id) {
-            state.status = result.status;
-            state.isConnect = result.status !== 'offline';
-            state.modalPopupInfoMessage = result.errorMessage;
-        }
-
-        if (name === 'updateAccountData' && result.id === state.id) {
-            Object.assign(state, result);
-        }
-    });
-});
-
 async function onClickSave() {
+    if (uiState.isLoading) return;
+
+    uiState.isLoading = true;
     try {
-        // Сохраняем изменения на сервере
         await accountStore.updateAccountData({
-            id: state.id,
-            name: state.name,
-            apiId: state.apiId,
-            apiHash: state.apiHash,
-            phoneNumber: state.phoneNumber,
+            id: accountData.value.id,
+            name: editableData.name,
+            apiId: editableData.apiId,
+            apiHash: editableData.apiHash,
+            phoneNumber: editableData.phoneNumber,
         });
 
-        state.isEdit = false;
+        uiState.isEdit = false;
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_UPDATE);
     } catch (error) {
         console.error('Update account error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка обновления аккаунта');
+    } finally {
+        uiState.isLoading = false;
     }
 }
 
 function onClickEdit() {
-    state.isEdit = !state.isEdit;
+    uiState.isEdit = !uiState.isEdit;
 }
 
 async function onClickDelete() {
+    if (uiState.isLoading) return;
+
+    uiState.isLoading = true;
     try {
-        // Удаляем аккаунт на сервере
-        await accountStore.deleteAccountData(state.id);
+        await accountStore.deleteAccountData(accountData.value.id);
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_DELETE);
     } catch (error) {
         console.error('Delete account error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка удаления аккаунта');
+    } finally {
+        uiState.isLoading = false;
     }
 }
 
 async function onClickStart() {
+    if (uiState.isLoading) return;
+
     if (
         !isValidConnectData({
-            apiId: state.apiId,
-            apiHash: state.apiHash,
-            phoneNumber: state.phoneNumber,
+            apiId: accountData.value.apiId,
+            apiHash: accountData.value.apiHash,
+            phoneNumber: accountData.value.phoneNumber,
         })
     ) {
         toastStore.addToast('error', LOC_TOAST_VALID_ERROR);
         return;
     }
 
-    accountStore.changeStatus(state.id, 'connect');
+    uiState.isLoading = true;
+    await accountStore.changeStatus(accountData.value.id, 'connect');
 
     try {
         // Шаг 1: Начать подключение
-        const connectResult = await connectAccount(state.id);
+        const connectResult = await connectAccount(accountData.value.id);
 
         if (connectResult.status === 'code_required') {
             // Шаг 2: Запросить код у пользователя
             const code = await showConfirm('Введите код из Telegram');
 
             if (!code) {
-                await accountStore.changeStatus(state.id, 'offline');
+                await accountStore.changeStatus(accountData.value.id, 'offline');
                 return;
             }
 
             // Шаг 3: Отправить код
-            const verifyResult = await verifyCode(state.id, code, connectResult.phoneCodeHash);
+            const verifyResult = await verifyCode(
+                accountData.value.id,
+                code,
+                connectResult.phoneCodeHash
+            );
 
             if (verifyResult.status === 'connected') {
-                await accountStore.changeStatus(state.id, 'online');
+                await accountStore.changeStatus(accountData.value.id, 'online');
                 toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
             }
         }
@@ -150,55 +160,75 @@ async function onClickStart() {
 
             if (password) {
                 try {
-                    await verifyPassword(state.id, password);
-                    await accountStore.changeStatus(state.id, 'online');
+                    await verifyPassword(accountData.value.id, password);
+                    await accountStore.changeStatus(accountData.value.id, 'online');
                     toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
                 } catch (err) {
-                    await accountStore.changeStatus(state.id, 'error', {
+                    await accountStore.changeStatus(accountData.value.id, 'error', {
                         title: 'Ошибка 2FA',
                         desc: err.message,
                     });
                 }
             }
         } else {
-            await accountStore.changeStatus(state.id, 'error', {
+            await accountStore.changeStatus(accountData.value.id, 'error', {
                 title: 'Ошибка подключения',
                 desc: error.message,
             });
         }
+    } finally {
+        uiState.isLoading = false;
     }
 }
 
 async function onClickDisconnect() {
+    if (uiState.isLoading) return;
+
+    uiState.isLoading = true;
     try {
-        await accountStore.changeStatus(state.id, 'offline');
+        await accountStore.changeStatus(accountData.value.id, 'offline');
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_DISCONNECT);
     } catch (error) {
         console.error('Disconnect error:', error);
+    } finally {
+        uiState.isLoading = false;
     }
-}
-
-async function startConnectAccount() {
-    console.log('startConnectAccount connection');
-}
-
-function prepareErrorMessage(error) {
-    let errorObj = { title: '', desc: '' };
-    errorObj.title = `Ошибка подключения - ${error?.errorMessage} ${error.code}`;
-    errorObj.desc = `сообщение - ${error.message}`;
-
-    return errorObj;
 }
 
 function prepareDetailMessage() {
+    const status = accountData.value?.status || 'offline';
     let messageObj = { title: '', desc: '' };
-    if (state.isConnect) {
-        messageObj.title = 'Аккаунт подключен';
-        messageObj.desc = 'Можно выполнять операции с аккаунтом';
-    } else {
-        messageObj.title = 'Аккаунт не подключен';
-        messageObj.desc = 'Для работы необходимо подключить аккаунт';
+
+    switch (status) {
+        case 'online':
+            messageObj.title = 'Аккаунт активен';
+            messageObj.desc =
+                'Telegram-сессия установлена. Можете отправлять сообщения, приглашать пользователей в группы, выполнять массовые рассылки.';
+            break;
+
+        case 'connect':
+            messageObj.title = 'Идет подключение';
+            messageObj.desc =
+                'Выполняется авторизация в Telegram. Дождитесь завершения процесса или введите код подтверждения.';
+            break;
+
+        case 'error': {
+            const errorInfo = accountData.value?.errorMessage;
+            messageObj.title = errorInfo?.title || 'Ошибка подключения';
+            messageObj.desc =
+                errorInfo?.desc ||
+                'Не удалось установить соединение. Проверьте API-ключи и номер телефона, затем попробуйте снова.';
+            break;
+        }
+
+        case 'offline':
+        default:
+            messageObj.title = 'Требуется подключение';
+            messageObj.desc =
+                'Для работы с Telegram необходимо авторизоваться. Нажмите "Старт!" и следуйте инструкциям. Вам потребуется код из SMS или Telegram-приложения.';
+            break;
     }
+
     return messageObj;
 }
 
@@ -209,31 +239,39 @@ function isValidConnectData(fields) {
 }
 
 async function showDetail() {
-    if (state.modalPopupInfoMessage === null) {
-        state.modalPopupInfoMessage = prepareDetailMessage();
+    if (uiState.modalPopupInfoMessage === null) {
+        uiState.modalPopupInfoMessage = prepareDetailMessage();
     }
 
-    state.isModalPopupInfoVisible = true;
+    uiState.isModalPopupInfoVisible = true;
 }
 
-let resolveConfirmPromise;
+// Хранилище для активного промиса
+const confirmPromiseStore = { resolve: null };
+
 function showConfirm(message) {
-    state.modalConfirmMessage = message || 'Введите код для входа в Telegram';
-    state.isModalConfirmVisible = true;
+    uiState.modalConfirmMessage = message || 'Введите код для входа в Telegram';
+    uiState.isModalConfirmVisible = true;
 
     return new Promise((resolve) => {
-        resolveConfirmPromise = resolve;
+        confirmPromiseStore.resolve = resolve;
     });
 }
 
 function handleConfirmOk(inputValue) {
-    state.isModalConfirmVisible = false;
-    resolveConfirmPromise(inputValue);
+    uiState.isModalConfirmVisible = false;
+    if (confirmPromiseStore.resolve) {
+        confirmPromiseStore.resolve(inputValue);
+        confirmPromiseStore.resolve = null;
+    }
 }
 
 function handleConfirmCancel() {
-    state.isModalConfirmVisible = false;
-    resolveConfirmPromise(false);
+    uiState.isModalConfirmVisible = false;
+    if (confirmPromiseStore.resolve) {
+        confirmPromiseStore.resolve(false);
+        confirmPromiseStore.resolve = null;
+    }
 }
 </script>
 
@@ -242,71 +280,83 @@ function handleConfirmCancel() {
     <div v-if="accountExists" class="product-card">
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
-            <AccountStatus v-bind="{ status: state.status }" />
-            <button class="button-detail" @click="showDetail">подробности</button>
+            <AccountStatus v-bind="{ status: accountData?.status || 'offline' }" />
+            <button class="button-detail" :disabled="uiState.isLoading" @click="showDetail">
+                подробности
+            </button>
             <DetailPopup
-                :message="state.modalPopupInfoMessage"
-                :is-visible="state.isModalPopupInfoVisible"
-                @close="state.isModalPopupInfoVisible = false"
+                :message="uiState.modalPopupInfoMessage"
+                :is-visible="uiState.isModalPopupInfoVisible"
+                @close="uiState.isModalPopupInfoVisible = false"
             />
         </div>
         <div class="product-details">
             <input
-                v-model="state.name"
+                :value="uiState.isEdit ? editableData.name : accountData.name"
                 type="text"
-                :disabled="!state.isEdit"
+                :disabled="!uiState.isEdit || uiState.isLoading"
                 placeholder="Название"
+                @input="uiState.isEdit && (editableData.name = $event.target.value)"
             />
             <input
-                v-model="state.apiId"
-                type="text"
-                :disabled="!state.isEdit"
+                :value="uiState.isEdit ? editableData.apiId : accountData.apiId"
                 placeholder="App api_id"
+                :disabled="!uiState.isEdit || uiState.isLoading"
+                type="text"
+                @input="uiState.isEdit && (editableData.apiId = $event.target.value)"
             />
             <input
-                v-model="state.apiHash"
+                :value="uiState.isEdit ? editableData.apiHash : accountData.apiHash"
                 type="text"
-                :disabled="!state.isEdit"
+                :disabled="!uiState.isEdit || uiState.isLoading"
                 placeholder="App api_hash"
+                @input="uiState.isEdit && (editableData.apiHash = $event.target.value)"
             />
             <input
-                v-model="state.phoneNumber"
+                :value="uiState.isEdit ? editableData.phoneNumber : accountData.phoneNumber"
                 type="text"
-                :disabled="!state.isEdit"
+                :disabled="!uiState.isEdit || uiState.isLoading"
                 placeholder="Номер телефона"
+                @input="uiState.isEdit && (editableData.phoneNumber = $event.target.value)"
             />
             <div class="buttons">
-                <button v-if="state.isEdit" @click="onClickSave">Сохранить</button>
-                <button v-if="!state.isEdit" :disabled="state.isConnect" @click="onClickEdit">
+                <button v-if="uiState.isEdit" :disabled="uiState.isLoading" @click="onClickSave">
+                    {{ uiState.isLoading ? 'Сохранение...' : 'Сохранить' }}
+                </button>
+                <button
+                    v-if="!uiState.isEdit"
+                    :disabled="isConnect || uiState.isLoading"
+                    @click="onClickEdit"
+                >
                     Редактировать
                 </button>
                 <button
-                    v-if="state.isEdit"
-                    :disabled="state.isConnect"
+                    v-if="uiState.isEdit"
+                    :disabled="isConnect || uiState.isLoading"
                     class="button-cancel"
                     @click="onClickDelete"
                 >
-                    Удалить аккаунт
+                    {{ uiState.isLoading ? 'Удаление...' : 'Удалить аккаунт' }}
                 </button>
                 <button
-                    v-if="!state.isEdit && !state.isConnect"
-                    :disabled="state.isConnect"
+                    v-if="!uiState.isEdit && !isConnect"
+                    :disabled="isConnect || uiState.isLoading"
                     @click="onClickStart"
                 >
-                    Старт!
+                    {{ uiState.isLoading ? 'Подключение...' : 'Старт!' }}
                 </button>
                 <button
-                    v-if="!state.isEdit && state.isConnect"
-                    :disabled="!state.isConnect"
+                    v-if="!uiState.isEdit && isConnect"
+                    :disabled="!isConnect || uiState.isLoading"
                     class="button-cancel"
                     @click="onClickDisconnect"
                 >
-                    Отключить
+                    {{ uiState.isLoading ? 'Отключение...' : 'Отключить' }}
                 </button>
             </div>
             <Confirm
-                :message="state.modalConfirmMessage"
-                :is-visible="state.isModalConfirmVisible"
+                :message="uiState.modalConfirmMessage"
+                :is-visible="uiState.isModalConfirmVisible"
                 @confirm="handleConfirmOk"
                 @cancel="handleConfirmCancel"
             />

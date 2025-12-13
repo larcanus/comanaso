@@ -3,7 +3,7 @@ import circleOffImagePath from '@/assets/circle-off.png';
 import circleOkImagePath from '@/assets/circle-ok.png';
 import circleArrowsImagePath from '@/assets/circle-arrows.png';
 import circleErrorImagePath from '@/assets/circle-error.png';
-import { computed, defineProps, reactive } from 'vue';
+import { computed, defineProps } from 'vue';
 
 const props = defineProps({
     status: String,

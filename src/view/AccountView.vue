@@ -36,7 +36,7 @@ onMounted(async () => {
 
         <div v-else class="accounts-container">
             <div v-for="accountId of accountIds" :key="accountId">
-                <AccountCard :account="accountId" />
+                <AccountCard :account-id="accountId" />
             </div>
             <AddAccount />
         </div>
