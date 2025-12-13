@@ -361,5 +361,4 @@ export class AccountService {
     }
 }
 
-// Экспортируем синглтон экземпляр
 export const accountService = new AccountService();
