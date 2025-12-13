@@ -6,15 +6,13 @@ import { apiService } from './api.js';
 export class AccountService {
     /**
      * Получить список всех аккаунтов пользователя
-     * @returns {Promise<Array>} Список аккаунтов
+     * @returns {Promise<Response>} Список аккаунтов
      */
     async getAccounts() {
         try {
-            const response = await apiService.authRequest('/accounts', {
+            return await apiService.authRequest('/accounts', {
                 method: 'GET',
             });
-
-            return response?.accounts;
         } catch (error) {
             console.error('Get accounts error:', error);
 
