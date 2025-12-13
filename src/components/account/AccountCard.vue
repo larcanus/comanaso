@@ -110,6 +110,7 @@ async function onClickDelete() {
 }
 
 async function onClickStart() {
+    console.log('onClickStart', uiState);
     if (uiState.isLoading) return;
 
     if (
@@ -182,6 +183,7 @@ async function onClickStart() {
 }
 
 async function onClickDisconnect() {
+    console.log('onClickDisconnect', uiState);
     if (uiState.isLoading) return;
 
     uiState.isLoading = true;
@@ -196,6 +198,7 @@ async function onClickDisconnect() {
 }
 
 function prepareDetailMessage() {
+    console.log('prepareDetailMessage', accountData.value);
     const status = accountData.value?.status || 'offline';
     let messageObj = { title: '', desc: '' };
 
@@ -239,9 +242,7 @@ function isValidConnectData(fields) {
 }
 
 async function showDetail() {
-    if (uiState.modalPopupInfoMessage === null) {
-        uiState.modalPopupInfoMessage = prepareDetailMessage();
-    }
+    uiState.modalPopupInfoMessage = prepareDetailMessage();
 
     uiState.isModalPopupInfoVisible = true;
 }
