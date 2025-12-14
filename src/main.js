@@ -1,15 +1,21 @@
 import './style/main.css';
 
 import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
-import { createPinia } from 'pinia';
+import { apiService } from '@/services/api.js';
+import { forceLogout } from '@/store/storeController.js';
 import localStorageUtils from '@/store/localStorage.js';
 
 const app = createApp(App);
-const store = createPinia();
-app.use(store);
+const pinia = createPinia();
+
+app.use(pinia);
 app.use(router);
+
+// Устанавливаем обработчик критических ошибок авторизации
+apiService.setAuthErrorHandler(forceLogout);
 
 localStorageUtils.initLocalStore().catch(console.error);
 

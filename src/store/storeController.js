@@ -4,6 +4,10 @@ import { useAccountStore } from '@/store/account.js';
 import { useDialogStore } from '@/store/dialogs.js';
 import { useToastStore } from '@/store/toast.js';
 import localStorageUtils from '@/store/localStorage.js';
+import router from '@/router/index.js';
+
+// Флаг для предотвращения множественных вызовов logout
+let isLoggingOut = false;
 
 /**
  * Контроллер для инициализации и управления всеми stores
@@ -19,6 +23,9 @@ export async function logInAllStore(userData) {
         if (!userData?.token || !userData?.user) {
             throw new Error('Неверный формат данных пользователя');
         }
+
+        // Сбрасываем флаг при успешном входе
+        isLoggingOut = false;
 
         // Устанавливаем данные аутентификации в store
         authStore.setAuthData({
@@ -64,12 +71,14 @@ export async function logInAllStore(userData) {
 
 /**
  * Выход из системы
+ * @param {boolean} showNotification - Показывать ли уведомление
  */
-export async function logoutAllStore() {
+export async function logoutAllStore(showNotification = true) {
     const authStore = useAuthStore();
     const userStore = useUserStore();
     const accountStore = useAccountStore();
     const dialogsStore = useDialogStore();
+    const toastStore = useToastStore();
 
     try {
         // Очищаем все stores
@@ -81,10 +90,20 @@ export async function logoutAllStore() {
         // Очищаем localStorage
         localStorageUtils.clearLocalStorage();
 
+        if (showNotification) {
+            toastStore.addToast({
+                message: 'Вы вышли из системы',
+                type: 'info',
+                duration: 3000,
+            });
+        }
+
         console.log('=== logoutAllStore: все данные очищены ===');
 
         return true;
     } catch (error) {
+        console.error('Ошибка при выходе:', error);
+
         // В случае ошибки всё равно пытаемся очистить localStorage
         try {
             localStorageUtils.clearLocalStorage();
@@ -93,6 +112,58 @@ export async function logoutAllStore() {
         }
 
         return false;
+    }
+}
+
+/**
+ * Принудительный выход из системы с перенаправлением
+ * Используется при критических ошибках авторизации
+ * @param {Object} error - Объект ошибки
+ */
+export async function forceLogout(error) {
+    // Если уже идет процесс logout, игнорируем повторные вызовы
+    if (isLoggingOut) {
+        console.log('⚠️ Logout уже выполняется, пропускаем повторный вызов');
+        return;
+    }
+
+    isLoggingOut = true;
+    console.warn('🔴 Принудительный выход из системы:', error);
+
+    const toastStore = useToastStore();
+
+    // Определяем сообщение для пользователя
+    let message = 'Сессия завершена. Пожалуйста, войдите снова';
+
+    if (error?.error === 'TOKEN_EXPIRED') {
+        message = 'Время сессии истекло. Войдите заново';
+    } else if (error?.error === 'USER_NOT_FOUND') {
+        message = 'Пользователь не найден. Требуется повторная авторизация';
+    } else if (error?.status === 401 || error?.status === 403) {
+        message = 'Доступ запрещен. Войдите в систему';
+    }
+
+    try {
+        // Выполняем выход без уведомления (покажем свое)
+        await logoutAllStore(false);
+
+        // Показываем уведомление
+        toastStore.addToast({
+            message,
+            type: 'warning',
+            duration: 5000,
+        });
+
+        // Перенаправляем на страницу входа
+        if (router.currentRoute.value.name !== 'home') {
+            await router.push({ name: 'home' });
+        }
+    } finally {
+        // Сбрасываем флаг после небольшой задержки
+        // Это предотвращает повторные вызовы во время навигации
+        setTimeout(() => {
+            isLoggingOut = false;
+        }, 1000);
     }
 }
 

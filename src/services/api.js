@@ -5,6 +5,61 @@ class ApiService {
     constructor() {
         this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
         this.timeout = parseInt(import.meta.env.VITE_API_TIMEOUT) || 10000;
+        this.authToken = null;
+        this.onAuthError = null; // Callback для обработки ошибок авторизации
+    }
+
+    /**
+     * Установить обработчик ошибок авторизации
+     * @param {Function} callback - Функция для вызова при ошибке авторизации
+     */
+    setAuthErrorHandler(callback) {
+        this.onAuthError = callback;
+    }
+
+    /**
+     * Проверить, является ли ошибка критической для авторизации
+     * @param {Object} error - Объект ошибки
+     * @returns {boolean}
+     */
+    isAuthError(error) {
+        // 401 - Unauthorized
+        if (error.status === 401) {
+            return true;
+        }
+
+        // 403 - Forbidden
+        if (error.status === 403) {
+            return true;
+        }
+
+        // 404 с ошибкой USER_NOT_FOUND - пользователь удален или токен невалиден
+        if (error.status === 404 && error.error === 'USER_NOT_FOUND') {
+            return true;
+        }
+
+        // Токен истек или невалиден
+        if (error.error === 'TOKEN_EXPIRED' || error.error === 'INVALID_TOKEN') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Обработать критическую ошибку авторизации
+     * @param {Object} error - Объект ошибки
+     */
+    async handleAuthError(error) {
+        console.warn('🔴 Критическая ошибка авторизации:', error);
+
+        if (this.onAuthError) {
+            try {
+                await this.onAuthError(error);
+            } catch (callbackError) {
+                console.error('Ошибка в обработчике авторизации:', callbackError);
+            }
+        }
     }
 
     /**
@@ -52,10 +107,17 @@ class ApiService {
                     message: `HTTP ${response.status}: ${response.statusText}`,
                 }));
 
-                throw {
+                const error = {
                     status: response.status,
                     ...errorData,
                 };
+
+                // Проверяем, является ли это критической ошибкой авторизации
+                if (this.isAuthError(error)) {
+                    await this.handleAuthError(error);
+                }
+
+                throw error;
             }
 
             // Обработка ответов без тела (204 No Content, 205 Reset Content)
@@ -81,6 +143,7 @@ class ApiService {
                 };
             }
 
+            // Если ошибка уже обработана (имеет status), просто пробрасываем
             if (error.status) {
                 throw error;
             }
@@ -116,10 +179,14 @@ class ApiService {
      */
     async authRequest(endpoint, options = {}) {
         if (!this.authToken) {
-            throw {
+            const error = {
                 error: 'NO_TOKEN',
                 message: 'Токен авторизации отсутствует',
             };
+
+            // Это тоже критическая ошибка авторизации
+            await this.handleAuthError(error);
+            throw error;
         }
 
         return this.request(endpoint, {
