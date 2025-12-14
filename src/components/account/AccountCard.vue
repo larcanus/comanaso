@@ -130,11 +130,11 @@ async function onClickStart() {
     try {
         // Шаг 1: Начать подключение
         const connectResult = await accountService.connectAccount(accountData.value.id);
-
+        console.log('connectResult',connectResult);
         if (connectResult.status === 'code_required') {
             // Шаг 2: Запросить код у пользователя
             const code = await showConfirm('Введите код из Telegram');
-
+            console.log('code',code);
             if (!code) {
                 await accountStore.changeStatus(accountData.value.id, 'offline');
                 return;
@@ -146,7 +146,7 @@ async function onClickStart() {
                 code,
                 connectResult.phoneCodeHash
             );
-
+            console.log('verifyResult',verifyResult);
             if (verifyResult.status === 'connected') {
                 await accountStore.changeStatus(accountData.value.id, 'online');
                 toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
@@ -193,7 +193,7 @@ async function onClickDisconnect() {
 
     uiState.isLoading = true;
     try {
-        await accountService.disconnectAccount(accountData.value.id);
+        await accountService.logoutAccount(accountData.value.id);
         await accountStore.changeStatus(accountData.value.id, 'offline');
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_DISCONNECT);
     } catch (error) {
