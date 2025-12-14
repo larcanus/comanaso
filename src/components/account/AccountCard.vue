@@ -12,7 +12,7 @@ const toastStore = useToastStore();
 
 const props = defineProps({
     accountId: {
-        type: String,
+        type: Number,
         required: true,
     },
 });
