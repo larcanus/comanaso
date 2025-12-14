@@ -182,6 +182,26 @@ export const useAccountStore = defineStore('account', () => {
         return state.value[id] ? { ...state.value[id] } : null;
     }
 
+    /**
+     * Получить имя аккаунта по ID
+     * @param {number|string} id - ID аккаунта
+     * @returns {string} Имя аккаунта
+     */
+    function getAccountName(id) {
+        const account = state.value[id];
+        return account?.name || `Аккаунт #${id}`;
+    }
+
+    /**
+     * Получить статус аккаунта по ID
+     * @param {number|string} id - ID аккаунта
+     * @returns {string} Статус аккаунта
+     */
+    function getAccountStatus(id) {
+        const account = state.value[id];
+        return account?.status || 'offline';
+    }
+
     function clearAccounts() {
         state.value = {};
     }
@@ -203,7 +223,7 @@ export const useAccountStore = defineStore('account', () => {
     }
 
     // Getters (computed)
-    const accountIds = computed(() => Object.keys(state.value));
+    const accountIds = computed(() => Object.keys(state.value).map(id => Number(id)));
     const accounts = computed(() => Object.values(state.value));
     const accountsCount = computed(() => Object.keys(state.value).length);
     const hasAccounts = computed(() => Object.keys(state.value).length > 0);
@@ -228,6 +248,8 @@ export const useAccountStore = defineStore('account', () => {
         updateAccountData,
         changeStatus,
         getById,
+        getAccountName,
+        getAccountStatus,
         clearAccounts,
 
         // Getters
