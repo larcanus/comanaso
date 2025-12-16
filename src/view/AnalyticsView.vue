@@ -4,27 +4,33 @@ import DialogTable from '@/components/table/DialogTable.vue';
 import UpdateButton from '@/components/button/UpdateButton.vue';
 import DialogPie from '@/components/chart/DialogPie.vue';
 import AccountSelector from '@/components/selector/AccountSelector.vue';
+import LoadingProgress from '@/components/progress/LoadingProgress.vue';
 import useAccountStore from '@/store/account.js';
 import useDialogStore from '@/store/dialogs.js';
+import useUserStore from '@/store/user.js';
 import useToastStore from '@/store/toast.js';
 import { analyticsService } from '@/services/analytics.service.js';
 
 const accountStore = useAccountStore();
 const dialogStore = useDialogStore();
+const userStore = useUserStore();
 const toastStore = useToastStore();
 
 const selectedAccountId = ref(null);
 const isLoadingAnalytics = ref(false);
 
-// Конфигурация для запроса данных (в будущем можно сделать настройки)
-const analyticsConfig = ref({
-    includeDialogs: true,
-    includeFolders: true,
-    includeStats: true,
+// Состояние прогресса загрузки
+const loadingProgress = ref({
+    step: 0,
+    total: 0,
+    progress: 0,
+    label: '',
+    status: 'loading',
 });
 
 const hasSelectedAccount = computed(() => selectedAccountId.value !== null);
-const hasDialogsData = computed(() => dialogStore?.dialogs?.length > 0);
+const hasDialogsData = computed(() => dialogStore?.state?.dialogs?.length > 0);
+const isLoading = computed(() => isLoadingAnalytics.value);
 
 // Автоматически выбираем первый аккаунт при монтировании
 onMounted(async () => {
@@ -43,20 +49,54 @@ watch(selectedAccountId, async (newAccountId) => {
 });
 
 /**
+ * Обработчик прогресса загрузки
+ */
+function handleProgress(progressData) {
+    loadingProgress.value = {
+        step: progressData.step,
+        total: progressData.total,
+        progress: progressData.progress,
+        label: progressData.label,
+        status: progressData.status,
+    };
+
+    console.log('[AnalyticsView] Progress:', progressData);
+}
+
+/**
  * Загрузка данных аналитики для выбранного аккаунта
  */
 async function loadAnalyticsData(accountId) {
     isLoadingAnalytics.value = true;
 
-    try {
-        const data = await analyticsService.getAnalyticsData(accountId, analyticsConfig.value);
+    // Сбрасываем прогресс
+    loadingProgress.value = {
+        step: 0,
+        total: 3,
+        progress: 0,
+        label: 'Начало загрузки...',
+        status: 'loading',
+    };
 
-        // Сохраняем диалоги в store
-        if (data.dialogs?.items) {
-            dialogStore.setDialogs(data.dialogs.items);
+    try {
+        const data = await analyticsService.loadAllData(accountId, handleProgress);
+
+        // Сохраняем данные профиля в user store
+        if (data.accountInfo) {
+            userStore.setUserData({
+                id: data.accountInfo.id,
+                fullName: `${data.accountInfo.firstName || ''} ${data.accountInfo.lastName || ''}`.trim(),
+                avatar: data.accountInfo.photo?.photoId || '',
+            });
         }
 
-        // В будущем можно сохранять folders и stats в соответствующие stores
+        // Сохраняем диалоги в dialog store
+        if (data.dialogs?.dialogs) {
+            dialogStore.setDialogs(data.dialogs.dialogs);
+        }
+
+        // В будущем можно сохранять folders в соответствующий store
+        console.log('[AnalyticsView] Folders loaded:', data.folders);
 
         toastStore.addToast('success', 'Данные аналитики успешно загружены');
     } catch (error) {
@@ -64,7 +104,7 @@ async function loadAnalyticsData(accountId) {
         toastStore.addToast('error', error.userMessage || 'Ошибка загрузки данных аналитики');
 
         // Очищаем данные при ошибке
-        dialogStore.clearDialogs();
+        dialogStore.$reset();
     } finally {
         isLoadingAnalytics.value = false;
     }
@@ -103,9 +143,14 @@ async function refreshAnalytics() {
             <p>👆 Выберите аккаунт для просмотра аналитики</p>
         </div>
 
-        <div v-else-if="isLoadingAnalytics" class="loading-state">
-            <div class="spinner"></div>
-            <p>Загрузка данных аналитики...</p>
+        <div v-else-if="isLoading" class="loading-state">
+            <LoadingProgress
+                :progress="loadingProgress.progress"
+                :label="loadingProgress.label"
+                :status="loadingProgress.status"
+                :step="loadingProgress.step"
+                :total="loadingProgress.total"
+            />
         </div>
 
         <div v-else-if="hasDialogsData" class="analytics-content">
@@ -178,25 +223,7 @@ h1 {
     align-items: center;
     justify-content: center;
     min-height: 300px;
-    gap: 20px;
-}
-
-.loading-state p {
-    font-size: 16px;
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(255, 255, 255, 0.1);
-    border-top-color: #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    width: 100%;
+    max-width: 800px;
 }
 </style>

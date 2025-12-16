@@ -48,25 +48,51 @@ class AnalyticsService {
     }
 
     /**
-     * Получить только диалоги
+     * Получить информацию об аккаунте (профиль)
      * @param {number} accountId - ID аккаунта
-     * @param {number} limit - Лимит диалогов
-     * @param {number} offset - Смещение
+     * @returns {Promise<Object>} Данные профиля
+     */
+    async getAccountInfo(accountId) {
+        try {
+            const response = await apiService.authRequest(`/api/accounts/${accountId}/me`);
+            return response;
+        } catch (error) {
+            console.error('[AnalyticsService] Error fetching account info:', error);
+            throw this._handleError(error, 'Ошибка загрузки информации об аккаунте');
+        }
+    }
+
+    /**
+     * Получить список диалогов
+     * @param {number} accountId - ID аккаунта
+     * @param {Object} options - Параметры запроса
+     * @param {number} options.limit - Лимит диалогов (default: 100, max: 500)
+     * @param {number} options.offset - Смещение для пагинации (default: 0)
+     * @param {boolean} options.archived - Включить архивные (default: false)
      * @returns {Promise<Object>} Данные диалогов
      */
-    async getDialogs(accountId, limit = 500, offset = 0) {
+    async getDialogs(accountId, options = {}) {
+        const { limit = 100, offset = 0, archived = false } = options;
+
         try {
-            const response = await apiService.request(`/api/accounts/${accountId}/dialogs`, {
-                params: { limit, offset },
+            const params = new URLSearchParams({
+                limit: limit.toString(),
+                offset: offset.toString(),
+                archived: archived.toString(),
             });
 
+            const response = await apiService.authRequest(
+                `/api/accounts/${accountId}/dialogs?${params}`
+            );
+
             return {
-                total: response.data.total,
-                dialogs: response.data.dialogs,
+                total: response.total,
+                hasMore: response.hasMore,
+                dialogs: response.dialogs,
             };
         } catch (error) {
             console.error('[AnalyticsService] Error fetching dialogs:', error);
-            throw this._handleError(error);
+            throw this._handleError(error, 'Ошибка загрузки диалогов');
         }
     }
 
@@ -86,35 +112,97 @@ class AnalyticsService {
     }
 
     /**
-     * Получить папки
+     * Получить список папок
      * @param {number} accountId - ID аккаунта
      * @returns {Promise<Array>} Список папок
      */
     async getFolders(accountId) {
         try {
-            const response = await apiService.request(`/api/accounts/${accountId}/folders`);
-            return response.data;
+            const response = await apiService.authRequest(`/api/accounts/${accountId}/folders`);
+            return response;
         } catch (error) {
             console.error('[AnalyticsService] Error fetching folders:', error);
-            throw this._handleError(error);
+            throw this._handleError(error, 'Ошибка загрузки папок');
         }
     }
 
     /**
-     * Получить рекомендуемые папки
+     * Загрузить все данные последовательно с отслеживанием прогресса
      * @param {number} accountId - ID аккаунта
-     * @returns {Promise<Array>} Рекомендуемые папки
+     * @param {Function} onProgress - Callback для отслеживания прогресса
+     * @returns {Promise<Object>} Все данные аналитики
      */
-    async getSuggestedFolders(accountId) {
-        try {
-            const response = await apiService.request(
-                `/api/accounts/${accountId}/folders/suggested`
-            );
-            return response.data;
-        } catch (error) {
-            console.error('[AnalyticsService] Error fetching suggested folders:', error);
-            throw this._handleError(error);
+    async loadAllData(accountId, onProgress) {
+        const steps = [
+            {
+                name: 'accountInfo',
+                label: 'Загрузка информации об аккаунте',
+                method: () => this.getAccountInfo(accountId),
+            },
+            {
+                name: 'dialogs',
+                label: 'Загрузка диалогов',
+                method: () => this.getDialogs(accountId, { limit: 500 }),
+            },
+            {
+                name: 'folders',
+                label: 'Загрузка папок',
+                method: () => this.getFolders(accountId),
+            },
+        ];
+
+        const result = {};
+        const totalSteps = steps.length;
+
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            const progress = ((i + 1) / totalSteps) * 100;
+
+            try {
+                // Уведомляем о начале загрузки шага
+                if (onProgress) {
+                    onProgress({
+                        step: i + 1,
+                        total: totalSteps,
+                        progress: Math.round(progress),
+                        label: step.label,
+                        status: 'loading',
+                    });
+                }
+
+                // Выполняем запрос
+                const data = await step.method();
+                result[step.name] = data;
+
+                // Уведомляем об успешной загрузке
+                if (onProgress) {
+                    onProgress({
+                        step: i + 1,
+                        total: totalSteps,
+                        progress: Math.round(progress),
+                        label: step.label,
+                        status: 'success',
+                        data,
+                    });
+                }
+            } catch (error) {
+                // Уведомляем об ошибке
+                if (onProgress) {
+                    onProgress({
+                        step: i + 1,
+                        total: totalSteps,
+                        progress: Math.round(progress),
+                        label: step.label,
+                        status: 'error',
+                        error,
+                    });
+                }
+
+                throw error;
+            }
         }
+
+        return result;
     }
 
     /**
@@ -145,43 +233,37 @@ class AnalyticsService {
      * Обработка ошибок API
      * @private
      */
-    _handleError(error) {
-        if (error.response) {
-            const { status, data } = error.response;
-
-            switch (status) {
-                case 403:
-                    return {
-                        code: 'ACCOUNT_NOT_CONNECTED',
-                        userMessage: 'Аккаунт не подключен к Telegram',
-                        details: data,
-                    };
-                case 404:
-                    return {
-                        code: 'ACCOUNT_NOT_FOUND',
-                        userMessage: 'Аккаунт не найден',
-                        details: data,
-                    };
-                case 401:
-                    return {
-                        code: 'UNAUTHORIZED',
-                        userMessage: 'Необходима авторизация',
-                        details: data,
-                    };
-                default:
-                    return {
-                        code: 'UNKNOWN_ERROR',
-                        userMessage: data?.message || 'Произошла ошибка при получении данных',
-                        details: data,
-                    };
-            }
+    _handleError(error, defaultMessage = 'Произошла ошибка при получении данных') {
+        if (error.error) {
+            // Ошибка уже обработана в apiService
+            return {
+                code: error.error,
+                userMessage: this._getErrorMessage(error.error, error.message),
+                details: error,
+            };
         }
 
         return {
-            code: 'NETWORK_ERROR',
-            userMessage: 'Ошибка сети. Проверьте подключение к интернету',
-            details: error.message,
+            code: 'UNKNOWN_ERROR',
+            userMessage: defaultMessage,
+            details: error,
         };
+    }
+
+    /**
+     * Получить понятное сообщение об ошибке
+     * @private
+     */
+    _getErrorMessage(errorCode, defaultMessage) {
+        const messages = {
+            ACCOUNT_NOT_CONNECTED: 'Аккаунт не подключен к Telegram',
+            ACCOUNT_NOT_FOUND: 'Аккаунт не найден',
+            UNAUTHORIZED: 'Необходима авторизация',
+            NETWORK_ERROR: 'Ошибка сети. Проверьте подключение к интернету',
+            TIMEOUT_ERROR: 'Превышено время ожидания ответа от сервера',
+        };
+
+        return messages[errorCode] || defaultMessage;
     }
 }
 

@@ -1,7 +1,7 @@
 <script setup>
 import Confirm from '@/components/modal/Confirm.vue';
 import { reactive } from 'vue';
-import { telegramDataService } from '@/services/telegram-data.service.js';
+
 const state = reactive({
     isModalConfirmVisible: false,
     modalConfirmMessage: '',
@@ -16,10 +16,6 @@ async function onClickContainer() {
     const resultConfirm = await showConfirm();
     if (resultConfirm) {
         state.isGettingData = true;
-
-        await telegramDataService.getCommonData(null);
-
-        state.isGettingData = false;
     }
 }
 
