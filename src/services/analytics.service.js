@@ -15,26 +15,13 @@ import { apiService } from './api.js';
  */
 class AnalyticsService {
     /**
-     * Конфигурация по умолчанию
-     * @type {AnalyticsConfig}
-     */
-    defaultConfig = {
-        includeDialogs: true,
-        includeFolders: true,
-        includeStats: true,
-        dialogsLimit: 500,
-        dialogsOffset: 0,
-    };
-
-    /**
      * Получить информацию об аккаунте (профиль)
      * @param {number} accountId - ID аккаунта
      * @returns {Promise<Object>} Данные профиля
      */
     async getAccountInfo(accountId) {
         try {
-            const response = await apiService.authRequest(`/accounts/${accountId}/me`);
-            return response;
+            return await apiService.authRequest(`/accounts/${accountId}/me`);
         } catch (error) {
             console.error('[AnalyticsService] Error fetching account info:', error);
             throw this._handleError(error, 'Ошибка загрузки информации об аккаунте');
@@ -63,7 +50,7 @@ class AnalyticsService {
             const response = await apiService.authRequest(
                 `/accounts/${accountId}/dialogs?${params}`
             );
-
+            console.info('[AnalyticsService] fetching dialogs response:', response);
             return {
                 total: response.total,
                 hasMore: response.hasMore,
@@ -83,6 +70,7 @@ class AnalyticsService {
     async getFolders(accountId) {
         try {
             const response = await apiService.authRequest(`/accounts/${accountId}/folders`);
+            console.info('[AnalyticsService] fetching folders response:', response);
             return response;
         } catch (error) {
             console.error('[AnalyticsService] Error fetching folders:', error);
