@@ -233,6 +233,10 @@ export const useAccountStore = defineStore('account', () => {
     const offlineAccounts = computed(() =>
         Object.values(state.value).filter((acc) => acc.status === 'offline')
     );
+    function isOnline(id) {
+        const account = state.value[id];
+        return account?.status === 'online';
+    }
 
     return {
         // State
@@ -259,6 +263,7 @@ export const useAccountStore = defineStore('account', () => {
         hasAccounts,
         onlineAccounts,
         offlineAccounts,
+        isOnline,
     };
 });
 

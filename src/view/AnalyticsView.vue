@@ -63,10 +63,21 @@ function handleProgress(progressData) {
     console.log('[AnalyticsView] Progress:', progressData);
 }
 
+async function checkAccountIsOnline(accountId)
+{
+    return accountStore.isOnline(accountId);
+}
+
+
 /**
  * Загрузка данных аналитики для выбранного аккаунта
  */
 async function loadAnalyticsData(accountId) {
+    const isOnline = await checkAccountIsOnline(accountId);
+    if (!isOnline) {
+        return;
+    }
+
     isLoadingAnalytics.value = true;
 
     // Сбрасываем прогресс
@@ -85,7 +96,8 @@ async function loadAnalyticsData(accountId) {
         if (data.accountInfo) {
             userStore.setUserData({
                 id: data.accountInfo.id,
-                fullName: `${data.accountInfo.firstName || ''} ${data.accountInfo.lastName || ''}`.trim(),
+                fullName:
+                    `${data.accountInfo.firstName || ''} ${data.accountInfo.lastName || ''}`.trim(),
                 avatar: data.accountInfo.photo?.photoId || '',
             });
         }

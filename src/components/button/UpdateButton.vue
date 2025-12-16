@@ -8,7 +8,10 @@ const state = reactive({
     isGettingData: false,
 });
 
+const emit = defineEmits(['refresh']);
+
 async function onClickContainer() {
+    emit('refresh');
     if (state.isGettingData) {
         return;
     }
