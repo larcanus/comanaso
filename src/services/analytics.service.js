@@ -27,34 +27,13 @@ class AnalyticsService {
     };
 
     /**
-     * Получить все данные для аналитики по аккаунту
-     * @param {number} accountId - ID аккаунта
-     * @param {Partial<AnalyticsConfig>} config - Конфигурация запроса
-     * @returns {Promise<Object>} Данные аналитики
-     */
-    async getAnalyticsData(accountId, config = {}) {
-        const finalConfig = { ...this.defaultConfig, ...config };
-
-        try {
-            // Используем общий эндпоинт для получения всех данных
-            const response = await apiService.request(`/api/accounts/${accountId}/data`);
-
-            // Фильтруем данные согласно конфигурации
-            return this._filterDataByConfig(response.data, finalConfig);
-        } catch (error) {
-            console.error('[AnalyticsService] Error fetching analytics data:', error);
-            throw this._handleError(error);
-        }
-    }
-
-    /**
      * Получить информацию об аккаунте (профиль)
      * @param {number} accountId - ID аккаунта
      * @returns {Promise<Object>} Данные профиля
      */
     async getAccountInfo(accountId) {
         try {
-            const response = await apiService.authRequest(`/api/accounts/${accountId}/me`);
+            const response = await apiService.authRequest(`/accounts/${accountId}/me`);
             return response;
         } catch (error) {
             console.error('[AnalyticsService] Error fetching account info:', error);
@@ -82,7 +61,7 @@ class AnalyticsService {
             });
 
             const response = await apiService.authRequest(
-                `/api/accounts/${accountId}/dialogs?${params}`
+                `/accounts/${accountId}/dialogs?${params}`
             );
 
             return {
@@ -97,28 +76,13 @@ class AnalyticsService {
     }
 
     /**
-     * Получить статистику по диалогам
-     * @param {number} accountId - ID аккаунта
-     * @returns {Promise<Object>} Статистика
-     */
-    async getDialogStats(accountId) {
-        try {
-            const response = await apiService.request(`/api/accounts/${accountId}/dialogs/stats`);
-            return response.data;
-        } catch (error) {
-            console.error('[AnalyticsService] Error fetching dialog stats:', error);
-            throw this._handleError(error);
-        }
-    }
-
-    /**
      * Получить список папок
      * @param {number} accountId - ID аккаунта
      * @returns {Promise<Array>} Список папок
      */
     async getFolders(accountId) {
         try {
-            const response = await apiService.authRequest(`/api/accounts/${accountId}/folders`);
+            const response = await apiService.authRequest(`/accounts/${accountId}/folders`);
             return response;
         } catch (error) {
             console.error('[AnalyticsService] Error fetching folders:', error);
