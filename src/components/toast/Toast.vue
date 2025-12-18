@@ -3,6 +3,7 @@ import { reactive } from 'vue';
 import okImagePath from '@/assets/circle-ok.png';
 import errorImagePath from '@/assets/circle-error.png';
 import useToastStore from '@/store/toast.js';
+
 const toastStore = useToastStore();
 const state = reactive({
     toasts: toastStore.state,
@@ -16,10 +17,14 @@ toastStore.$subscribe((mutation, store) => {
 
 function getImagePath(type) {
     switch (type) {
-        case 'ok':
+        case 'success':
             return okImagePath;
         case 'error':
             return errorImagePath;
+        case 'warning':
+            return okImagePath; // Можно использовать отдельную иконку для warning
+        case 'info':
+            return okImagePath; // Можно использовать отдельную иконку для info
         default:
             return errorImagePath;
     }
@@ -79,32 +84,45 @@ function getImagePath(type) {
     padding: 0.5rem;
 
     opacity: 0.9;
-    border-radius: 2px;
+    border-radius: 8px;
     margin: 10px;
     text-align: center;
     place-items: center;
     max-width: 350px;
     width: 50rem;
     white-space: break-spaces;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 span {
     color: var(--vt-c-white-soft);
+    font-weight: 500;
 }
 
 .toast-type-error {
     background-color: #d0363e;
+    border: 2px solid #a02830;
 }
-.toast-type-ok {
+
+.toast-type-success {
     background-color: #42e362;
+    border: 2px solid #35b34f;
 }
+
+.toast-type-warning {
+    background-color: #ff9800;
+    border: 2px solid #e68900;
+}
+
 .toast-type-info {
-    background-color: #d8a600;
+    background-color: #2196f3;
+    border: 2px solid #1976d2;
 }
 
 .icon {
-    width: 1rem;
-    height: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
     margin: 0.5rem;
+    flex-shrink: 0;
 }
 </style>
