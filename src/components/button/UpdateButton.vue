@@ -60,11 +60,7 @@ function handleConfirmCancel() {
 </script>
 
 <template>
-    <div
-        class="container"
-        :class="{ disabled: isButtonDisabled }"
-        @click="onClickContainer"
-    >
+    <div class="container" :class="{ disabled: isButtonDisabled }" @click="onClickContainer">
         <img
             src="@/assets/refresh.png"
             alt="update"
@@ -99,7 +95,9 @@ function handleConfirmCancel() {
 .button-img {
     width: 50px;
     height: 50px;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
 }
 
 .button-img.disabled {

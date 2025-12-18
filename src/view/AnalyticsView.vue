@@ -169,8 +169,7 @@ async function refreshAnalytics() {
             @account-selected="handleAccountSelected"
         />
 
-        <div v-if="!hasSelectedAccount" class="empty-state">
-        </div>
+        <div v-if="!hasSelectedAccount" class="empty-state"></div>
 
         <div v-else-if="!isAccountOnline" class="offline-state">
             <p>🔌 Аккаунт не подключен</p>

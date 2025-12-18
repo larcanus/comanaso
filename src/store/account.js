@@ -223,7 +223,7 @@ export const useAccountStore = defineStore('account', () => {
     }
 
     // Getters (computed)
-    const accountIds = computed(() => Object.keys(state.value).map(id => Number(id)));
+    const accountIds = computed(() => Object.keys(state.value).map((id) => Number(id)));
     const accounts = computed(() => Object.values(state.value));
     const accountsCount = computed(() => Object.keys(state.value).length);
     const hasAccounts = computed(() => Object.keys(state.value).length > 0);

@@ -103,7 +103,7 @@ async function onClickSignIn() {
         login: state.value.loginValue,
         password: state.value.passwordValue,
     });
-    console.log('onClickSignIn res',res);
+    console.log('onClickSignIn res', res);
     if (res.ok) {
         await router.push('/main');
     } else {
