@@ -79,7 +79,10 @@ function handleProgress(progressData) {
  */
 async function loadAnalyticsData(accountId) {
     if (!accountStore.isOnline(accountId)) {
-        toastStore.addToast('warning', 'Аккаунт не подключен. Подключите аккаунт для загрузки данных.');
+        toastStore.addToast(
+            'warning',
+            'Аккаунт не подключен. Подключите аккаунт для загрузки данных.'
+        );
         return;
     }
 
@@ -157,7 +160,6 @@ async function refreshAnalytics() {
     <div class="view-container">
         <div class="header-container">
             <h1>Аналитика</h1>
-            <p>Здесь отображаются доступные данные и аналитика.</p>
         </div>
 
         <AccountSelector
@@ -171,8 +173,12 @@ async function refreshAnalytics() {
 
         <div v-else-if="!isAccountOnline" class="offline-state">
             <p>🔌 Аккаунт не подключен</p>
-            <p class="hint">Статус: <span class="status-badge">{{ accountStatus }}</span></p>
-            <p class="hint">Подключите аккаунт в разделе "Аккаунты" для загрузки данных аналитики</p>
+            <p class="hint">
+                Статус: <span class="status-badge">{{ accountStatus }}</span>
+            </p>
+            <p class="hint">
+                Подключите аккаунт в разделе "Аккаунты" для загрузки данных аналитики
+            </p>
         </div>
 
         <div v-else-if="isLoading" class="loading-state">

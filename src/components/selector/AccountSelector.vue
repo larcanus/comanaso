@@ -66,7 +66,7 @@ function getStatusText(status) {
 
 <template>
     <div class="account-selector">
-        <div class="selector-label">Аккаунт для аналитики:</div>
+        <div class="selector-label">Аккаунт:</div>
         <div class="dropdown-container">
             <button class="dropdown-button" @click="toggleDropdown">
                 <span v-if="selectedAccount" class="selected-account">
@@ -116,6 +116,7 @@ function getStatusText(status) {
     margin: 20px 0;
     width: 100%;
     max-width: 400px;
+    min-width: 300px;
 }
 
 .selector-label {
@@ -133,7 +134,7 @@ function getStatusText(status) {
     padding: 12px 16px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 2px;
     color: white;
     font-size: 16px;
     cursor: pointer;
@@ -166,6 +167,7 @@ function getStatusText(status) {
 .arrow {
     transition: transform 0.3s ease;
     font-size: 12px;
+    margin-left: 30px;
 }
 
 .arrow.open {
@@ -185,12 +187,13 @@ function getStatusText(status) {
     left: 0;
     right: 0;
     background: white;
-    border-radius: 8px;
+    border-radius: 2px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     z-index: 1000;
     max-height: 300px;
     overflow-y: auto;
+    border: 1px solid #ccc;
 }
 
 .dropdown-item {
