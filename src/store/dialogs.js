@@ -73,11 +73,13 @@ const useDialogStore = defineStore('dialog', () => {
 function validateDialogs(dialogs = [], foldersState) {
     const preparedDialogs = dialogs?.map((dialog) => {
         const dialogData = toValue(dialog);
+        const idValue = dialogData.id?.value || dialogData.id || dialogData.entity?.id?.value || '';
+
         return {
             title: getTitleDialogLoc(dialogData),
             archived: getArchivedDialogLoc(dialogData.archived),
             type: getTypeDialogLoc(dialogData),
-            id: { value: dialogData.id?.value, loc: dialogData.id?.value },
+            id: { value: idValue, loc: String(idValue) },
             folderId: getFolderIdDialogLoc(dialogData, foldersState),
             pinned: getPinnedDialogLoc(dialogData.pinned),
             unreadCount: {
@@ -86,7 +88,7 @@ function validateDialogs(dialogs = [], foldersState) {
             },
             mute: getMuteDialogLoc(dialogData.dialog),
             date: getDateDialogLoc(dialogData.date),
-            creator: getCreatorDialogLoc(dialogData.entity.creator),
+            creator: getCreatorDialogLoc(dialogData.entity?.creator),
         };
     });
     console.log('preparedDialogs', preparedDialogs);
@@ -96,7 +98,7 @@ function validateDialogs(dialogs = [], foldersState) {
 function getTitleDialogLoc(dialogData) {
     const objectData = {
         value: '',
-        loc: 'Без названия'
+        loc: 'Без названия',
     };
 
     if (dialogData.title && dialogData.title.length > 0) {
@@ -112,8 +114,10 @@ function getTitleDialogLoc(dialogData) {
     }
 
     // Если оба поля отсутствуют или пустые
-    if ((!dialogData.title || dialogData.title.length === 0) &&
-        (!dialogData.name || dialogData.name.length === 0)) {
+    if (
+        (!dialogData.title || dialogData.title.length === 0) &&
+        (!dialogData.name || dialogData.name.length === 0)
+    ) {
         objectData.value = '';
         objectData.loc = 'Удаленный аккаунт';
     }
@@ -125,31 +129,29 @@ function getTitleDialogLoc(dialogData) {
  * @return {object}
  */
 function getTypeDialogLoc(dialogData) {
-    const objectData = {
-        value: {
-            isChannel: dialogData.isChannel,
-            isGroup: dialogData.isGroup,
-            isUser: dialogData.isUser,
-        },
+    // Получаем тип из строкового поля или из булевых полей (для обратной совместимости)
+    let typeValue = dialogData.type || dialogData.entity?.type || '';
+
+    // Если тип в булевых полях, конвертируем в строку
+    if (!typeValue) {
+        if (dialogData.isChannel) typeValue = 'channel';
+        else if (dialogData.isGroup) typeValue = 'group';
+        else if (dialogData.isUser) typeValue = 'user';
+    }
+
+    const typeMap = {
+        channel: 'канал',
+        user: 'личный',
+        group: 'групповой',
+        chat: 'групповой',
+        supergroup: 'супергруппа',
+        bot: 'бот',
     };
 
-    if (dialogData.isChannel) {
-        objectData.loc = 'канал';
-    }
-
-    if (dialogData.isGroup) {
-        objectData.loc = 'групповой закрытый';
-    }
-
-    if (dialogData.isGroup && dialogData.isChannel && dialogData.entity.broadcast === false) {
-        objectData.loc = 'групповой открытый';
-    }
-
-    if (dialogData.isUser) {
-        objectData.loc = 'личный';
-    }
-
-    return objectData;
+    return {
+        value: typeValue,
+        loc: typeMap[typeValue] || typeValue || 'неизвестно',
+    };
 }
 
 function getFolderIdDialogLoc(dialogData, foldersState) {
