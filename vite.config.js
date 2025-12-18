@@ -1,38 +1,68 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import vueJsx from '@vitejs/plugin-vue-jsx';
-import VueDevTools from 'vite-plugin-vue-devtools';
-import fs from 'node:fs';
-import path from 'node:path';
+import vueDevTools from 'vite-plugin-vue-devtools';
+import fs from 'fs';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
     const isDev = mode === 'development';
 
-    // Проверяем, нужно ли использовать HTTPS (только если явно указано)
-    const useHttps = process.env.VITE_USE_HTTPS === 'true';
+    // HTTPS конфигурация
+    let httpsConfig = false;
+    if (env.VITE_USE_HTTPS === 'true') {
+        const certPath = path.resolve(__dirname, '.cert/cert.pem');
+        const keyPath = path.resolve(__dirname, '.cert/key.pem');
 
-    // Получаем конфигурацию HTTPS если нужно
-    const httpsConfig = useHttps && isDev ? getHttpsConfig() : false;
+        if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+            httpsConfig = {
+                key: fs.readFileSync(keyPath),
+                cert: fs.readFileSync(certPath),
+            };
+            console.log('✅ HTTPS включен\n');
+        } else {
+            console.warn('⚠️  Сертификаты не найдены!');
+            console.warn('Создайте сертификаты в папке .cert/');
+            console.warn('\n Windows (PowerShell от имени администратора):');
+            console.warn(
+                '  $cert = New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\\LocalMachine\\My"'
+            );
+            console.warn('  $pwd = ConvertTo-SecureString -String "password" -Force -AsPlainText');
+            console.warn(
+                '  Export-PfxCertificate -Cert $cert -FilePath "$PWD\\.cert\\cert.pfx" -Password $pwd'
+            );
+            console.warn('  # Затем конвертируйте PFX в PEM с помощью OpenSSL');
+            console.warn('\n Linux/Mac:');
+            console.warn('  npm run cert:generate\n');
+            console.warn('⚠️  Запуск без HTTPS. Используйте npm run dev:https для HTTPS.\n');
+        }
+    }
 
     return {
         plugins: [
             vue({
                 template: {
                     compilerOptions: {
-                        isCustomElement: (tag) => tag.startsWith('custom-'),
+                        isCustomElement: (tag) => tag.startsWith('ion-'),
                     },
                 },
             }),
-            vueJsx(),
-            VueDevTools(),
-        ],
+            isDev &&
+                vueDevTools({
+                    launchEditor: 'code',
+                }),
+        ].filter(Boolean),
         resolve: {
             alias: {
                 '@': fileURLToPath(new URL('./src', import.meta.url)),
             },
+        },
+        define: {
+            __VUE_PROD_DEVTOOLS__: isDev,
+            __VUE_OPTIONS_API__: true,
+            __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: isDev,
         },
         base: env.VITE_BASE_URL || '/comanaso/',
         server: {
@@ -41,6 +71,16 @@ export default defineConfig(({ mode }) => {
             https: httpsConfig,
             open: false,
             cors: true,
+            hmr: {
+                overlay: true,
+                protocol: httpsConfig ? 'wss' : 'ws',
+                host: 'localhost',
+                port: 5173,
+            },
+            watch: {
+                usePolling: false,
+                interval: 100,
+            },
             proxy: {
                 // Настройка прокси для API-запросов (когда будет сервер)
                 '/api': {
@@ -65,19 +105,15 @@ export default defineConfig(({ mode }) => {
             rollupOptions: {
                 output: {
                     manualChunks: {
-                        'vue-vendor': ['vue', 'vue-router', 'pinia'],
-                        'chart-vendor': ['chart.js', 'vue-chartjs'],
+                        vendor: ['vue', 'vue-router', 'pinia'],
+                        axios: ['axios'],
                     },
                 },
             },
             chunkSizeWarningLimit: 1000,
         },
         optimizeDeps: {
-            include: ['vue', 'vue-router', 'pinia', 'chart.js', 'vue-chartjs'],
-        },
-        define: {
-            __VUE_PROD_DEVTOOLS__: true,
-            __VUE_OPTIONS_API__: true,
+            include: ['vue', 'vue-router', 'pinia', 'axios'],
         },
     };
 });
