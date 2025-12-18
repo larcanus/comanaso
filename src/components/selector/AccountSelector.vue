@@ -74,7 +74,10 @@ function getStatusText(status) {
                         class="status-indicator"
                         :style="{ backgroundColor: getStatusColor(selectedAccount.status) }"
                     ></span>
-                    {{ selectedAccount.name || `Аккаунт #${selectedAccount.id}` }}
+
+                    <span class="account-name">
+                        {{ selectedAccount.name || `Аккаунт #${selectedAccount.id}` }}
+                    </span>
                 </span>
                 <span v-else class="placeholder">Выберите аккаунт</span>
                 <span class="arrow" :class="{ open: isDropdownOpen }">▼</span>
@@ -217,6 +220,7 @@ function getStatusText(status) {
 .account-name {
     flex: 1;
     font-weight: 500;
+    transform: translateY(-1px);
 }
 
 .account-status {
