@@ -2,7 +2,7 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
-import vueDevTools from 'vite-plugin-vue-devtools';
+import VueDevTools from 'vite-plugin-vue-devtools';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
                 },
             }),
             vueJsx(),
-            vueDevTools(),
+            VueDevTools(),
         ],
         resolve: {
             alias: {
@@ -74,6 +74,10 @@ export default defineConfig(({ mode }) => {
         },
         optimizeDeps: {
             include: ['vue', 'vue-router', 'pinia', 'chart.js', 'vue-chartjs'],
+        },
+        define: {
+            __VUE_PROD_DEVTOOLS__: true,
+            __VUE_OPTIONS_API__: true,
         },
     };
 });

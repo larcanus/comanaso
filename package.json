@@ -30,6 +30,6 @@
     "eslint-plugin-vue": "^9.31.0",
     "prettier": "^3.4.2",
     "vite": "^6.0.3",
-    "vite-plugin-vue-devtools": "^7.6.10"
+    "vite-plugin-vue-devtools": "^8.0.5"
   }
 }
