@@ -5,6 +5,7 @@ import UpdateButton from '@/components/button/UpdateButton.vue';
 import DialogPie from '@/components/chart/DialogPie.vue';
 import AccountSelector from '@/components/selector/AccountSelector.vue';
 import LoadingProgress from '@/components/progress/LoadingProgress.vue';
+import UserInfoCard from '@/components/card/UserInfoCard.vue';
 import useAccountStore from '@/store/account.js';
 import useDialogStore from '@/store/dialogs.js';
 import useUserStore from '@/store/user.js';
@@ -30,6 +31,7 @@ const loadingProgress = ref({
 
 const hasSelectedAccount = computed(() => selectedAccountId.value !== null);
 const hasDialogsData = computed(() => dialogStore?.state?.dialogs?.length > 0);
+const hasUserData = computed(() => userStore.hasUser);
 const isLoading = computed(() => isLoadingAnalytics.value);
 
 // Проверка статуса выбранного аккаунта
@@ -77,10 +79,7 @@ function handleProgress(progressData) {
  */
 async function loadAnalyticsData(accountId) {
     if (!accountStore.isOnline(accountId)) {
-        toastStore.addToast(
-            'warning',
-            'Аккаунт не подключен. Подключите аккаунт для загрузки данных.'
-        );
+        toastStore.addToast('warning', 'Аккаунт не подключен. Подключите аккаунт для загрузки данных.');
         return;
     }
 
@@ -172,12 +171,8 @@ async function refreshAnalytics() {
 
         <div v-else-if="!isAccountOnline" class="offline-state">
             <p>🔌 Аккаунт не подключен</p>
-            <p class="hint">
-                Статус: <span class="status-badge">{{ accountStatus }}</span>
-            </p>
-            <p class="hint">
-                Подключите аккаунт в разделе "Аккаунты" для загрузки данных аналитики
-            </p>
+            <p class="hint">Статус: <span class="status-badge">{{ accountStatus }}</span></p>
+            <p class="hint">Подключите аккаунт в разделе "Аккаунты" для загрузки данных аналитики</p>
         </div>
 
         <div v-else-if="isLoading" class="loading-state">
@@ -190,9 +185,18 @@ async function refreshAnalytics() {
             />
         </div>
 
-        <div v-else-if="hasDialogsData" class="analytics-content">
-            <DialogTable />
-            <DialogPie />
+        <div v-else-if="hasUserData || hasDialogsData" class="analytics-content">
+            <!-- Информация о пользователе -->
+            <UserInfoCard v-if="hasUserData" />
+
+            <!-- TODO: Блок папок -->
+
+            <!-- Блок диалогов -->
+            <DialogTable v-if="hasDialogsData" />
+            <DialogPie v-if="hasDialogsData" />
+
+            <!-- TODO: Блок AI анализа -->
+
             <UpdateButton :is-disabled="!isAccountOnline" @refresh="refreshAnalytics" />
         </div>
 
