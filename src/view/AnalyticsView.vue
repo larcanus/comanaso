@@ -32,6 +32,17 @@ const hasSelectedAccount = computed(() => selectedAccountId.value !== null);
 const hasDialogsData = computed(() => dialogStore?.state?.dialogs?.length > 0);
 const isLoading = computed(() => isLoadingAnalytics.value);
 
+// Проверка статуса выбранного аккаунта
+const isAccountOnline = computed(() => {
+    if (!selectedAccountId.value) return false;
+    return accountStore.isOnline(selectedAccountId.value);
+});
+
+const accountStatus = computed(() => {
+    if (!selectedAccountId.value) return 'offline';
+    return accountStore.getAccountStatus(selectedAccountId.value);
+});
+
 // Автоматически выбираем первый аккаунт при монтировании
 onMounted(async () => {
     await accountStore.loadAccountsFromServer();
@@ -43,7 +54,7 @@ onMounted(async () => {
 
 // Загружаем данные при изменении выбранного аккаунта
 watch(selectedAccountId, async (newAccountId) => {
-    if (newAccountId) {
+    if (newAccountId && accountStore.isOnline(newAccountId)) {
         await loadAnalyticsData(newAccountId);
     }
 });
@@ -63,18 +74,12 @@ function handleProgress(progressData) {
     console.log('[AnalyticsView] Progress:', progressData);
 }
 
-async function checkAccountIsOnline(accountId)
-{
-    return accountStore.isOnline(accountId);
-}
-
-
 /**
  * Загрузка данных аналитики для выбранного аккаунта
  */
 async function loadAnalyticsData(accountId) {
-    const isOnline = await checkAccountIsOnline(accountId);
-    if (!isOnline) {
+    if (!accountStore.isOnline(accountId)) {
+        toastStore.addToast('warning', 'Аккаунт не подключен. Подключите аккаунт для загрузки данных.');
         return;
     }
 
@@ -155,6 +160,12 @@ async function refreshAnalytics() {
             <p>👆 Выберите аккаунт для просмотра аналитики</p>
         </div>
 
+        <div v-else-if="!isAccountOnline" class="offline-state">
+            <p>🔌 Аккаунт не подключен</p>
+            <p class="hint">Статус: <span class="status-badge">{{ accountStatus }}</span></p>
+            <p class="hint">Подключите аккаунт в разделе "Аккаунты" для загрузки данных аналитики</p>
+        </div>
+
         <div v-else-if="isLoading" class="loading-state">
             <LoadingProgress
                 :progress="loadingProgress.progress"
@@ -168,13 +179,19 @@ async function refreshAnalytics() {
         <div v-else-if="hasDialogsData" class="analytics-content">
             <DialogTable />
             <DialogPie />
-            <UpdateButton @refresh="refreshAnalytics" />
+            <UpdateButton
+                :is-disabled="!isAccountOnline"
+                @refresh="refreshAnalytics"
+            />
         </div>
 
         <div v-else class="empty-state">
             <p>📊 Нет данных для отображения</p>
             <p class="hint">Нажмите кнопку обновления для загрузки данных</p>
-            <UpdateButton @refresh="refreshAnalytics" />
+            <UpdateButton
+                :is-disabled="!isAccountOnline"
+                @refresh="refreshAnalytics"
+            />
         </div>
     </div>
 </template>
@@ -209,7 +226,8 @@ h1 {
     align-items: center;
 }
 
-.empty-state {
+.empty-state,
+.offline-state {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -218,15 +236,36 @@ h1 {
     text-align: center;
 }
 
-.empty-state p {
+.empty-state p,
+.offline-state p {
     font-size: 18px;
     margin: 10px 0;
 }
 
-.empty-state .hint {
+.empty-state .hint,
+.offline-state .hint {
     font-size: 14px;
     color: #999;
     margin-bottom: 20px;
+}
+
+.offline-state {
+    background: rgba(255, 152, 0, 0.1);
+    border: 2px dashed rgba(255, 152, 0, 0.3);
+    border-radius: 12px;
+    padding: 40px;
+    max-width: 600px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(255, 152, 0, 0.2);
+    border-radius: 12px;
+    color: #ff9800;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
 }
 
 .loading-state {

@@ -1,6 +1,13 @@
 <script setup>
 import Confirm from '@/components/modal/Confirm.vue';
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
+
+const props = defineProps({
+    isDisabled: {
+        type: Boolean,
+        default: false,
+    },
+});
 
 const state = reactive({
     isModalConfirmVisible: false,
@@ -10,15 +17,23 @@ const state = reactive({
 
 const emit = defineEmits(['refresh']);
 
+const isButtonDisabled = computed(() => props.isDisabled || state.isGettingData);
+
 async function onClickContainer() {
-    emit('refresh');
-    if (state.isGettingData) {
+    // Если кнопка отключена - ничего не делаем
+    if (isButtonDisabled.value) {
         return;
     }
 
     const resultConfirm = await showConfirm();
     if (resultConfirm) {
         state.isGettingData = true;
+        // Эмитим событие только после подтверждения
+        emit('refresh');
+        // Сбрасываем состояние загрузки через некоторое время
+        setTimeout(() => {
+            state.isGettingData = false;
+        }, 2000);
     }
 }
 
@@ -33,9 +48,9 @@ function showConfirm() {
     });
 }
 
-function handleConfirmOk(inputValue) {
+function handleConfirmOk() {
     state.isModalConfirmVisible = false;
-    resolveConfirmPromise(inputValue);
+    resolveConfirmPromise(true);
 }
 
 function handleConfirmCancel() {
@@ -45,12 +60,16 @@ function handleConfirmCancel() {
 </script>
 
 <template>
-    <div class="container" @click="onClickContainer">
+    <div
+        class="container"
+        :class="{ disabled: isButtonDisabled }"
+        @click="onClickContainer"
+    >
         <img
             src="@/assets/refresh.png"
             alt="update"
             class="button-img"
-            :class="{ getting: state.isGettingData }"
+            :class="{ getting: state.isGettingData, disabled: isButtonDisabled }"
         />
     </div>
     <Confirm
@@ -69,11 +88,25 @@ function handleConfirmCancel() {
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
+
+.container.disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
 .button-img {
     width: 50px;
     height: 50px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
+
+.button-img.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 @keyframes rotate360 {
     to {
         transform: rotate(360deg);
@@ -84,7 +117,7 @@ function handleConfirmCancel() {
     animation: 2s rotate360 infinite linear;
 }
 
-.button-img:active {
+.button-img:not(.disabled):active {
     transform: scale(1.2);
 }
 </style>
