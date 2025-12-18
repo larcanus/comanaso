@@ -52,7 +52,7 @@ const statusText = computed(() => {
         return date.toLocaleDateString('ru-RU', {
             day: 'numeric',
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
         });
     }
 
@@ -62,14 +62,14 @@ const statusText = computed(() => {
 // Язык
 const languageName = computed(() => {
     const langMap = {
-        'ru': 'Русский',
-        'en': 'English',
-        'uk': 'Українська',
-        'de': 'Deutsch',
-        'es': 'Español',
-        'fr': 'Français',
-        'it': 'Italiano',
-        'pt': 'Português',
+        ru: 'Русский',
+        en: 'English',
+        uk: 'Українська',
+        de: 'Deutsch',
+        es: 'Español',
+        fr: 'Français',
+        it: 'Italiano',
+        pt: 'Português',
     };
     return langMap[userStore.userLangCode] || userStore.userLangCode || 'Не указан';
 });
@@ -87,11 +87,7 @@ const languageName = computed(() => {
                 <div v-if="userStore.userAvatar" class="avatar">
                     <img :src="userStore.userAvatar" alt="Аватар" />
                 </div>
-                <div
-                    v-else
-                    class="avatar-placeholder"
-                    :style="{ backgroundColor: avatarBgColor }"
-                >
+                <div v-else class="avatar-placeholder" :style="{ backgroundColor: avatarBgColor }">
                     <span class="avatar-letter">{{ avatarLetter }}</span>
                 </div>
             </div>
@@ -103,10 +99,18 @@ const languageName = computed(() => {
                     <div class="info-row primary">
                         <h2 class="user-name">{{ userStore.fullName }}</h2>
                         <div class="badges">
-                            <span v-if="userStore.userIsPremium" class="badge premium" title="Premium пользователь">
+                            <span
+                                v-if="userStore.userIsPremium"
+                                class="badge premium"
+                                title="Premium пользователь"
+                            >
                                 Premium
                             </span>
-                            <span v-if="userStore.userIsVerified" class="badge verified" title="Верифицирован">
+                            <span
+                                v-if="userStore.userIsVerified"
+                                class="badge verified"
+                                title="Верифицирован"
+                            >
                                 Verified
                             </span>
                             <span v-if="userStore.userIsBot" class="badge bot" title="Бот">
@@ -141,10 +145,7 @@ const languageName = computed(() => {
 
                     <div class="info-item">
                         <span class="info-label">Статус:</span>
-                        <span
-                            class="info-value status"
-                            :class="{ online: userStore.isOnline }"
-                        >
+                        <span class="info-value status" :class="{ online: userStore.isOnline }">
                             {{ statusText }}
                         </span>
                     </div>
