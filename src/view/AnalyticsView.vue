@@ -168,7 +168,6 @@ async function refreshAnalytics() {
         />
 
         <div v-if="!hasSelectedAccount" class="empty-state">
-            <p>👆 Выберите аккаунт для просмотра аналитики</p>
         </div>
 
         <div v-else-if="!isAccountOnline" class="offline-state">

@@ -87,8 +87,11 @@ export const useUserStore = defineStore('user', () => {
     const userPhoto = computed(() => photo.value);
 
     // Полное имя (комбинация firstName + lastName)
-    const fullName = computed(() =>
-        `${firstName.value} ${lastName.value}`.trim() || username.value || 'Неизвестный пользователь'
+    const fullName = computed(
+        () =>
+            `${firstName.value} ${lastName.value}`.trim() ||
+            username.value ||
+            'Неизвестный пользователь'
     );
 
     // Флаги
