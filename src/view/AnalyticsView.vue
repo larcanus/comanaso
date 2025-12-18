@@ -94,14 +94,23 @@ async function loadAnalyticsData(accountId) {
 
     try {
         const data = await analyticsService.loadAllData(accountId, handleProgress);
-
+        console.log('loadAllData: ',data);
         // Сохраняем данные профиля в user store
         if (data.accountInfo) {
             userStore.setUserData({
                 id: data.accountInfo.id,
-                fullName:
-                    `${data.accountInfo.firstName || ''} ${data.accountInfo.lastName || ''}`.trim(),
+                firstName: data.accountInfo.firstName || '',
+                lastName: data.accountInfo.lastName || '',
+                username: data.accountInfo.username || '',
+                phone: data.accountInfo.phone || '',
+                bio: data.accountInfo.bio || '',
+                photo: data.accountInfo.photo,
                 avatar: data.accountInfo.photo?.photoId || '',
+                isBot: data.accountInfo.isBot || false,
+                isPremium: data.accountInfo.isPremium || false,
+                isVerified: data.accountInfo.isVerified || false,
+                langCode: data.accountInfo.langCode || null,
+                status: data.accountInfo.status || null,
             });
         }
 
