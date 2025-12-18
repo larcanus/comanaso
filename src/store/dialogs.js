@@ -16,22 +16,32 @@ const useDialogStore = defineStore('dialog', () => {
 
     function setFolders(data) {
         console.log('setFolders', data);
-        foldersState.value.rawFoldersData = data.filters.filter(
-            (filter) => filter.className !== 'DialogFilterDefault'
-        );
+
+        // Если data - это массив, используем его напрямую
+        // Если это объект с полем filters, используем filters
+        const foldersArray = Array.isArray(data) ? data : data?.filters || [];
+
+        // Фильтруем папки - исключаем дефолтные (isDefault: true)
+        foldersState.value.rawFoldersData = foldersArray.filter((folder) => !folder.isDefault);
+
+        // Очищаем предыдущие связи
+        foldersState.value.dialogsIdByFolderId = {};
+
+        // Обрабатываем каждую папку
         foldersState.value.rawFoldersData.forEach((folder) => {
-            folder.includePeers.forEach((includePeer) => {
-                const entityIds = foldersState.value.dialogsIdByFolderId[folder.id];
-                const entityId =
-                    includePeer.channelId?.value ??
-                    includePeer.userId?.value ??
-                    includePeer.chatId?.value;
-                if (entityIds) {
-                    foldersState.value.dialogsIdByFolderId[folder.id].push(entityId);
-                } else {
-                    foldersState.value.dialogsIdByFolderId[folder.id] = [entityId];
-                }
-            });
+            // includedChatIds - это уже массив строк с ID чатов
+            if (folder.includedChatIds && Array.isArray(folder.includedChatIds)) {
+                foldersState.value.dialogsIdByFolderId[folder.id] = folder.includedChatIds.map(
+                    (id) => String(id)
+                );
+            } else {
+                foldersState.value.dialogsIdByFolderId[folder.id] = [];
+            }
+        });
+
+        console.log('Folders processed:', {
+            rawFolders: foldersState.value.rawFoldersData,
+            dialogsByFolder: foldersState.value.dialogsIdByFolderId,
         });
 
         return foldersState.value;
@@ -84,18 +94,26 @@ function validateDialogs(dialogs = [], foldersState) {
 }
 
 function getTitleDialogLoc(dialogData) {
-    const objectData = {};
+    const objectData = {
+        value: '',
+        loc: 'Без названия'
+    };
+
     if (dialogData.title && dialogData.title.length > 0) {
         objectData.value = dialogData.title;
         objectData.loc = dialogData.title;
+        return objectData;
     }
 
     if (dialogData.name && dialogData.name.length > 0) {
         objectData.value = dialogData.name;
         objectData.loc = dialogData.name;
+        return objectData;
     }
 
-    if (dialogData.title.length === 0 && dialogData.title.length === 0) {
+    // Если оба поля отсутствуют или пустые
+    if ((!dialogData.title || dialogData.title.length === 0) &&
+        (!dialogData.name || dialogData.name.length === 0)) {
         objectData.value = '';
         objectData.loc = 'Удаленный аккаунт';
     }
@@ -139,21 +157,35 @@ function getFolderIdDialogLoc(dialogData, foldersState) {
         value: [],
         loc: '',
     };
+
+    // Проверяем архивные диалоги
     if (dialogData.folderId === 1) {
         objectData.value.push(1);
         objectData.loc = 'Архив';
-
         return objectData;
     }
 
-    const entityId = dialogData.entity?.id?.value;
+    // Получаем ID диалога (приводим к строке для сравнения)
+    const entityId = String(dialogData.entity?.id?.value || dialogData.id?.value || '');
+
+    if (!entityId) {
+        objectData.loc = 'нет';
+        return objectData;
+    }
+
+    // Ищем диалог в папках
     Object.keys(foldersState.value.dialogsIdByFolderId).forEach((folderId) => {
-        if (foldersState.value.dialogsIdByFolderId[folderId].includes(entityId)) {
-            objectData.value.push(folderId);
-            const title =
-                foldersState.value.rawFoldersData.find((folderData) => {
-                    return folderData.id === Number(folderId);
-                })?.title || '';
+        const folderDialogIds = foldersState.value.dialogsIdByFolderId[folderId];
+
+        // Проверяем наличие ID диалога в папке
+        if (folderDialogIds.includes(entityId)) {
+            objectData.value.push(Number(folderId));
+
+            const folder = foldersState.value.rawFoldersData.find(
+                (folderData) => folderData.id === Number(folderId)
+            );
+
+            const title = folder?.title || `Папка #${folderId}`;
 
             objectData.loc.length > 0
                 ? (objectData.loc += `, '${title}'`)
@@ -195,9 +227,10 @@ function getPinnedDialogLoc(pinned) {
 
 function getMuteDialogLoc(dialog) {
     const objectData = {
-        value: dialog.notifySettings?.muteUntil,
+        value: dialog?.notifySettings?.muteUntil || null,
         loc: 'нет',
     };
+
     if (dialog && dialog.notifySettings?.muteUntil > 1) {
         const currentTimestamp = Date.now();
         const until = currentTimestamp + dialog.notifySettings?.muteUntil;

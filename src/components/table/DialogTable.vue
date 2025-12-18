@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, toRaw, shallowRef } from 'vue';
+import { ref, computed, onMounted, onUnmounted, toRaw, watch } from 'vue';
 import useDialogStore from '@/store/dialogs.js';
 
 const dialogStore = useDialogStore();
@@ -58,15 +58,6 @@ function unsubscribeEventListeners() {
     window.removeEventListener('resize', updateDivWidth);
     appNode.value.removeEventListener('click', hideColumnMenu);
 }
-
-dialogStore.$onAction(({ name, after }) => {
-    after(() => {
-        if (name === 'setDialogs') {
-            dialogState.value = dialogStore.getPreparedDialogs();
-            dialogsFiltered.value = dialogState.value;
-        }
-    });
-});
 
 function hideColumnMenu(e) {
     if (e.target.id && e.target.id.includes('column')) {

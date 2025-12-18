@@ -30,7 +30,7 @@ const loadingProgress = ref({
 });
 
 const hasSelectedAccount = computed(() => selectedAccountId.value !== null);
-const hasDialogsData = computed(() => dialogStore?.state?.dialogs?.length > 0);
+const hasDialogsData = computed(() => dialogStore?.state?.length > 0);
 const hasUserData = computed(() => userStore.hasUser);
 const isLoading = computed(() => isLoadingAnalytics.value);
 
@@ -119,13 +119,15 @@ async function loadAnalyticsData(accountId) {
             });
         }
 
+        // Сохраняем папки в dialog store
+        if (data.folders) {
+            dialogStore.setFolders(data.folders);
+        }
+
         // Сохраняем диалоги в dialog store
         if (data.dialogs?.dialogs) {
             dialogStore.setDialogs(data.dialogs.dialogs);
         }
-
-        // В будущем можно сохранять folders в соответствующий store
-        console.log('[AnalyticsView] Folders loaded:', data.folders);
 
         toastStore.addToast('success', 'Данные аналитики успешно загружены');
     } catch (error) {
