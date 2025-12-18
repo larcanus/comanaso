@@ -122,11 +122,11 @@ const languageName = computed(() => {
                     <div class="info-row">
                         <div class="info-item highlight">
                             <span class="info-label">Т:</span>
-                            <span class="info-value phone">{{ formattedPhone }}</span>
+                            <span class="info-value phone sub-margin">{{ formattedPhone }}</span>
                         </div>
                         <div class="info-item highlight">
                             <span class="info-label">ID:</span>
-                            <span class="info-value">{{ userStore.userId }}</span>
+                            <span class="info-value sub-margin">{{ userStore.userId }}</span>
                         </div>
                     </div>
                 </div>
@@ -331,6 +331,10 @@ const languageName = computed(() => {
 
 .info-value.phone {
     white-space: nowrap;
+}
+
+.info-value.sub-margin {
+    margin-left: 5px;
 }
 
 .info-value.status {
