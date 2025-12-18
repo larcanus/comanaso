@@ -121,7 +121,7 @@ const languageName = computed(() => {
 
                     <div class="info-row">
                         <div class="info-item highlight">
-                            <span class="info-label">Телефон:</span>
+                            <span class="info-label">Т:</span>
                             <span class="info-value phone">{{ formattedPhone }}</span>
                         </div>
                         <div class="info-item highlight">
@@ -164,16 +164,16 @@ const languageName = computed(() => {
 .user-info-card {
     width: 100%;
     max-width: 750px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    border: 1px solid #ccc;
+    border-radius: 2px;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin: 10px;
+    box-sizing: border-box;
 }
 
 .card-header {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 12px 16px;
+    background-color: var(--vt-bt-background-color);
+    padding: 10px;
     text-align: center;
 }
 
@@ -187,9 +187,9 @@ const languageName = computed(() => {
 .card-content {
     display: flex;
     flex-direction: row;
-    gap: 20px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.95);
+    gap: 15px;
+    padding: 10px;
+    background-color: var(--color-background);
 }
 
 /* Аватар */
@@ -205,7 +205,7 @@ const languageName = computed(() => {
     height: 105px;
     border-radius: 50%;
     overflow: hidden;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    border: 1px solid #ccc;
 }
 
 .avatar img {
@@ -231,35 +231,35 @@ const languageName = computed(() => {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
 }
 
 .info-main {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .info-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
 }
 
 .info-row.primary {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e0e0e0;
+    gap: 6px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ccc;
 }
 
 .user-name {
     margin: 0;
     font-size: 20px;
     font-weight: 700;
-    color: var(--vt-c-indigo);
+    color: var(--color-heading);
 }
 
 .badges {
@@ -270,25 +270,29 @@ const languageName = computed(() => {
 
 .badge {
     padding: 3px 10px;
-    border-radius: 10px;
+    border-radius: 3px;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
+    border: 1px solid #ccc;
 }
 
 .badge.premium {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    background-color: #ffd700;
     color: #333;
+    border-color: #ffed4e;
 }
 
 .badge.verified {
-    background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+    background-color: #00b4d8;
     color: var(--vt-c-white);
+    border-color: #0077b6;
 }
 
 .badge.bot {
-    background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
-    color: var(--vt-c-white);
+    background-color: #a8dadc;
+    color: #333;
+    border-color: #457b9d;
 }
 
 .info-item {
@@ -300,10 +304,11 @@ const languageName = computed(() => {
 }
 
 .info-item.highlight {
-    background: rgba(102, 126, 234, 0.1);
-    padding: 8px 12px;
-    border-radius: 6px;
-    border-left: 3px solid #667eea;
+    background-color: var(--color-background-soft);
+    padding: 5px 10px;
+    border-radius: 2px;
+    border: 1px solid #ccc;
+    display: inline-block;
 }
 
 .info-item.bio {
@@ -313,13 +318,13 @@ const languageName = computed(() => {
 
 .info-label {
     font-weight: 600;
-    color: #555;
+    color: var(--color-text);
     white-space: nowrap;
     font-size: 14px;
 }
 
 .info-value {
-    color: var(--vt-c-indigo);
+    color: var(--color-heading);
     font-weight: 500;
     font-size: 14px;
 }
@@ -339,7 +344,7 @@ const languageName = computed(() => {
 
 .bio-text {
     margin: 4px 0 0 0;
-    color: #555;
+    color: var(--color-text);
     line-height: 1.5;
     font-style: italic;
     font-size: 13px;
@@ -348,8 +353,8 @@ const languageName = computed(() => {
 .info-additional {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-top: 8px;
+    gap: 6px;
+    padding-top: 6px;
 }
 
 /* Адаптивность */
@@ -357,7 +362,6 @@ const languageName = computed(() => {
     .card-content {
         flex-direction: column;
         align-items: center;
-        padding: 16px;
     }
 
     .avatar-section {
