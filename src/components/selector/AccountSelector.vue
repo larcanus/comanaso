@@ -207,6 +207,7 @@ function getStatusText(status) {
     gap: 10px;
     transition: background-color 0.2s ease;
     color: #333;
+    letter-spacing: normal;
 }
 
 .dropdown-item:hover {
@@ -221,6 +222,8 @@ function getStatusText(status) {
     flex: 1;
     font-weight: 500;
     transform: translateY(-1px);
+    letter-spacing: normal;
+    font-size: 14px;
 }
 
 .account-status {
