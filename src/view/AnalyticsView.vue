@@ -45,8 +45,6 @@ const accountStatus = computed(() => {
 
 // Автоматически выбираем первый аккаунт при монтировании
 onMounted(async () => {
-    await accountStore.loadAccountsFromServer();
-
     if (accountStore.accountIds.length > 0) {
         selectedAccountId.value = accountStore.accountIds[0];
     }
