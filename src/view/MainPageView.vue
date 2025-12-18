@@ -2,11 +2,11 @@
 import { useRouter, useRoute } from 'vue-router';
 import { computed, ref } from 'vue';
 import FooterSection from '@/components/front-page-section/FooterSection.vue';
-import { useUserStore } from '@/store/user';
+import { useAuthStore } from '@/store/auth.js';
 import LogOut from '@/components/button/LogOut.vue';
 import Toast from '@/components/toast/Toast.vue';
 
-const store = useUserStore();
+const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 const currentRouterPath = computed(() => {
@@ -47,7 +47,9 @@ function onMenuClick() {
             </div>
             <div class="user-info">
                 <img src="@/assets/empty-avatar.png" alt="User Avatar" class="avatar" />
-                <h2 class="user-name">{{ store.fullName }}</h2>
+                <h2 class="user-name">
+                    {{ authStore.userName || authStore.userLogin || 'Неизвестный пользователь' }}
+                </h2>
             </div>
             <nav class="navigation">
                 <button
