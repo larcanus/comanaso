@@ -77,7 +77,10 @@ function handleProgress(progressData) {
  */
 async function loadAnalyticsData(accountId) {
     if (!accountStore.isOnline(accountId)) {
-        toastStore.addToast('warning', 'Аккаунт не подключен. Подключите аккаунт для загрузки данных.');
+        toastStore.addToast(
+            'warning',
+            'Аккаунт не подключен. Подключите аккаунт для загрузки данных.'
+        );
         return;
     }
 
@@ -94,7 +97,7 @@ async function loadAnalyticsData(accountId) {
 
     try {
         const data = await analyticsService.loadAllData(accountId, handleProgress);
-        console.log('loadAllData: ',data);
+        console.log('loadAllData: ', data);
         // Сохраняем данные профиля в user store
         if (data.accountInfo) {
             userStore.setUserData({
@@ -169,8 +172,12 @@ async function refreshAnalytics() {
 
         <div v-else-if="!isAccountOnline" class="offline-state">
             <p>🔌 Аккаунт не подключен</p>
-            <p class="hint">Статус: <span class="status-badge">{{ accountStatus }}</span></p>
-            <p class="hint">Подключите аккаунт в разделе "Аккаунты" для загрузки данных аналитики</p>
+            <p class="hint">
+                Статус: <span class="status-badge">{{ accountStatus }}</span>
+            </p>
+            <p class="hint">
+                Подключите аккаунт в разделе "Аккаунты" для загрузки данных аналитики
+            </p>
         </div>
 
         <div v-else-if="isLoading" class="loading-state">
@@ -186,19 +193,13 @@ async function refreshAnalytics() {
         <div v-else-if="hasDialogsData" class="analytics-content">
             <DialogTable />
             <DialogPie />
-            <UpdateButton
-                :is-disabled="!isAccountOnline"
-                @refresh="refreshAnalytics"
-            />
+            <UpdateButton :is-disabled="!isAccountOnline" @refresh="refreshAnalytics" />
         </div>
 
         <div v-else class="empty-state">
             <p>📊 Нет данных для отображения</p>
             <p class="hint">Нажмите кнопку обновления для загрузки данных</p>
-            <UpdateButton
-                :is-disabled="!isAccountOnline"
-                @refresh="refreshAnalytics"
-            />
+            <UpdateButton :is-disabled="!isAccountOnline" @refresh="refreshAnalytics" />
         </div>
     </div>
 </template>
