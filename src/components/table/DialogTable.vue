@@ -41,23 +41,17 @@ function updateDivWidth() {
 }
 
 const appNode = computed(() => document.querySelector('#app'));
+
 onMounted(() => {
-    subscribeEventListeners();
+    appNode.value?.addEventListener('click', hideColumnMenu);
+    window.addEventListener('resize', updateDivWidth);
+
 });
 
 onUnmounted(() => {
-    unsubscribeEventListeners();
-});
-
-function subscribeEventListeners() {
+    appNode.value?.removeEventListener('click', hideColumnMenu);
     window.addEventListener('resize', updateDivWidth);
-    appNode.value.addEventListener('click', hideColumnMenu);
-}
-
-function unsubscribeEventListeners() {
-    window.removeEventListener('resize', updateDivWidth);
-    appNode.value.removeEventListener('click', hideColumnMenu);
-}
+});
 
 function hideColumnMenu(e) {
     if (e.target.id && e.target.id.includes('column')) {
@@ -65,10 +59,6 @@ function hideColumnMenu(e) {
     }
     showColumnMenu.value = false;
 }
-
-onUnmounted(() => {
-    window.removeEventListener('resize', updateDivWidth);
-});
 
 function toggleColumnMenu() {
     showColumnMenu.value = !showColumnMenu.value;
@@ -257,17 +247,17 @@ function handleSearchInput() {
             </div>
         </div>
         <div class="pagination">
-            <button :disabled="currentPage === 1" @click="prevPageToStart"><<</button>
-            <button :disabled="currentPage === 1" @click="prevPage"><</button>
+            <button :disabled="currentPage === 1" @click="prevPageToStart">&laquo;</button>
+            <button :disabled="currentPage === 1" @click="prevPage">&lt;</button>
             <span>Page {{ currentPage }} of {{ totalPages }}</span>
             <button :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
-                >
+                &gt;
             </button>
             <button
                 :disabled="currentPage === totalPages || totalPages === 0"
                 @click="nextPageToEnd"
             >
-                >>
+                &raquo;
             </button>
         </div>
     </div>
@@ -293,6 +283,8 @@ function handleSearchInput() {
     min-width: 100px;
     box-sizing: border-box;
     overflow-x: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .table-container {
