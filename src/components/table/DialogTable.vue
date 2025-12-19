@@ -256,7 +256,7 @@ function handleSearchInput() {
         <div class="pagination">
             <button :disabled="currentPage === 1" @click="prevPageToStart">&laquo;</button>
             <button :disabled="currentPage === 1" @click="prevPage">&lt;</button>
-            <span>Page {{ currentPage }} of {{ totalPages }}</span>
+            <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
             <button :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
                 &gt;
             </button>
@@ -281,15 +281,26 @@ function handleSearchInput() {
     align-content: center;
     text-align: center;
     justify-self: center;
-    color: var(--vt-c-white-mute_x2);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1px;
+    padding: 12px 20px;
     margin: 10px 0 5px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header h3 {
+    color: #ffffff;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .main-container {
     box-sizing: border-box;
     overflow-x: auto;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 1px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .table-container {
@@ -303,16 +314,26 @@ function handleSearchInput() {
 }
 
 .styled-table thead {
-    background-color: #ada1af;
-    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.styled-table thead th {
+    color: #ffffff;
+    font-weight: 600;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .styled-table th,
 .styled-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    padding: 12px;
     text-align: center;
-    color: var(--vt-c-black-soft);
+}
+
+.styled-table tbody td {
+    color: #2c3e50;
+    font-weight: 500;
 }
 
 #date,
@@ -323,12 +344,19 @@ function handleSearchInput() {
 
 .styled-table th {
     cursor: pointer;
-    font-weight: bold;
-    white-space: nowrap;
 }
 
 .styled-table tbody tr {
-    background-color: #e7e5e8;
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+.styled-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #e3e7ff;
 }
 
 .table-controls {
@@ -340,18 +368,25 @@ function handleSearchInput() {
     position: absolute;
     top: -10px;
     right: -10px;
-    background-color: white;
-    border: 1px solid #ddd;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    border: none;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
     font-size: 16px;
     z-index: 901;
+    transition: all 0.3s ease;
+}
+
+.edit-columns-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
 }
 
 .column-menu {
@@ -361,8 +396,9 @@ function handleSearchInput() {
     background-color: white;
     color: var(--vt-c-black-soft);
     border: 1px solid #ddd;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 1px;
     z-index: 900;
 }
 
@@ -370,7 +406,7 @@ function handleSearchInput() {
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    margin: 2px 0 5px 0;
+    margin: 4px 0 6px 0;
 }
 
 .column-menu-item input {
@@ -383,36 +419,87 @@ function handleSearchInput() {
 }
 
 .pagination {
-    margin-top: 10px;
+    margin-top: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 8px;
 }
 
 .pagination button {
-    margin: 0 5px;
+    padding: 10px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 1px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.pagination button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.pagination button:disabled {
+    background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
+    box-shadow: none;
+}
+
+.pagination .page-info {
+    padding: 0 12px;
+    font-weight: 500;
+    color: var(--color-heading);
+    font-size: 15px;
 }
 
 .search-container {
     display: flex;
     align-items: center;
     position: relative;
+    margin-bottom: 12px;
 }
 
 .search-button {
-    background: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
     border: none;
+    border-radius: 1px;
     cursor: pointer;
     font-size: 1.5rem;
+    padding: 8px 12px;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.search-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .search-input {
     margin-left: 10px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 2px;
+    padding: 8px 12px;
+    border: 2px solid #667eea;
+    border-radius: 1px;
     width: 200px;
     overflow: hidden;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #764ba2;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .fade-enter-active,
@@ -428,5 +515,70 @@ function handleSearchInput() {
 .fade-enter-to,
 .fade-leave-from {
     width: 200px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .header h3 {
+        font-size: 18px;
+    }
+
+    .pagination {
+        gap: 6px;
+    }
+
+    .pagination button {
+        padding: 12px 18px;
+        font-size: 18px;
+        min-width: 50px;
+        min-height: 50px;
+    }
+
+    .pagination .page-info {
+        font-size: 14px;
+        padding: 0 8px;
+    }
+
+    .styled-table th,
+    .styled-table td {
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 10px 15px;
+    }
+
+    .header h3 {
+        font-size: 16px;
+    }
+
+    .pagination button {
+        padding: 14px 20px;
+        font-size: 20px;
+        min-width: 54px;
+        min-height: 54px;
+    }
+
+    .pagination .page-info {
+        font-size: 13px;
+    }
+
+    .styled-table th,
+    .styled-table td {
+        padding: 8px 6px;
+        font-size: 13px;
+    }
+
+    .search-input {
+        width: 150px;
+    }
+
+    .fade-enter-to,
+    .fade-leave-from {
+        width: 150px;
+    }
 }
 </style>
