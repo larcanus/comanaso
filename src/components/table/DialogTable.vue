@@ -312,8 +312,9 @@ function handleSearchInput() {
 }
 
 .search-button:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .search-input-wrapper {
@@ -449,8 +450,8 @@ function handleSearchInput() {
 }
 
 .edit-columns-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #7c8ef5 0%, #8a5bb3 100%);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
 }
 
 .column-menu {
