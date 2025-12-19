@@ -189,10 +189,8 @@ function handleSearchInput() {
 
 <template>
     <div>
-        <div class="header-table-wrapper">
-            <div class="header">
-                <h3>{{ tableHeaderLoc }}</h3>
-            </div>
+        <div class="header">
+            <h3>{{ tableHeaderLoc }}</h3>
             <div class="search-container">
                 <button class="search-button" @click="toggleSearch">🔍</button>
                 <Transition name="fade">
@@ -201,7 +199,7 @@ function handleSearchInput() {
                         v-model="searchQuery"
                         type="text"
                         class="search-input"
-                        placeholder="Введите текст для поиска..."
+                        placeholder="Поиск..."
                         @input="handleSearchInput"
                     />
                 </Transition>
@@ -271,16 +269,12 @@ function handleSearchInput() {
 </template>
 
 <style scoped>
-.header-table-wrapper {
-    display: flex;
-    flex-direction: column;
-}
-
 .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    align-content: center;
-    text-align: center;
-    justify-self: center;
+    gap: 12px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 1px;
     padding: 12px 20px;
@@ -294,6 +288,88 @@ function handleSearchInput() {
     font-size: 20px;
     font-weight: 600;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-button {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 6px 10px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.search-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.search-input {
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #2c3e50;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.search-input::placeholder {
+    color: rgba(44, 62, 80, 0.6);
+}
+
+.search-input:focus {
+    background: #ffffff;
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.fade-enter-active {
+    transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.fade-leave-active {
+    transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.fade-enter-from {
+    width: 0;
+    opacity: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.fade-enter-to {
+    width: 200px;
+    opacity: 1;
+}
+
+.fade-leave-from {
+    width: 200px;
+    opacity: 1;
+}
+
+.fade-leave-to {
+    width: 0;
+    opacity: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-left-width: 0;
+    border-right-width: 0;
 }
 
 .main-container {
@@ -461,66 +537,25 @@ function handleSearchInput() {
     font-size: 15px;
 }
 
-.search-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    margin-bottom: 12px;
-}
-
-.search-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 1px;
-    cursor: pointer;
-    font-size: 1.5rem;
-    padding: 8px 12px;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
-    transition: all 0.3s ease;
-}
-
-.search-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.search-input {
-    margin-left: 10px;
-    padding: 8px 12px;
-    border: 2px solid #667eea;
-    border-radius: 1px;
-    width: 200px;
-    overflow: hidden;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #764ba2;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: width 0.3s ease-in-out;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    width: 0;
-}
-
-.fade-enter-to,
-.fade-leave-from {
-    width: 200px;
-}
-
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
+    .header {
+        flex-wrap: wrap;
+        padding: 10px 15px;
+    }
+
     .header h3 {
         font-size: 18px;
+        flex: 1 1 auto;
+    }
+
+    .search-container {
+        flex: 0 1 auto;
+    }
+
+    .fade-enter-to,
+    .fade-leave-from {
+        width: 150px;
     }
 
     .pagination {
@@ -548,11 +583,28 @@ function handleSearchInput() {
 
 @media (max-width: 480px) {
     .header {
-        padding: 10px 15px;
+        padding: 10px;
+        gap: 8px;
     }
 
     .header h3 {
         font-size: 16px;
+        flex: 1 1 100%;
+        text-align: center;
+    }
+
+    .search-container {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+
+    .fade-enter-to,
+    .fade-leave-from {
+        width: 120px;
+    }
+
+    .search-input {
+        font-size: 13px;
     }
 
     .pagination button {
@@ -570,15 +622,6 @@ function handleSearchInput() {
     .styled-table td {
         padding: 8px 6px;
         font-size: 13px;
-    }
-
-    .search-input {
-        width: 150px;
-    }
-
-    .fade-enter-to,
-    .fade-leave-from {
-        width: 150px;
     }
 }
 </style>
