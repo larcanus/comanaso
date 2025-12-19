@@ -45,7 +45,6 @@ const appNode = computed(() => document.querySelector('#app'));
 onMounted(() => {
     appNode.value?.addEventListener('click', hideColumnMenu);
     window.addEventListener('resize', updateDivWidth);
-
 });
 
 onUnmounted(() => {
