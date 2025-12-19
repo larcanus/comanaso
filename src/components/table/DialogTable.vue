@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, toRaw, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, toRaw } from 'vue';
 import useDialogStore from '@/store/dialogs.js';
+import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
 
 const dialogStore = useDialogStore();
 
@@ -33,23 +34,21 @@ const defaultVisibleColumns = allColumns.filter(
 const visibleColumns = ref(defaultVisibleColumns.map((column) => column.key));
 const showColumnMenu = ref(false);
 
-const isMobileWidth = (width) => width <= 750;
-const mainDivWidth = ref(window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7));
-
-function updateDivWidth() {
-    mainDivWidth.value = window.innerWidth * (isMobileWidth(window.innerWidth) ? 0.9 : 0.7);
-}
+// Динамический расчет ширины таблицы
+const { width: tableWidth } = useResponsiveWidth({
+    mobileBreakpoint: 750,
+    desktopWidthRatio: 0.7,
+    mobileWidthRatio: 0.9,
+});
 
 const appNode = computed(() => document.querySelector('#app'));
 
 onMounted(() => {
     appNode.value?.addEventListener('click', hideColumnMenu);
-    window.addEventListener('resize', updateDivWidth);
 });
 
 onUnmounted(() => {
     appNode.value?.removeEventListener('click', hideColumnMenu);
-    window.addEventListener('resize', updateDivWidth);
 });
 
 function hideColumnMenu(e) {
@@ -229,7 +228,7 @@ function handleSearchInput() {
                 </div>
             </div>
         </div>
-        <div class="main-container" :style="{ width: mainDivWidth + 'px' }">
+        <div class="main-container" :style="{ width: tableWidth + 'px' }">
             <div class="table-container">
                 <table class="styled-table">
                     <thead>
@@ -287,8 +286,6 @@ function handleSearchInput() {
 }
 
 .main-container {
-    max-width: 1000px;
-    min-width: 100px;
     box-sizing: border-box;
     overflow-x: auto;
     border-radius: 4px;
@@ -298,6 +295,7 @@ function handleSearchInput() {
 .table-container {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .styled-table {

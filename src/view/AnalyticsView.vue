@@ -11,6 +11,7 @@ import useDialogStore from '@/store/dialogs.js';
 import useUserStore from '@/store/user.js';
 import useToastStore from '@/store/toast.js';
 import { analyticsService } from '@/services/analytics.service.js';
+import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
 
 const accountStore = useAccountStore();
 const dialogStore = useDialogStore();
@@ -19,6 +20,13 @@ const toastStore = useToastStore();
 
 const selectedAccountId = ref(null);
 const isLoadingAnalytics = ref(false);
+
+// Динамический расчет ширины контента
+const { width: contentWidth } = useResponsiveWidth({
+    mobileBreakpoint: 750,
+    desktopWidthRatio: 0.7,
+    mobileWidthRatio: 0.9,
+});
 
 // Состояние прогресса загрузки
 const loadingProgress = ref({
@@ -191,7 +199,11 @@ async function refreshAnalytics() {
             />
         </div>
 
-        <div v-else-if="hasUserData || hasDialogsData" class="analytics-content">
+        <div
+            v-else-if="hasUserData || hasDialogsData"
+            class="analytics-content"
+            :style="{ width: contentWidth + 'px' }"
+        >
             <!-- Информация о пользователе -->
             <UserInfoCard v-if="hasUserData" />
 
