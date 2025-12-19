@@ -194,14 +194,15 @@ function handleSearchInput() {
             <div class="search-container">
                 <button class="search-button" @click="toggleSearch">🔍</button>
                 <Transition name="fade">
-                    <input
-                        v-if="showInput"
-                        v-model="searchQuery"
-                        type="text"
-                        class="search-input"
-                        placeholder="Поиск..."
-                        @input="handleSearchInput"
-                    />
+                    <div v-if="showInput" class="search-input-wrapper">
+                        <input
+                            v-model="searchQuery"
+                            type="text"
+                            class="search-input"
+                            placeholder="Поиск..."
+                            @input="handleSearchInput"
+                        />
+                    </div>
                 </Transition>
             </div>
         </div>
@@ -315,7 +316,13 @@ function handleSearchInput() {
     transform: scale(1.05);
 }
 
+.search-input-wrapper {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .search-input {
+    width: 200px;
     padding: 6px 12px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 1px;
@@ -336,40 +343,21 @@ function handleSearchInput() {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
-.fade-enter-active {
-    transition: width 0.3s ease, opacity 0.3s ease;
-}
-
+.fade-enter-active,
 .fade-leave-active {
-    transition: width 0.3s ease, opacity 0.3s ease;
+    transition: max-width 0.1s ease, opacity 0.1s ease;
 }
 
-.fade-enter-from {
-    width: 0;
-    opacity: 0;
-    padding-left: 0;
-    padding-right: 0;
-    border-left-width: 0;
-    border-right-width: 0;
-}
-
-.fade-enter-to {
-    width: 200px;
-    opacity: 1;
-}
-
-.fade-leave-from {
-    width: 200px;
-    opacity: 1;
-}
-
+.fade-enter-from,
 .fade-leave-to {
-    width: 0;
+    max-width: 0;
     opacity: 0;
-    padding-left: 0;
-    padding-right: 0;
-    border-left-width: 0;
-    border-right-width: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+    max-width: 200px;
+    opacity: 1;
 }
 
 .main-container {
@@ -553,9 +541,13 @@ function handleSearchInput() {
         flex: 0 1 auto;
     }
 
+    .search-input {
+        width: 150px;
+    }
+
     .fade-enter-to,
     .fade-leave-from {
-        width: 150px;
+        max-width: 150px;
     }
 
     .pagination {
@@ -598,9 +590,13 @@ function handleSearchInput() {
         justify-content: center;
     }
 
+    .search-input {
+        width: 120px;
+    }
+
     .fade-enter-to,
     .fade-leave-from {
-        width: 120px;
+        max-width: 120px;
     }
 
     .search-input {
