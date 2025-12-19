@@ -172,11 +172,20 @@ function toggleSearch() {
 }
 
 function handleSearchInput() {
+    const query = searchQuery.value.toLowerCase().trim();
+
+    if (!query) {
+        dialogsFiltered.value = dialogState.value;
+        return;
+    }
+
     dialogsFiltered.value = dialogState.value.filter((item) => {
         const itemTitleValue = toRaw(item.title);
-
-        return itemTitleValue.loc.startsWith(searchQuery.value);
+        return itemTitleValue.loc.toLowerCase().includes(query);
     });
+
+    // Сбрасываем на первую страницу после поиска
+    currentPage.value = 1;
 }
 </script>
 
