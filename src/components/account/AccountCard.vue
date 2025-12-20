@@ -114,6 +114,19 @@ async function onClickDelete() {
     }
 }
 
+/**
+ * Вспомогательная функция для безопасного отключения аккаунта
+ * Используется при отмене подключения или ошибках
+ */
+async function safeDisconnect(accountId) {
+    try {
+        await accountService.disconnectAccount(accountId);
+        console.log(`Account ${accountId} disconnected successfully`);
+    } catch (disconnectError) {
+        console.warn('Disconnect error (non-critical):', disconnectError);
+    }
+}
+
 async function onClickStart() {
     console.log('onClickStart', uiState);
     if (uiState.isLoading) return;
@@ -136,11 +149,14 @@ async function onClickStart() {
         // Шаг 1: Начать подключение
         const connectResult = await accountService.connectAccount(accountData.value.id);
         console.log('connectResult', connectResult);
+
         if (connectResult.status === 'code_required') {
             // Шаг 2: Запросить код у пользователя
             const code = await showConfirm('Введите код из Telegram');
             console.log('code', code);
+
             if (!code) {
+                await safeDisconnect(accountData.value.id);
                 await accountStore.changeStatus(accountData.value.id, 'offline');
                 return;
             }
@@ -152,6 +168,7 @@ async function onClickStart() {
                 connectResult.phoneCodeHash
             );
             console.log('verifyResult', verifyResult);
+
             if (verifyResult.status === 'connected') {
                 await accountStore.changeStatus(accountData.value.id, 'online');
                 toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
@@ -171,6 +188,9 @@ async function onClickStart() {
                     await accountStore.changeStatus(accountData.value.id, 'online');
                     toastStore.addToast('ok', LOC_TOAST_SUCCESS_CONNECT);
                 } catch (err) {
+                    // Ошибка при вводе пароля 2FA - отключаем
+                    await safeDisconnect(accountData.value.id);
+
                     await accountStore.changeStatus(accountData.value.id, 'error', {
                         title: 'Ошибка 2FA',
                         desc: err.userMessage || err.message,
@@ -178,9 +198,14 @@ async function onClickStart() {
                     toastStore.addToast('error', err.userMessage || 'Ошибка 2FA');
                 }
             } else {
+                // Пользователь отменил ввод пароля 2FA - отключаем
+                await safeDisconnect(accountData.value.id);
                 await accountStore.changeStatus(accountData.value.id, 'offline');
             }
         } else {
+            // Любая другая ошибка при подключении - отключаем
+            await safeDisconnect(accountData.value.id);
+
             await accountStore.changeStatus(accountData.value.id, 'error', {
                 title: 'Ошибка подключения',
                 desc: error.userMessage || error.message,
