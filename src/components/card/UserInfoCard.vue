@@ -73,6 +73,15 @@ const languageName = computed(() => {
     };
     return langMap[userStore.userLangCode] || userStore.userLangCode || 'Не указан';
 });
+
+// Форматирование значений Premium и Verified
+const premiumText = computed(() => {
+    return userStore.userIsPremium ? 'Да' : 'Нет';
+});
+
+const verifiedText = computed(() => {
+    return userStore.userIsVerified ? 'Да' : 'Нет';
+});
 </script>
 
 <template>
@@ -97,24 +106,10 @@ const languageName = computed(() => {
                 <!-- Основной блок -->
                 <div class="info-main">
                     <div class="info-row primary">
-                        <h2 class="user-name">{{ userStore.fullName }}</h2>
-                        <div class="badges">
-                            <span
-                                v-if="userStore.userIsPremium"
-                                class="badge premium"
-                                title="Premium пользователь"
-                            >
-                                Premium
-                            </span>
-                            <span
-                                v-if="userStore.userIsVerified"
-                                class="badge verified"
-                                title="Верифицирован"
-                            >
-                                Verified
-                            </span>
-                            <span v-if="userStore.userIsBot" class="badge bot" title="Бот">
-                                Bot
+                        <div class="user-name-container">
+                            <h2 class="user-name">{{ userStore.fullName }}</h2>
+                            <span v-if="userStore.userIsBot" class="bot-indicator" title="Бот">
+                                🤖
                             </span>
                         </div>
                     </div>
@@ -131,25 +126,57 @@ const languageName = computed(() => {
                     </div>
                 </div>
 
-                <!-- Дополнительная информация -->
+                <!-- Дополнительная информация - сетка 2x2 -->
                 <div class="info-additional">
-                    <div v-if="userStore.hasUsername" class="info-item">
-                        <span class="info-label">Username:</span>
-                        <span class="info-value">@{{ userStore.userName }}</span>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Username:</span>
+                            <span class="info-value">
+                                {{ userStore.hasUsername ? `@${userStore.userName}` : 'Не указан' }}
+                            </span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Premium:</span>
+                            <span
+                                class="info-value"
+                                :class="{
+                                    'value-yes': userStore.userIsPremium,
+                                    'value-no': !userStore.userIsPremium
+                                }"
+                            >
+                                {{ premiumText }}
+                            </span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Язык:</span>
+                            <span class="info-value">{{ languageName }}</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Verified:</span>
+                            <span
+                                class="info-value"
+                                :class="{
+                                    'value-yes': userStore.userIsVerified,
+                                    'value-no': !userStore.userIsVerified
+                                }"
+                            >
+                                {{ verifiedText }}
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="info-item">
-                        <span class="info-label">Язык:</span>
-                        <span class="info-value">{{ languageName }}</span>
-                    </div>
-
-                    <div class="info-item">
+                    <!-- Статус отдельно -->
+                    <div class="info-item status-row">
                         <span class="info-label">Статус:</span>
                         <span class="info-value status" :class="{ online: userStore.isOnline }">
                             {{ statusText }}
                         </span>
                     </div>
 
+                    <!-- Биография -->
                     <div v-if="userStore.hasBio" class="info-item bio">
                         <span class="info-label">О себе:</span>
                         <p class="info-value bio-text">{{ userStore.userBio }}</p>
@@ -207,6 +234,7 @@ const languageName = computed(() => {
     border-radius: 50%;
     overflow: hidden;
     border: 1px solid #ccc;
+    position: relative;
 }
 
 .avatar img {
@@ -249,11 +277,17 @@ const languageName = computed(() => {
 }
 
 .info-row.primary {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 6px;
     padding-bottom: 8px;
     border-bottom: 1px solid #ccc;
+}
+
+.user-name-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .user-name {
@@ -263,45 +297,15 @@ const languageName = computed(() => {
     color: var(--color-heading);
 }
 
-.badges {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.badge {
-    padding: 3px 10px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    border: 1px solid #ccc;
-}
-
-.badge.premium {
-    background-color: #ffd700;
-    color: #333;
-    border-color: #ffed4e;
-}
-
-.badge.verified {
-    background-color: #00b4d8;
-    color: var(--vt-c-white);
-    border-color: #0077b6;
-}
-
-.badge.bot {
-    background-color: #a8dadc;
-    color: #333;
-    border-color: #457b9d;
+.bot-indicator {
+    font-size: 18px;
+    line-height: 1;
 }
 
 .info-item {
     display: flex;
     gap: 6px;
     align-items: baseline;
-    flex: 1;
-    min-width: 140px;
 }
 
 .info-item.highlight {
@@ -315,6 +319,11 @@ const languageName = computed(() => {
 .info-item.bio {
     flex-direction: column;
     align-items: flex-start;
+}
+
+.info-item.status-row {
+    padding-top: 6px;
+    border-top: 1px solid #e0e0e0;
 }
 
 .info-label {
@@ -347,6 +356,16 @@ const languageName = computed(() => {
     font-weight: 600;
 }
 
+.info-value.value-yes {
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.info-value.value-no {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
 .bio-text {
     margin: 4px 0 0 0;
     color: var(--color-text);
@@ -358,8 +377,15 @@ const languageName = computed(() => {
 .info-additional {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     padding-top: 6px;
+}
+
+/* Сетка 2x2 для дополнительной информации */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
 }
 
 /* Адаптивность */
@@ -389,20 +415,19 @@ const languageName = computed(() => {
 
     .user-name {
         font-size: 18px;
-        text-align: center;
-        width: 100%;
     }
 
-    .info-row.primary {
-        align-items: center;
-    }
-
-    .badges {
+    .user-name-container {
         justify-content: center;
     }
 
-    .info-item {
-        min-width: 100%;
+    .info-row.primary {
+        justify-content: center;
+    }
+
+    /* На мобильных делаем список */
+    .info-grid {
+        grid-template-columns: 1fr;
     }
 }
 
