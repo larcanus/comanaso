@@ -118,7 +118,7 @@ async function loadAnalyticsData(accountId) {
                 phone: data.accountInfo.phone || '',
                 bio: data.accountInfo.bio || '',
                 photo: data.accountInfo.photo,
-                avatar: data.accountInfo.photo?.photoId || '',
+                avatar: data.accountInfo.url || '',
                 isBot: data.accountInfo.isBot || false,
                 isPremium: data.accountInfo.isPremium || false,
                 isVerified: data.accountInfo.isVerified || false,

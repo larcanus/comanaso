@@ -142,7 +142,7 @@ const verifiedText = computed(() => {
                                 class="info-value"
                                 :class="{
                                     'value-yes': userStore.userIsPremium,
-                                    'value-no': !userStore.userIsPremium
+                                    'value-no': !userStore.userIsPremium,
                                 }"
                             >
                                 {{ premiumText }}
@@ -160,7 +160,7 @@ const verifiedText = computed(() => {
                                 class="info-value"
                                 :class="{
                                     'value-yes': userStore.userIsVerified,
-                                    'value-no': !userStore.userIsVerified
+                                    'value-no': !userStore.userIsVerified,
                                 }"
                             >
                                 {{ verifiedText }}
