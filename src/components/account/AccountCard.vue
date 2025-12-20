@@ -38,8 +38,10 @@ const uiState = reactive({
     isEdit: false,
     isModalPopupInfoVisible: false,
     isModalConfirmVisible: false,
+    isModalConfirmDeleteVisible: false,
     isLoading: false,
     modalConfirmMessage: null,
+    modalConfirmDeleteMessage: null,
     modalPopupInfoMessage: null,
 });
 
@@ -95,6 +97,10 @@ function onClickEdit() {
 
 async function onClickDelete() {
     if (uiState.isLoading) return;
+
+    // Показываем окно подтверждения
+    const confirmed = await showDeleteConfirm();
+    if (!confirmed) return;
 
     uiState.isLoading = true;
     try {
@@ -249,11 +255,10 @@ function isValidConnectData(fields) {
 
 async function showDetail() {
     uiState.modalPopupInfoMessage = prepareDetailMessage();
-
     uiState.isModalPopupInfoVisible = true;
 }
 
-// Хранилище для активного промиса
+// Хранилище для активного промиса (для ввода кода)
 const confirmPromiseStore = { resolve: null };
 
 function showConfirm(message) {
@@ -278,6 +283,35 @@ function handleConfirmCancel() {
     if (confirmPromiseStore.resolve) {
         confirmPromiseStore.resolve(false);
         confirmPromiseStore.resolve = null;
+    }
+}
+
+// Хранилище для промиса подтверждения удаления
+const deleteConfirmPromiseStore = { resolve: null };
+
+function showDeleteConfirm() {
+    const accountName = accountData.value?.name || 'этот аккаунт';
+    uiState.modalConfirmDeleteMessage = `Вы уверены, что хотите удалить "${accountName}"?\n\nЭто действие необратимо.`;
+    uiState.isModalConfirmDeleteVisible = true;
+
+    return new Promise((resolve) => {
+        deleteConfirmPromiseStore.resolve = resolve;
+    });
+}
+
+function handleDeleteConfirmOk() {
+    uiState.isModalConfirmDeleteVisible = false;
+    if (deleteConfirmPromiseStore.resolve) {
+        deleteConfirmPromiseStore.resolve(true);
+        deleteConfirmPromiseStore.resolve = null;
+    }
+}
+
+function handleDeleteConfirmCancel() {
+    uiState.isModalConfirmDeleteVisible = false;
+    if (deleteConfirmPromiseStore.resolve) {
+        deleteConfirmPromiseStore.resolve(false);
+        deleteConfirmPromiseStore.resolve = null;
     }
 }
 </script>
@@ -361,11 +395,23 @@ function handleConfirmCancel() {
                     {{ uiState.isLoading ? 'Отключение...' : 'Отключить' }}
                 </button>
             </div>
+
+            <!-- Модальное окно для ввода кода Telegram -->
             <Confirm
                 :message="uiState.modalConfirmMessage"
                 :is-visible="uiState.isModalConfirmVisible"
+                :is-input="true"
                 @confirm="handleConfirmOk"
                 @cancel="handleConfirmCancel"
+            />
+
+            <!-- Модальное окно для подтверждения удаления -->
+            <Confirm
+                :message="uiState.modalConfirmDeleteMessage"
+                :is-visible="uiState.isModalConfirmDeleteVisible"
+                :is-input="false"
+                @confirm="handleDeleteConfirmOk"
+                @cancel="handleDeleteConfirmCancel"
             />
         </div>
     </div>
