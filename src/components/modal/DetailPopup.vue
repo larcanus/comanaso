@@ -17,17 +17,29 @@ const emit = defineEmits(['close']);
 function closeModal() {
     emit('close');
 }
+
+// Обработка клавиши Escape
+function handleKeyDown(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+}
 </script>
 
 <template>
     <teleport to="body">
-        <div v-if="isVisible" class="modal-overlay">
+        <div
+            v-if="isVisible"
+            class="modal-overlay"
+            @click.self="closeModal"
+            @keydown="handleKeyDown"
+        >
             <div class="modal-content">
                 <div class="content">
-                    <h3>{{ message.title }}</h3>
-                    <p>{{ message.desc }}</p>
+                    <h3 class="modal-title">{{ message?.title }}</h3>
+                    <p class="modal-description">{{ message?.desc }}</p>
                 </div>
-                <button @click="closeModal">OK</button>
+                <button class="btn-close" @click="closeModal">OK</button>
             </div>
         </div>
     </teleport>
@@ -38,42 +50,125 @@ function closeModal() {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
-    background-color: white;
-    padding: 20px;
+    background-color: var(--color-background-soft);
+    border: 1px solid #ccc;
+    padding: 25px;
     border-radius: 2px;
     text-align: center;
-    width: 50%;
+    width: 90%;
     max-width: 500px;
     text-wrap: wrap;
-}
-.content {
-    margin: 1% 0 4% 0;
-    color: #030101;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.2s ease-out;
 }
 
-button {
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.content {
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    color: var(--color-heading);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+}
+
+.modal-description {
+    color: var(--color-text);
+    font-size: 15px;
+    margin: 0;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.btn-close {
     cursor: pointer;
-    width: 50%;
-    max-width: 70%;
-    padding: 2px;
-    height: max-content;
+    width: 100%;
+    max-width: 200px;
+    height: 40px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 2px;
     background-color: var(--vt-bt-background-color);
     color: var(--vt-bt-text-color);
-    border-radius: 2px;
+    transition: background-color 0.2s ease;
 }
-button:hover {
+
+.btn-close:hover {
     background-color: var(--vt-bt-background-color-hover);
+}
+
+@media (max-width: 700px) {
+    .modal-content {
+        width: 85%;
+        padding: 20px;
+    }
+
+    .modal-title {
+        font-size: 18px;
+    }
+
+    .modal-description {
+        font-size: 14px;
+    }
+
+    .btn-close {
+        font-size: 13px;
+        height: 38px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 90%;
+        padding: 18px;
+    }
+
+    .modal-title {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .modal-description {
+        font-size: 13px;
+    }
+
+    .btn-close {
+        max-width: 100%;
+    }
 }
 </style>

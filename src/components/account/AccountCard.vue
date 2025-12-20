@@ -19,7 +19,6 @@ const props = defineProps({
 
 const LOC_TOAST_VALID_ERROR = 'Ошибка данных. Проверьте поля аккаунта';
 const LOC_TOAST_CONNECT_ERROR = 'Ошибка подключения';
-const LOC_TOAST_SUCCESS_CREATE_CLIENT = 'Успех - Клиент подключен к аккаунту!';
 const LOC_TOAST_SUCCESS_CONNECT = 'Аккаунт успешно подключен!';
 const LOC_TOAST_SUCCESS_DISCONNECT = 'Аккаунт отключен';
 const LOC_TOAST_SUCCESS_UPDATE = 'Данные аккаунта обновлены';

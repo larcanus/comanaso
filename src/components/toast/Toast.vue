@@ -7,6 +7,7 @@ const toastStore = useToastStore();
 
 function getImagePath(type) {
     switch (type) {
+        case 'ok':
         case 'success':
             return okImagePath;
         case 'error':

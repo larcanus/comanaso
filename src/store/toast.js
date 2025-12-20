@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 const TOAST_TIME = 4000;
-const VALID_TOAST_TYPES = ['success', 'error', 'warning', 'info'];
+const VALID_TOAST_TYPES = ['ok', 'success', 'error', 'warning', 'info'];
 
 export const useToastStore = defineStore('toast', () => {
     const state = ref([]);
