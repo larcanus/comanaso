@@ -1,19 +1,9 @@
 <script setup>
-import { reactive } from 'vue';
 import okImagePath from '@/assets/circle-ok.png';
 import errorImagePath from '@/assets/circle-error.png';
 import useToastStore from '@/store/toast.js';
 
 const toastStore = useToastStore();
-const state = reactive({
-    toasts: toastStore.state,
-});
-
-toastStore.$subscribe((mutation, store) => {
-    if (mutation.events.type === 'set') {
-        state.toasts = store.state;
-    }
-});
 
 function getImagePath(type) {
     switch (type) {
@@ -22,9 +12,9 @@ function getImagePath(type) {
         case 'error':
             return errorImagePath;
         case 'warning':
-            return okImagePath; // Можно использовать отдельную иконку для warning
+            return okImagePath;
         case 'info':
-            return okImagePath; // Можно использовать отдельную иконку для info
+            return okImagePath;
         default:
             return errorImagePath;
     }
@@ -34,10 +24,10 @@ function getImagePath(type) {
 <template>
     <Teleport to="body">
         <Transition name="toast">
-            <div v-if="state.toasts.length" class="toaster">
+            <div v-if="toastStore.state.length" class="toaster">
                 <TransitionGroup name="toast" tag="ul">
                     <li
-                        v-for="toast in state.toasts"
+                        v-for="toast in toastStore.state"
                         :key="toast.id"
                         class="toast"
                         :class="`toast-type-${toast.type}`"
@@ -92,6 +82,10 @@ function getImagePath(type) {
     width: 50rem;
     white-space: break-spaces;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    /* Default стили если тип не распознан */
+    background-color: #424242;
+    border: 2px solid #303030;
 }
 
 span {

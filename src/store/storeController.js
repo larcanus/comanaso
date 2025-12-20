@@ -45,11 +45,7 @@ export async function logInAllStore(userData) {
         localStorageUtils.setUserData(userData.user);
 
         // Показываем уведомление об успешном входе
-        toastStore.addToast({
-            message: 'Успешный вход в систему',
-            type: 'success',
-            duration: 3000,
-        });
+        toastStore.addToast('success', 'Успешный вход в систему');
 
         console.log('=== logInAllStore SUCCESS ===');
         return true;
@@ -59,11 +55,7 @@ export async function logInAllStore(userData) {
 
         // Показываем уведомление об ошибке
         const toastStore = useToastStore();
-        toastStore.addToast({
-            message: 'Ошибка при входе в систему',
-            type: 'error',
-            duration: 5000,
-        });
+        toastStore.addToast('error', 'Ошибка при входе в систему');
 
         return false;
     }
@@ -91,11 +83,7 @@ export async function logoutAllStore(showNotification = true) {
         localStorageUtils.clearLocalStorage();
 
         if (showNotification) {
-            toastStore.addToast({
-                message: 'Вы вышли из системы',
-                type: 'info',
-                duration: 3000,
-            });
+            toastStore.addToast('info', 'Вы вышли из системы');
         }
 
         console.log('=== logoutAllStore: все данные очищены ===');
@@ -148,11 +136,7 @@ export async function forceLogout(error) {
         await logoutAllStore(false);
 
         // Показываем уведомление
-        toastStore.addToast({
-            message,
-            type: 'warning',
-            duration: 5000,
-        });
+        toastStore.addToast('warning', message);
 
         // Перенаправляем на страницу входа
         if (router.currentRoute.value.name !== 'home') {

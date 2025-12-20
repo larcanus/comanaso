@@ -2,33 +2,51 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 const TOAST_TIME = 4000;
+const VALID_TOAST_TYPES = ['success', 'error', 'warning', 'info'];
 
 export const useToastStore = defineStore('toast', () => {
     const state = ref([]);
 
     function addToast(type, text) {
-        this.state.push(preparedToast(type, text));
+        // Валидация типа
+        if (!VALID_TOAST_TYPES.includes(type)) {
+            console.warn(`[Toast] Invalid toast type: "${type}". Using "info" as fallback.`);
+            type = 'info';
+        }
+
+        // Валидация текста
+        if (!text || typeof text !== 'string') {
+            console.warn('[Toast] Invalid toast text. Toast not added.');
+            return;
+        }
+
+        const toast = preparedToast(type, text);
+        state.value.push(toast);
+
+        console.log(`[Toast] Added: ${type} - ${text}`);
     }
 
     function preparedToast(type, text) {
-        const toastId = Math.floor(Math.random() * 1000);
-        hiddenToastHandler(toastId, state);
+        const toastId = Date.now() + Math.random();
+        hiddenToastHandler(toastId);
         return { type, text, id: toastId };
     }
 
-    function removeToast(toast) {
-        state.value = state.value.filter((item) => item.id !== toast.id);
+    function removeToast(toastId) {
+        state.value = state.value.filter((item) => item.id !== toastId);
     }
 
-    function hiddenToastHandler(id, state) {
+    function hiddenToastHandler(id) {
         setTimeout(() => {
-            state.value = state.value.filter((item) => {
-                return item.id !== id;
-            });
+            removeToast(id);
         }, TOAST_TIME);
     }
 
-    return { state, addToast, removeToast };
+    function clearAll() {
+        state.value = [];
+    }
+
+    return { state, addToast, removeToast, clearAll };
 });
 
 export default useToastStore;
