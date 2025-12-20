@@ -210,6 +210,7 @@ const verifiedText = computed(() => {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
+    user-select: none;
 }
 
 .card-content {
@@ -235,12 +236,14 @@ const verifiedText = computed(() => {
     overflow: hidden;
     border: 1px solid #ccc;
     position: relative;
+    user-select: none;
 }
 
 .avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    user-select: none;
 }
 
 .avatar-placeholder {
@@ -253,6 +256,7 @@ const verifiedText = computed(() => {
     font-size: 48px;
     color: var(--vt-c-white);
     font-weight: bold;
+    user-select: none;
 }
 
 /* Информация */
@@ -300,6 +304,7 @@ const verifiedText = computed(() => {
 .bot-indicator {
     font-size: 18px;
     line-height: 1;
+    user-select: none;
 }
 
 .info-item {
@@ -331,12 +336,15 @@ const verifiedText = computed(() => {
     color: var(--color-text);
     white-space: nowrap;
     font-size: 14px;
+    user-select: none;
+    cursor: default;
 }
 
 .info-value {
     color: var(--color-heading);
     font-weight: 500;
     font-size: 14px;
+    user-select: text;
 }
 
 .info-value.phone {
