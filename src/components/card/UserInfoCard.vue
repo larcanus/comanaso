@@ -1,9 +1,16 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import useUserStore from '@/store/user.js';
 import { getColorFromString, getFirstLetter } from '@/utils/colorUtils.js';
 
 const userStore = useUserStore();
+
+// Состояние раскрытия детальной информации
+const isExpanded = ref(false);
+
+function toggleExpanded() {
+    isExpanded.value = !isExpanded.value;
+}
 
 // Генерируем случайный цвет для аватара-заглушки на основе имени
 const avatarBgColor = computed(() => {
@@ -82,6 +89,98 @@ const premiumText = computed(() => {
 const verifiedText = computed(() => {
     return userStore.userIsVerified ? 'Да' : 'Нет';
 });
+
+// Форматирование для детальной информации
+const yesNoFormatter = (value) => (value ? 'Да' : 'Нет');
+
+const detailedFields = computed(() => [
+    {
+        category: 'Социальные связи',
+        fields: [
+            { label: 'В контактах', value: yesNoFormatter(userStore.userIsContact) },
+            {
+                label: 'Взаимный контакт',
+                value: yesNoFormatter(userStore.userIsMutualContact),
+            },
+            { label: 'Близкий друг', value: yesNoFormatter(userStore.userIsCloseFriend) },
+            {
+                label: 'Требуется Premium для связи',
+                value: yesNoFormatter(userStore.userIsContactRequirePremium),
+            },
+        ],
+    },
+    {
+        category: 'Истории (Stories)',
+        fields: [
+            { label: 'Истории скрыты', value: yesNoFormatter(userStore.userIsStoriesHidden) },
+            {
+                label: 'Истории недоступны',
+                value: yesNoFormatter(userStore.userIsStoriesUnavailable),
+            },
+            {
+                label: 'ID последней истории',
+                value: userStore.userStoriesMaxId || 'Не указан',
+            },
+            { label: 'Есть активные истории', value: yesNoFormatter(userStore.hasStories) },
+        ],
+    },
+    {
+        category: 'Дополнительные юзернеймы',
+        fields: [
+            {
+                label: 'Количество',
+                value: userStore.userUsernames.length > 0 ? userStore.userUsernames.length : '0',
+            },
+            {
+                label: 'Список',
+                value:
+                    userStore.userUsernames.length > 0
+                        ? userStore.userUsernames.map((u) => `@${u}`).join(', ')
+                        : 'Нет',
+            },
+        ],
+    },
+    {
+        category: 'Визуальная кастомизация',
+        fields: [
+            { label: 'Emoji статус', value: userStore.userEmojiStatus || 'Не установлен' },
+            { label: 'Цвет имени', value: userStore.userColor || 'По умолчанию' },
+            { label: 'Цвет профиля', value: userStore.userProfileColor || 'По умолчанию' },
+            {
+                label: 'Кастомные цвета',
+                value: yesNoFormatter(userStore.hasCustomColors),
+            },
+        ],
+    },
+    {
+        category: 'Безопасность и ограничения',
+        fields: [
+            { label: 'Фейковый аккаунт', value: yesNoFormatter(userStore.userIsFake) },
+            { label: 'Скам аккаунт', value: yesNoFormatter(userStore.userIsScam) },
+            { label: 'Ограничен', value: yesNoFormatter(userStore.userIsRestricted) },
+            {
+                label: 'Причина ограничения',
+                value: userStore.userRestrictionReason || 'Нет',
+            },
+            { label: 'Удален', value: yesNoFormatter(userStore.userIsDeleted) },
+            {
+                label: 'Официальная поддержка',
+                value: yesNoFormatter(userStore.userIsSupport),
+            },
+        ],
+    },
+    {
+        category: 'Техническая информация',
+        fields: [
+            { label: 'Дата-центр фото', value: userStore.photoDcId || 'Не указан' },
+            { label: 'ID фото', value: userStore.userPhoto?.photoId || 'Нет фото' },
+            {
+                label: 'Видео в фото',
+                value: userStore.userPhoto?.hasVideo ? 'Да' : 'Нет',
+            },
+        ],
+    },
+]);
 </script>
 
 <template>
@@ -184,6 +283,37 @@ const verifiedText = computed(() => {
                 </div>
             </div>
         </div>
+
+        <!-- Кнопка "Подробно" -->
+        <div class="card-actions">
+            <button class="expand-button" @click="toggleExpanded">
+                <span>{{ isExpanded ? 'Скрыть подробности' : 'Показать подробности' }}</span>
+                <span class="expand-icon" :class="{ rotated: isExpanded }">▼</span>
+            </button>
+        </div>
+
+        <!-- Детальная информация (раскрывающаяся секция) -->
+        <transition name="expand">
+            <div v-if="isExpanded" class="detailed-info">
+                <div
+                    v-for="category in detailedFields"
+                    :key="category.category"
+                    class="detail-category"
+                >
+                    <h4 class="category-title">{{ category.category }}</h4>
+                    <div class="detail-grid">
+                        <div
+                            v-for="field in category.fields"
+                            :key="field.label"
+                            class="detail-item"
+                        >
+                            <span class="detail-label">{{ field.label }}:</span>
+                            <span class="detail-value">{{ field.value }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -292,6 +422,305 @@ const verifiedText = computed(() => {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.user-name {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-heading);
+}
+
+.bot-indicator {
+    font-size: 18px;
+    line-height: 1;
+    user-select: none;
+}
+
+.info-item {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+}
+
+.info-item.highlight {
+    background-color: var(--color-background-soft);
+    padding: 5px 10px;
+    border-radius: 2px;
+    border: 1px solid #ccc;
+    display: inline-block;
+}
+
+.info-item.bio {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.info-item.status-row {
+    padding-top: 6px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    font-size: 14px;
+    user-select: none;
+    cursor: default;
+}
+
+.info-value {
+    color: var(--color-heading);
+    font-weight: 500;
+    font-size: 14px;
+    user-select: text;
+}
+
+.info-value.phone {
+    white-space: nowrap;
+}
+
+.info-value.sub-margin {
+    margin-left: 5px;
+}
+
+.info-value.status {
+    color: #e74c3c;
+}
+
+.info-value.status.online {
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.info-value.value-yes {
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.info-value.value-no {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.bio-text {
+    margin: 4px 0 0 0;
+    color: var(--color-text);
+    line-height: 1.5;
+    font-style: italic;
+    font-size: 13px;
+}
+
+.info-additional {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 6px;
+}
+
+/* Сетка 2x2 для дополнительной информации */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+}
+
+/* Кнопка "Подробно" */
+.card-actions {
+    padding: 0 10px 10px;
+    background-color: var(--color-background);
+}
+
+.expand-button {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: var(--vt-bt-background-color);
+    color: var(--vt-c-white);
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.2s ease;
+    user-select: none;
+}
+
+.expand-button:hover {
+    background-color: var(--vt-bt-hover-background-color);
+}
+
+.expand-button:active {
+    background-color: var(--vt-bt-active-background-color);
+}
+
+.expand-icon {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.expand-icon.rotated {
+    transform: rotate(180deg);
+}
+
+/* Детальная информация */
+.detailed-info {
+    padding: 15px;
+    background-color: var(--color-background-mute);
+    border-top: 1px solid #ccc;
+}
+
+.detail-category {
+    margin-bottom: 20px;
+}
+
+.detail-category:last-child {
+    margin-bottom: 0;
+}
+
+.category-title {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-heading);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--vt-bt-background-color);
+    user-select: none;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px 15px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background-color: var(--color-background);
+    border-radius: 2px;
+    border: 1px solid #e0e0e0;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    user-select: none;
+}
+
+.detail-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-heading);
+    word-break: break-word;
+    user-select: text;
+}
+
+/* Анимация раскрытия */
+.expand-enter-active,
+.expand-leave-active {
+    transition: all 0.3s ease;
+    max-height: 2000px;
+    overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .card-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .avatar-section {
+        align-items: center;
+    }
+
+    .avatar,
+    .avatar-placeholder {
+        width: 90px;
+        height: 90px;
+    }
+
+    .avatar-letter {
+        font-size: 38px;
+    }
+
+    .info-section {
+        width: 100%;
+    }
+
+    .user-name {
+        font-size: 18px;
+    }
+
+    .user-name-container {
+        justify-content: center;
+    }
+
+    .info-row.primary {
+        justify-content: center;
+    }
+
+    /* На мобильных делаем список */
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header h3 {
+        font-size: 16px;
+    }
+
+    .user-name {
+        font-size: 16px;
+    }
+
+    .info-item {
+        flex-direction: column;
+        gap: 3px;
+        align-items: flex-start;
+    }
+
+    .info-label {
+        font-size: 13px;
+    }
+
+    .info-value {
+        font-size: 13px;
+    }
+
+    .category-title {
+        font-size: 14px;
+    }
+
+    .detail-label {
+        font-size: 11px;
+    }
+
+    .detail-value {
+        font-size: 13px;
+    }
 }
 
 .user-name {
