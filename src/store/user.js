@@ -46,69 +46,119 @@ export const useUserStore = defineStore('user', () => {
     const isDeleted = ref(false);
     const isSupport = ref(false);
 
-    // Actions
+    /**
+     * Нормализует и валидирует данные пользователя
+     * @param {Object} rawData - Сырые данные с бэкенда
+     */
+    function normalizeUserData(rawData) {
+        if (!rawData || typeof rawData !== 'object') {
+            console.warn('[UserStore] Invalid user data received:', rawData);
+            return null;
+        }
+
+        return {
+            // Основные данные
+            id: rawData.id ?? null,
+            firstName: rawData.firstName ?? '',
+            lastName: rawData.lastName ?? '',
+            username: rawData.username ?? '',
+            phone: rawData.phone ?? '',
+            bio: rawData.bio ?? '',
+            avatar: rawData.url ?? rawData.avatar ?? '',
+            photo: rawData.photo ?? null,
+
+            // Флаги и статусы
+            isBot: Boolean(rawData.isBot),
+            isPremium: Boolean(rawData.isPremium),
+            isVerified: Boolean(rawData.isVerified),
+            langCode: rawData.langCode ?? null,
+            status: rawData.status ?? null,
+
+            // Социальные связи
+            isContact: Boolean(rawData.isContact),
+            isMutualContact: Boolean(rawData.isMutualContact),
+            isCloseFriend: Boolean(rawData.isCloseFriend),
+            isContactRequirePremium: Boolean(rawData.isContactRequirePremium),
+
+            // Истории (Stories)
+            isStoriesHidden: Boolean(rawData.isStoriesHidden),
+            isStoriesUnavailable: rawData.isStoriesUnavailable !== false,
+            storiesMaxId: rawData.storiesMaxId ?? null,
+
+            // Дополнительные юзернеймы
+            usernames: Array.isArray(rawData.usernames) ? rawData.usernames : [],
+
+            // Визуальная кастомизация
+            emojiStatus: rawData.emojiStatus ?? null,
+            color: rawData.color ?? null,
+            profileColor: rawData.profileColor ?? null,
+
+            // Безопасность и ограничения
+            isFake: Boolean(rawData.isFake),
+            isScam: Boolean(rawData.isScam),
+            isRestricted: Boolean(rawData.isRestricted),
+            restrictionReason: rawData.restrictionReason ?? null,
+            isDeleted: Boolean(rawData.isDeleted),
+            isSupport: Boolean(rawData.isSupport),
+        };
+    }
+
+    /**
+     * Устанавливает данные пользователя
+     * @param {Object} userData - Данные пользователя (сырые или нормализованные)
+     */
     function setUserData(userData) {
-        // Основные данные
-        if (userData.id !== undefined) id.value = userData.id;
-        if (userData.firstName !== undefined) firstName.value = userData.firstName;
-        if (userData.lastName !== undefined) lastName.value = userData.lastName;
-        if (userData.username !== undefined) username.value = userData.username;
-        if (userData.phone !== undefined) phone.value = userData.phone;
-        if (userData.bio !== undefined) bio.value = userData.bio;
+        // Нормализуем данные
+        const normalized = normalizeUserData(userData);
 
-        // Фото
-        if (userData.avatar !== undefined) avatar.value = userData.avatar;
-        if (userData.photo !== undefined) photo.value = userData.photo;
+        if (!normalized) {
+            console.error('[UserStore] Failed to normalize user data');
+            return;
+        }
 
-        // Флаги
-        if (userData.isBot !== undefined) isBot.value = userData.isBot;
-        if (userData.isPremium !== undefined) isPremium.value = userData.isPremium;
-        if (userData.isVerified !== undefined) isVerified.value = userData.isVerified;
+        // Устанавливаем основные данные
+        id.value = normalized.id;
+        firstName.value = normalized.firstName;
+        lastName.value = normalized.lastName;
+        username.value = normalized.username;
+        phone.value = normalized.phone;
+        bio.value = normalized.bio;
+        avatar.value = normalized.avatar;
+        photo.value = normalized.photo;
 
-        // Дополнительно
-        if (userData.langCode !== undefined) langCode.value = userData.langCode;
-        if (userData.status !== undefined) status.value = userData.status;
+        // Флаги и статусы
+        isBot.value = normalized.isBot;
+        isPremium.value = normalized.isPremium;
+        isVerified.value = normalized.isVerified;
+        langCode.value = normalized.langCode;
+        status.value = normalized.status;
 
         // Социальные связи
-        if (userData.isContact !== undefined) isContact.value = userData.isContact;
-        if (userData.isMutualContact !== undefined)
-            isMutualContact.value = userData.isMutualContact;
-        if (userData.isCloseFriend !== undefined) isCloseFriend.value = userData.isCloseFriend;
-        if (userData.isContactRequirePremium !== undefined)
-            isContactRequirePremium.value = userData.isContactRequirePremium;
+        isContact.value = normalized.isContact;
+        isMutualContact.value = normalized.isMutualContact;
+        isCloseFriend.value = normalized.isCloseFriend;
+        isContactRequirePremium.value = normalized.isContactRequirePremium;
 
         // Истории
-        if (userData.isStoriesHidden !== undefined)
-            isStoriesHidden.value = userData.isStoriesHidden;
-        if (userData.isStoriesUnavailable !== undefined)
-            isStoriesUnavailable.value = userData.isStoriesUnavailable;
-        if (userData.storiesMaxId !== undefined) storiesMaxId.value = userData.storiesMaxId;
+        isStoriesHidden.value = normalized.isStoriesHidden;
+        isStoriesUnavailable.value = normalized.isStoriesUnavailable;
+        storiesMaxId.value = normalized.storiesMaxId;
 
         // Дополнительные юзернеймы
-        if (userData.usernames !== undefined) {
-            usernames.value = Array.isArray(userData.usernames) ? userData.usernames : [];
-        }
+        usernames.value = normalized.usernames;
 
         // Визуальная кастомизация
-        if (userData.emojiStatus !== undefined) emojiStatus.value = userData.emojiStatus;
-        if (userData.color !== undefined) color.value = userData.color;
-        if (userData.profileColor !== undefined) profileColor.value = userData.profileColor;
+        emojiStatus.value = normalized.emojiStatus;
+        color.value = normalized.color;
+        profileColor.value = normalized.profileColor;
 
         // Безопасность
-        if (userData.isFake !== undefined) isFake.value = userData.isFake;
-        if (userData.isScam !== undefined) isScam.value = userData.isScam;
-        if (userData.isRestricted !== undefined) isRestricted.value = userData.isRestricted;
-        if (userData.restrictionReason !== undefined)
-            restrictionReason.value = userData.restrictionReason;
-        if (userData.isDeleted !== undefined) isDeleted.value = userData.isDeleted;
-        if (userData.isSupport !== undefined) isSupport.value = userData.isSupport;
-
-        // Для обратной совместимости - если передали fullName
-        if (userData.fullName !== undefined) {
-            const names = userData.fullName.split(' ');
-            firstName.value = names[0] || '';
-            lastName.value = names.slice(1).join(' ') || '';
-        }
+        isFake.value = normalized.isFake;
+        isScam.value = normalized.isScam;
+        isRestricted.value = normalized.isRestricted;
+        restrictionReason.value = normalized.restrictionReason;
+        isDeleted.value = normalized.isDeleted;
+        isSupport.value = normalized.isSupport;
     }
 
     function updateUserFullName(name) {

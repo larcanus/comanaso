@@ -110,51 +110,7 @@ async function loadAnalyticsData(accountId) {
         console.log('loadAllData: ', data);
         // Сохраняем данные профиля в user store
         if (data.accountInfo) {
-            userStore.setUserData({
-                // Основные данные
-                id: data.accountInfo.id,
-                firstName: data.accountInfo.firstName || '',
-                lastName: data.accountInfo.lastName || '',
-                username: data.accountInfo.username || '',
-                phone: data.accountInfo.phone || '',
-                bio: data.accountInfo.bio || '',
-                photo: data.accountInfo.photo,
-                avatar: data.accountInfo.url || '',
-
-                // Флаги и статусы
-                isBot: data.accountInfo.isBot || false,
-                isPremium: data.accountInfo.isPremium || false,
-                isVerified: data.accountInfo.isVerified || false,
-                langCode: data.accountInfo.langCode || null,
-                status: data.accountInfo.status || null,
-
-                // Социальные связи
-                isContact: data.accountInfo.isContact || false,
-                isMutualContact: data.accountInfo.isMutualContact || false,
-                isCloseFriend: data.accountInfo.isCloseFriend || false,
-                isContactRequirePremium: data.accountInfo.isContactRequirePremium || false,
-
-                // Истории (Stories)
-                isStoriesHidden: data.accountInfo.isStoriesHidden || false,
-                isStoriesUnavailable: data.accountInfo.isStoriesUnavailable !== false,
-                storiesMaxId: data.accountInfo.storiesMaxId || null,
-
-                // Дополнительные юзернеймы
-                usernames: data.accountInfo.usernames || [],
-
-                // Визуальная кастомизация
-                emojiStatus: data.accountInfo.emojiStatus || null,
-                color: data.accountInfo.color || null,
-                profileColor: data.accountInfo.profileColor || null,
-
-                // Безопасность и ограничения
-                isFake: data.accountInfo.isFake || false,
-                isScam: data.accountInfo.isScam || false,
-                isRestricted: data.accountInfo.isRestricted || false,
-                restrictionReason: data.accountInfo.restrictionReason || null,
-                isDeleted: data.accountInfo.isDeleted || false,
-                isSupport: data.accountInfo.isSupport || false,
-            });
+            userStore.setUserData(data.accountInfo);
         }
 
         // Сохраняем папки в dialog store
