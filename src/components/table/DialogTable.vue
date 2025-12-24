@@ -124,6 +124,12 @@ function sortByColumn(columnKey) {
                 }
                 return second.value ? 1 : -1;
             }
+            case 'folderId': {
+                if (sortDown) {
+                    return first.value?.length > second.value?.length ? 1 : -1;
+                }
+                return first.value?.length < second.value?.length ? 1 : -1;
+            }
             default: {
                 if (sortDown) {
                     return first.value > second.value ? 1 : -1;

@@ -168,7 +168,7 @@ function getFolderIdDialogLoc(dialogData, foldersState) {
     }
 
     // Получаем ID диалога (приводим к строке для сравнения)
-    const entityId = String(dialogData.entity?.id?.value || dialogData.id?.value || '');
+    const entityId = String(dialogData.entity?.id || dialogData.id || '');
 
     if (!entityId) {
         objectData.loc = 'нет';
