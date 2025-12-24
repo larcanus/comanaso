@@ -344,23 +344,6 @@ function handleSearchInput() {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
-.fade-enter-active,
-.fade-leave-active {
-    transition: max-width 0.1s ease, opacity 0.1s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    max-width: 0;
-    opacity: 0;
-}
-
-.fade-enter-to,
-.fade-leave-from {
-    max-width: 200px;
-    opacity: 1;
-}
-
 .main-container {
     box-sizing: border-box;
     overflow-x: auto;
@@ -399,12 +382,6 @@ function handleSearchInput() {
 .styled-table tbody td {
     color: #2c3e50;
     font-weight: 500;
-}
-
-#date,
-#mute {
-    text-wrap: nowrap;
-    white-space: nowrap;
 }
 
 .styled-table th {
@@ -546,11 +523,6 @@ function handleSearchInput() {
         width: 150px;
     }
 
-    .fade-enter-to,
-    .fade-leave-from {
-        max-width: 150px;
-    }
-
     .pagination {
         gap: 6px;
     }
@@ -593,11 +565,6 @@ function handleSearchInput() {
 
     .search-input {
         width: 120px;
-    }
-
-    .fade-enter-to,
-    .fade-leave-from {
-        max-width: 120px;
     }
 
     .search-input {
