@@ -29,6 +29,44 @@ class AnalyticsService {
     }
 
     /**
+     * Получить фото профиля аккаунта
+     * @param {number} accountId - ID аккаунта
+     * @param {string} size - Размер фото ("small" или "big")
+     * @returns {Promise<string|null>} URL фото или null если не установлено
+     */
+    async getProfilePhoto(accountId, size = 'big') {
+        try {
+            const params = new URLSearchParams({ size });
+            const blob = await apiService.authRequest(`/accounts/${accountId}/me/photo?${params}`, {
+                method: 'GET',
+                responseType: 'blob',
+            });
+
+            // Создаем blob URL для изображения
+            if (blob && blob instanceof Blob && blob.size > 0) {
+                const photoUrl = URL.createObjectURL(blob);
+                console.info('[AnalyticsService] Profile photo loaded successfully', {
+                    size: blob.size,
+                    type: blob.type,
+                });
+                return photoUrl;
+            }
+
+            console.warn('[AnalyticsService] Received empty blob');
+            return null;
+        } catch (error) {
+            // Если фото не установлено - это нормально
+            if (error.error === 'PHOTO_NOT_FOUND') {
+                console.info('[AnalyticsService] Profile photo not set');
+                return null;
+            }
+
+            console.error('[AnalyticsService] Error fetching profile photo:', error);
+            throw this._handleError(error, 'Ошибка загрузки фото профиля');
+        }
+    }
+
+    /**
      * Получить список диалогов
      * @param {number} accountId - ID аккаунта
      * @param {Object} options - Параметры запроса
@@ -92,6 +130,11 @@ class AnalyticsService {
                 method: () => this.getAccountInfo(accountId),
             },
             {
+                name: 'profilePhoto',
+                label: 'Загрузка фото профиля',
+                method: () => this.getProfilePhoto(accountId),
+            },
+            {
                 name: 'dialogs',
                 label: 'Загрузка диалогов',
                 method: () => this.getDialogs(accountId, { limit: 500 }),
@@ -126,7 +169,7 @@ class AnalyticsService {
                 const data = await step.method();
                 result[step.name] = data;
 
-                // Уведомляем об успешной загрузке
+                // Уведомляем об успешном завершении шага
                 if (onProgress) {
                     onProgress({
                         step: i + 1,
@@ -138,6 +181,8 @@ class AnalyticsService {
                     });
                 }
             } catch (error) {
+                console.error(`[AnalyticsService] Error in step ${step.name}:`, error);
+
                 // Уведомляем об ошибке
                 if (onProgress) {
                     onProgress({
@@ -213,6 +258,7 @@ class AnalyticsService {
             UNAUTHORIZED: 'Необходима авторизация',
             NETWORK_ERROR: 'Ошибка сети. Проверьте подключение к интернету',
             TIMEOUT_ERROR: 'Превышено время ожидания ответа от сервера',
+            PHOTO_NOT_FOUND: 'Фото профиля не установлено',
         };
 
         return messages[errorCode] || defaultMessage;

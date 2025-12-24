@@ -120,6 +120,11 @@ class ApiService {
                 throw error;
             }
 
+            // Если ожидается blob
+            if (options.responseType === 'blob') {
+                return await response.blob();
+            }
+
             // Обработка ответов без тела (204 No Content, 205 Reset Content)
             if (response.status === 204 || response.status === 205) {
                 return null;

@@ -172,6 +172,11 @@ export const useUserStore = defineStore('user', () => {
     }
 
     function clearUser() {
+        // Освобождаем blob URL если был установлен
+        if (avatar.value && avatar.value.startsWith('blob:')) {
+            URL.revokeObjectURL(avatar.value);
+        }
+
         id.value = null;
         firstName.value = '';
         lastName.value = '';

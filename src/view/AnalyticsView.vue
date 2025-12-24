@@ -113,6 +113,10 @@ async function loadAnalyticsData(accountId) {
             userStore.setUserData(data.accountInfo);
         }
 
+        if (data.profilePhoto) {
+            userStore.setAvatar(data.profilePhoto);
+        }
+
         // Сохраняем папки в dialog store
         if (data.folders) {
             dialogStore.setFolders(data.folders);
