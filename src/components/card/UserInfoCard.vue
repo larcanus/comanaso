@@ -740,9 +740,9 @@ const detailedFields = computed(() => [
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    border: 1.5px solid var(--vt-bt-background-color);
+    border: 1.5px solid var(--color-text);
     background-color: transparent;
-    color: var(--vt-bt-background-color);
+    color: var(--color-text);
     font-size: 11px;
     font-weight: bold;
     display: flex;
