@@ -73,20 +73,20 @@ const useDialogStore = defineStore('dialog', () => {
 function validateDialogs(dialogs = [], foldersState) {
     const preparedDialogs = dialogs?.map((dialog) => {
         const dialogData = toValue(dialog);
-        const idValue = dialogData.id?.value || dialogData.id || dialogData.entity?.id?.value || '';
+        const idValue = dialogData.id || dialogData.entity?.id || '';
 
         return {
             title: getTitleDialogLoc(dialogData),
-            archived: getArchivedDialogLoc(dialogData.archived),
+            archived: getArchivedDialogLoc(dialogData.isArchived),
             type: getTypeDialogLoc(dialogData),
             id: { value: idValue, loc: String(idValue) },
             folderId: getFolderIdDialogLoc(dialogData, foldersState),
-            pinned: getPinnedDialogLoc(dialogData.pinned),
+            pinned: getPinnedDialogLoc(dialogData.isPinned),
             unreadCount: {
                 value: dialogData.unreadCount,
                 loc: dialogData.unreadCount,
             },
-            mute: getMuteDialogLoc(dialogData.dialog),
+            mute: getMuteDialogLoc(dialogData.isMuted),
             date: getDateDialogLoc(dialogData.date),
             creator: getCreatorDialogLoc(dialogData.entity?.creator),
         };
@@ -227,18 +227,18 @@ function getPinnedDialogLoc(pinned) {
     return objectData;
 }
 
-function getMuteDialogLoc(dialog) {
+function getMuteDialogLoc(muted) {
     const objectData = {
-        value: dialog?.notifySettings?.muteUntil || null,
-        loc: 'нет',
+        value: muted,
+        loc: muted ? 'да' : 'нет',
     };
 
-    if (dialog && dialog.notifySettings?.muteUntil > 1) {
-        const currentTimestamp = Date.now();
-        const until = currentTimestamp + dialog.notifySettings?.muteUntil;
-
-        objectData.loc = getDateDialogLoc(until).loc;
-    }
+    // if (dialog && dialog.notifySettings?.muteUntil > 1) {
+    //     const currentTimestamp = Date.now();
+    //     const until = currentTimestamp + dialog.notifySettings?.muteUntil;
+    //
+    //     objectData.loc = getDateDialogLoc(until).loc;
+    // }
 
     return objectData;
 }

@@ -137,7 +137,7 @@ class AnalyticsService {
             {
                 name: 'dialogs',
                 label: 'Загрузка диалогов',
-                method: () => this.getDialogs(accountId, { limit: 500 }),
+                method: () => this.getDialogs(accountId, { limit: 500, archived: false }),
             },
             {
                 name: 'folders',
