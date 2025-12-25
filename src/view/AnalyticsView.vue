@@ -14,7 +14,6 @@ import useToastStore from '@/store/toast.js';
 import { analyticsService } from '@/services/analytics.service.js';
 import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
 
-
 const accountStore = useAccountStore();
 const dialogStore = useDialogStore();
 const userStore = useUserStore();

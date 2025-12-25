@@ -350,9 +350,7 @@ function getDraftDialogLoc(draft) {
             date: draft.date,
         };
         // Обрезаем текст черновика для отображения
-        const shortText = draft.text.length > 30
-            ? draft.text.substring(0, 30) + '...'
-            : draft.text;
+        const shortText = draft.text.length > 30 ? draft.text.substring(0, 30) + '...' : draft.text;
         objectData.loc = `"${shortText}"`;
     }
 

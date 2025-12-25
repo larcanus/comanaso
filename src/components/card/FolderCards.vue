@@ -20,8 +20,8 @@ function getUnreadCount(folder) {
     const allDialogs = dialogStore.state || [];
 
     let unreadCount = 0;
-    dialogIds.forEach(dialogId => {
-        const dialog = allDialogs.find(d => String(d.id) === String(dialogId));
+    dialogIds.forEach((dialogId) => {
+        const dialog = allDialogs.find((d) => String(d.id) === String(dialogId));
         if (dialog?.unreadCount) {
             unreadCount += dialog.unreadCount;
         }
@@ -77,7 +77,7 @@ function closePopup() {
     <div v-if="hasFolders" class="folder-cards-container">
         <div class="folder-grid">
             <div
-                v-for="(folder) in folders"
+                v-for="folder in folders"
                 :key="folder.id"
                 class="folder-card"
                 @click="showFolderDetails(folder)"
