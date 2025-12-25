@@ -155,17 +155,17 @@ function getTypeDialogLoc(dialogData) {
     const typeValue = dialogData.type || '';
 
     const typeMap = {
-        channel: 'канал',
         user: 'личный',
         group: 'групповой',
-        megagroup: 'супергруппа',
+        supergroup: 'супергруппа',
+        channel: 'канал',
         bot: 'бот',
     };
 
     // Уточняем тип для каналов и мегагрупп
     let finalType = typeValue;
     if (typeValue === 'channel' && dialogData.entity?.isBroadcast === false) {
-        finalType = 'megagroup';
+        finalType = 'supergroup';
     }
     if (dialogData.entity?.isBot) {
         finalType = 'bot';

@@ -76,13 +76,12 @@ class AnalyticsService {
      * @returns {Promise<Object>} Данные диалогов
      */
     async getDialogs(accountId, options = {}) {
-        const { limit = 100, offset = 0, archived = false } = options;
+        const { limit = 100, offset = 0 } = options;
 
         try {
             const params = new URLSearchParams({
                 limit: limit.toString(),
                 offset: offset.toString(),
-                archived: archived.toString(),
             });
 
             const response = await apiService.authRequest(
@@ -137,7 +136,7 @@ class AnalyticsService {
             {
                 name: 'dialogs',
                 label: 'Загрузка диалогов',
-                method: () => this.getDialogs(accountId, { limit: 500, archived: false }),
+                method: () => this.getDialogs(accountId, { limit: 500 }),
             },
             {
                 name: 'folders',
