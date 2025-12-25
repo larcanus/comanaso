@@ -18,13 +18,30 @@ function getFolderIcon(index) {
     return folderIcons[index % folderIcons.length];
 }
 
+function getUnreadCount(folder) {
+    const dialogIds = dialogStore.foldersState.dialogsIdByFolderId[folder.id] || [];
+    const allDialogs = dialogStore.state || [];
+
+    let unreadCount = 0;
+    dialogIds.forEach(dialogId => {
+        const dialog = allDialogs.find(d => String(d.id) === String(dialogId));
+        if (dialog?.unreadCount) {
+            unreadCount += dialog.unreadCount;
+        }
+    });
+
+    return unreadCount;
+}
+
 function showFolderDetails(folder) {
     const dialogsCount = dialogStore.foldersState.dialogsIdByFolderId[folder.id]?.length || 0;
+    const unreadCount = getUnreadCount(folder);
 
     const details = [
         `📋 Название: ${folder.title}`,
         `🆔 ID: ${folder.id}`,
         `💬 Диалогов в папке: ${dialogsCount}`,
+        `🔔 Непрочитанных: ${unreadCount}`,
         '',
         '⚙️ Настройки фильтра:',
         `• Контакты: ${folder.contacts ? '✅ Да' : '❌ Нет'}`,
@@ -62,11 +79,6 @@ function closePopup() {
 
 <template>
     <div v-if="hasFolders" class="folder-cards-container">
-        <div class="folder-header">
-            <h3>📂 Папки</h3>
-            <span class="folder-count">{{ folders.length }}</span>
-        </div>
-
         <div class="folder-grid">
             <div
                 v-for="(folder, index) in folders"
@@ -76,8 +88,8 @@ function closePopup() {
             >
                 <div class="folder-icon">{{ getFolderIcon(index) }}</div>
                 <div class="folder-title">{{ folder.title }}</div>
-                <div class="folder-badge">
-                    {{ dialogStore.foldersState.dialogsIdByFolderId[folder.id]?.length || 0 }}
+                <div v-if="getUnreadCount(folder) > 0" class="folder-badge">
+                    {{ getUnreadCount(folder) }}
                 </div>
             </div>
         </div>
@@ -90,46 +102,14 @@ function closePopup() {
 .folder-cards-container {
     width: 100%;
     max-width: 750px;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    overflow: hidden;
-    margin: 10px;
+    margin: 10px auto;
     box-sizing: border-box;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    background-color: var(--color-background);
-}
-
-.folder-header {
-    background-color: var(--vt-bt-background-color);
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.folder-header h3 {
-    color: var(--vt-c-white);
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    user-select: none;
-}
-
-.folder-count {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: var(--vt-c-white);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    user-select: none;
 }
 
 .folder-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 12px;
-    padding: 15px;
 }
 
 .folder-card {
@@ -138,9 +118,9 @@ function closePopup() {
     align-items: center;
     justify-content: center;
     padding: 15px 10px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: transparent;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 2px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
@@ -149,10 +129,10 @@ function closePopup() {
 }
 
 .folder-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
     border-color: #667eea;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f2ff 100%);
+    background: rgba(102, 126, 234, 0.05);
 }
 
 .folder-icon {
