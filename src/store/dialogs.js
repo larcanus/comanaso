@@ -83,12 +83,17 @@ function validateDialogs(dialogs = [], foldersState) {
             folderId: getFolderIdDialogLoc(dialogData, foldersState),
             pinned: getPinnedDialogLoc(dialogData.isPinned),
             unreadCount: {
-                value: dialogData.unreadCount,
-                loc: dialogData.unreadCount,
+                value: dialogData.unreadCount || 0,
+                loc: dialogData.unreadCount || 0,
             },
-            mute: getMuteDialogLoc(dialogData.isMuted),
+            mute: getMuteDialogLoc(dialogData.notifySettings),
             date: getDateDialogLoc(dialogData.date),
-            creator: getCreatorDialogLoc(dialogData.entity?.creator),
+            creator: getCreatorDialogLoc(dialogData.entity?.isCreator),
+            unreadMark: {
+                value: dialogData.unreadMark || false,
+                loc: dialogData.unreadMark ? 'да' : 'нет',
+            },
+            draft: getDraftDialogLoc(dialogData.draft),
         };
     });
     console.log('preparedDialogs', preparedDialogs);
@@ -101,26 +106,43 @@ function getTitleDialogLoc(dialogData) {
         loc: 'Без названия',
     };
 
-    if (dialogData.title && dialogData.title.length > 0) {
-        objectData.value = dialogData.title;
-        objectData.loc = dialogData.title;
-        return objectData;
-    }
-
+    // Приоритет: name из корня диалога
     if (dialogData.name && dialogData.name.length > 0) {
         objectData.value = dialogData.name;
         objectData.loc = dialogData.name;
         return objectData;
     }
 
-    // Если оба поля отсутствуют или пустые
-    if (
-        (!dialogData.title || dialogData.title.length === 0) &&
-        (!dialogData.name || dialogData.name.length === 0)
-    ) {
-        objectData.value = '';
-        objectData.loc = 'Удаленный аккаунт';
+    // Затем проверяем title в entity (для групп и каналов)
+    if (dialogData.entity?.title && dialogData.entity.title.length > 0) {
+        objectData.value = dialogData.entity.title;
+        objectData.loc = dialogData.entity.title;
+        return objectData;
     }
+
+    // Для пользователей составляем имя из firstName и lastName
+    if (dialogData.entity?.firstName || dialogData.entity?.lastName) {
+        const firstName = dialogData.entity.firstName || '';
+        const lastName = dialogData.entity.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        if (fullName.length > 0) {
+            objectData.value = fullName;
+            objectData.loc = fullName;
+            return objectData;
+        }
+    }
+
+    // Проверяем username как запасной вариант
+    if (dialogData.entity?.username && dialogData.entity.username.length > 0) {
+        objectData.value = `@${dialogData.entity.username}`;
+        objectData.loc = `@${dialogData.entity.username}`;
+        return objectData;
+    }
+
+    // Если всё отсутствует
+    objectData.value = '';
+    objectData.loc = 'Удаленный аккаунт';
 
     return objectData;
 }
@@ -129,28 +151,29 @@ function getTitleDialogLoc(dialogData) {
  * @return {object}
  */
 function getTypeDialogLoc(dialogData) {
-    // Получаем тип из строкового поля или из булевых полей (для обратной совместимости)
-    let typeValue = dialogData.type || dialogData.entity?.type || '';
-
-    // Если тип в булевых полях, конвертируем в строку
-    if (!typeValue) {
-        if (dialogData.isChannel) typeValue = 'channel';
-        else if (dialogData.isGroup) typeValue = 'group';
-        else if (dialogData.isUser) typeValue = 'user';
-    }
+    // Получаем тип из строкового поля type
+    const typeValue = dialogData.type || '';
 
     const typeMap = {
         channel: 'канал',
         user: 'личный',
         group: 'групповой',
-        chat: 'групповой',
-        supergroup: 'супергруппа',
+        megagroup: 'супергруппа',
         bot: 'бот',
     };
 
+    // Уточняем тип для каналов и мегагрупп
+    let finalType = typeValue;
+    if (typeValue === 'channel' && dialogData.entity?.isBroadcast === false) {
+        finalType = 'megagroup';
+    }
+    if (dialogData.entity?.isBot) {
+        finalType = 'bot';
+    }
+
     return {
-        value: typeValue,
-        loc: typeMap[typeValue] || typeValue || 'неизвестно',
+        value: finalType,
+        loc: typeMap[finalType] || finalType || 'неизвестно',
     };
 }
 
@@ -161,14 +184,27 @@ function getFolderIdDialogLoc(dialogData, foldersState) {
     };
 
     // Проверяем архивные диалоги
-    if (dialogData.folderId === 1) {
+    if (dialogData.isArchived) {
         objectData.value.push(1);
         objectData.loc = 'Архив';
         return objectData;
     }
 
+    // Проверяем folderId из нового API
+    if (dialogData.folderId !== null && dialogData.folderId !== undefined) {
+        const folderId = Number(dialogData.folderId);
+        objectData.value.push(folderId);
+
+        const folder = foldersState.value.rawFoldersData.find(
+            (folderData) => folderData.id === folderId
+        );
+
+        objectData.loc = folder?.title || `Папка #${folderId}`;
+        return objectData;
+    }
+
     // Получаем ID диалога (приводим к строке для сравнения)
-    const entityId = String(dialogData.entity?.id || dialogData.id || '');
+    const entityId = String(dialogData.id || '');
 
     if (!entityId) {
         objectData.loc = 'нет';
@@ -227,18 +263,37 @@ function getPinnedDialogLoc(pinned) {
     return objectData;
 }
 
-function getMuteDialogLoc(muted) {
+function getMuteDialogLoc(notifySettings) {
     const objectData = {
-        value: muted,
-        loc: muted ? 'да' : 'нет',
+        value: false,
+        loc: 'нет',
     };
 
-    // if (dialog && dialog.notifySettings?.muteUntil > 1) {
-    //     const currentTimestamp = Date.now();
-    //     const until = currentTimestamp + dialog.notifySettings?.muteUntil;
-    //
-    //     objectData.loc = getDateDialogLoc(until).loc;
-    // }
+    if (!notifySettings) {
+        return objectData;
+    }
+
+    // Проверяем silent флаг
+    const isMuted = notifySettings.silent || false;
+    objectData.value = isMuted;
+
+    // Если есть muteUntil и это валидный timestamp
+    if (notifySettings.muteUntil && notifySettings.muteUntil > 0) {
+        const currentTimestamp = Math.floor(Date.now() / 1000); // текущее время в секундах
+        const muteUntil = notifySettings.muteUntil;
+
+        // Проверяем, не истекло ли время заглушения
+        if (muteUntil > currentTimestamp) {
+            objectData.value = true;
+            // Конвертируем timestamp в дату
+            const dateObj = getDateDialogLoc(muteUntil);
+            objectData.loc = `до ${dateObj.loc}`;
+            return objectData;
+        }
+    }
+
+    // Если просто заглушен без конкретной даты
+    objectData.loc = isMuted ? 'да' : 'нет';
 
     return objectData;
 }
@@ -248,9 +303,22 @@ function getDateDialogLoc(timestamp) {
         value: timestamp,
         loc: '',
     };
-    const preparedTimestamp =
-        String(timestamp).length === 10 ? Number(`${timestamp}000`) : timestamp;
-    const date = new Date(preparedTimestamp);
+
+    if (!timestamp) {
+        return objectData;
+    }
+
+    // Обрабатываем разные форматы timestamp
+    let date;
+    if (typeof timestamp === 'string') {
+        // ISO формат (2024-01-17T15:30:00Z)
+        date = new Date(timestamp);
+    } else {
+        // Unix timestamp (может быть в секундах или миллисекундах)
+        const preparedTimestamp =
+            String(timestamp).length === 10 ? Number(`${timestamp}000`) : timestamp;
+        date = new Date(preparedTimestamp);
+    }
 
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -263,11 +331,32 @@ function getDateDialogLoc(timestamp) {
     return objectData;
 }
 
-function getCreatorDialogLoc(creator) {
+function getCreatorDialogLoc(isCreator) {
     return {
-        value: creator,
-        loc: creator ? 'да' : 'нет',
+        value: isCreator || false,
+        loc: isCreator ? 'да' : 'нет',
     };
+}
+
+function getDraftDialogLoc(draft) {
+    const objectData = {
+        value: null,
+        loc: 'нет',
+    };
+
+    if (draft && draft.text) {
+        objectData.value = {
+            text: draft.text,
+            date: draft.date,
+        };
+        // Обрезаем текст черновика для отображения
+        const shortText = draft.text.length > 30
+            ? draft.text.substring(0, 30) + '...'
+            : draft.text;
+        objectData.loc = `"${shortText}"`;
+    }
+
+    return objectData;
 }
 
 // Экспортируем как именованный экспорт и как default
