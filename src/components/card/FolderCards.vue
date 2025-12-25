@@ -35,10 +35,9 @@ function showFolderDetails(folder) {
     const unreadCount = getUnreadCount(folder);
 
     const details = [
-        `📋 Название: ${folder.title}`,
-        `🆔 ID: ${folder.id}`,
-        `💬 Диалогов в папке: ${dialogsCount}`,
-        `🔔 Непрочитанных: ${unreadCount}`,
+        `ID: ${folder.id}`,
+        `Диалогов в папке: ${dialogsCount}`,
+        `Непрочитанных: ${unreadCount}`,
         '',
         '⚙️ Настройки фильтра:',
         `• Контакты: ${folder.contacts ? '✅ Да' : '❌ Нет'}`,
@@ -54,12 +53,12 @@ function showFolderDetails(folder) {
     // Добавляем информацию о закрепленных чатах
     if (folder.pinnedChatIds && folder.pinnedChatIds.length > 0) {
         details.push('');
-        details.push(`📌 Закрепленных чатов: ${folder.pinnedChatIds.length}`);
+        details.push(`Закрепленных чатов: ${folder.pinnedChatIds.length}`);
     }
 
     // Добавляем информацию об исключенных чатах
     if (folder.excludedChatIds && folder.excludedChatIds.length > 0) {
-        details.push(`🚫 Исключенных чатов: ${folder.excludedChatIds.length}`);
+        details.push(`Исключенных чатов: ${folder.excludedChatIds.length}`);
     }
 
     popupMessage.value = {
@@ -78,7 +77,7 @@ function closePopup() {
     <div v-if="hasFolders" class="folder-cards-container">
         <div class="folder-grid">
             <div
-                v-for="(folder, index) in folders"
+                v-for="(folder) in folders"
                 :key="folder.id"
                 class="folder-card"
                 @click="showFolderDetails(folder)"
