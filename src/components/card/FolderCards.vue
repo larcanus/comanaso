@@ -41,7 +41,6 @@ function showFolderDetails(folder) {
         '',
         '⚙️ Настройки фильтра:',
         `• Контакты: ${folder.contacts ? '✅ Да' : '❌ Нет'}`,
-        `• Не контакты: ${folder.nonContacts ? '✅ Да' : '❌ Нет'}`,
         `• Группы: ${folder.groups ? '✅ Да' : '❌ Нет'}`,
         `• Каналы: ${folder.broadcasts ? '✅ Да' : '❌ Нет'}`,
         `• Боты: ${folder.bots ? '✅ Да' : '❌ Nет'}`,
@@ -58,6 +57,7 @@ function showFolderDetails(folder) {
 
     // Добавляем информацию об исключенных чатах
     if (folder.excludedChatIds && folder.excludedChatIds.length > 0) {
+        details.push('');
         details.push(`Исключенных чатов: ${folder.excludedChatIds.length}`);
     }
 
@@ -90,7 +90,12 @@ function closePopup() {
             </div>
         </div>
 
-        <DetailPopup :message="popupMessage" :is-visible="isPopupVisible" @close="closePopup" />
+        <DetailPopup
+            :message="popupMessage"
+            :is-visible="isPopupVisible"
+            align="left"
+            @close="closePopup"
+        />
     </div>
 </template>
 

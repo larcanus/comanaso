@@ -10,6 +10,11 @@ const props = defineProps({
         type: Boolean,
         required: true,
     },
+    align: {
+        type: String,
+        default: 'center',
+        validator: (value) => ['center', 'left'].includes(value),
+    },
 });
 
 const emit = defineEmits(['close']);
@@ -35,7 +40,7 @@ function handleKeyDown(event) {
             @keydown="handleKeyDown"
         >
             <div class="modal-content">
-                <div class="content">
+                <div class="content" :class="`content-${align}`">
                     <h3 class="modal-title">{{ message?.title }}</h3>
                     <p class="modal-description">{{ message?.desc }}</p>
                 </div>
@@ -95,6 +100,18 @@ function handleKeyDown(event) {
 
 .content {
     margin-bottom: 20px;
+}
+
+.content-left {
+    text-align: left;
+}
+
+.content-left .modal-title {
+    text-align: center;
+}
+
+.content-left .modal-description {
+    text-align: left;
 }
 
 .modal-title {
