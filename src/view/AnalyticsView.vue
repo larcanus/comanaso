@@ -6,12 +6,14 @@ import DialogPie from '@/components/chart/DialogPie.vue';
 import AccountSelector from '@/components/selector/AccountSelector.vue';
 import LoadingProgress from '@/components/progress/LoadingProgress.vue';
 import UserInfoCard from '@/components/card/UserInfoCard.vue';
+import FolderCards from '@/components/card/FolderCards.vue';
 import useAccountStore from '@/store/account.js';
 import useDialogStore from '@/store/dialogs.js';
 import useUserStore from '@/store/user.js';
 import useToastStore from '@/store/toast.js';
 import { analyticsService } from '@/services/analytics.service.js';
 import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
+
 
 const accountStore = useAccountStore();
 const dialogStore = useDialogStore();
@@ -197,7 +199,8 @@ async function refreshAnalytics() {
             <!-- Информация о пользователе -->
             <UserInfoCard v-if="hasUserData" />
 
-            <!-- TODO: Блок папок -->
+            <!-- Блок папок -->
+            <FolderCards />
 
             <!-- Блок диалогов -->
             <DialogTable v-if="hasDialogsData" />

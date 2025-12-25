@@ -1,0 +1,253 @@
+<script setup>
+import { ref, computed } from 'vue';
+import useDialogStore from '@/store/dialogs.js';
+import DetailPopup from '@/components/modal/DetailPopup.vue';
+
+const dialogStore = useDialogStore();
+
+const folders = computed(() => dialogStore.foldersState.rawFoldersData || []);
+const hasFolders = computed(() => folders.value.length > 0);
+
+const isPopupVisible = ref(false);
+const popupMessage = ref(null);
+
+// Иконки для папок (можно расширить)
+const folderIcons = ['📁', '📂', '🗂️', '📋', '📌', '⭐', '💼', '🎯', '🔖'];
+
+function getFolderIcon(index) {
+    return folderIcons[index % folderIcons.length];
+}
+
+function showFolderDetails(folder) {
+    const dialogsCount = dialogStore.foldersState.dialogsIdByFolderId[folder.id]?.length || 0;
+
+    const details = [
+        `📋 Название: ${folder.title}`,
+        `🆔 ID: ${folder.id}`,
+        `💬 Диалогов в папке: ${dialogsCount}`,
+        '',
+        '⚙️ Настройки фильтра:',
+        `• Контакты: ${folder.contacts ? '✅ Да' : '❌ Нет'}`,
+        `• Не контакты: ${folder.nonContacts ? '✅ Да' : '❌ Нет'}`,
+        `• Группы: ${folder.groups ? '✅ Да' : '❌ Нет'}`,
+        `• Каналы: ${folder.broadcasts ? '✅ Да' : '❌ Нет'}`,
+        `• Боты: ${folder.bots ? '✅ Да' : '❌ Nет'}`,
+        `• Исключить прочитанные: ${folder.excludeRead ? '✅ Да' : '❌ Нет'}`,
+        `• Исключить заглушенные: ${folder.excludeMuted ? '✅ Да' : '❌ Нет'}`,
+        `• Исключить архивные: ${folder.excludeArchived ? '✅ Да' : '❌ Нет'}`,
+    ];
+
+    // Добавляем информацию о закрепленных чатах
+    if (folder.pinnedChatIds && folder.pinnedChatIds.length > 0) {
+        details.push('');
+        details.push(`📌 Закрепленных чатов: ${folder.pinnedChatIds.length}`);
+    }
+
+    // Добавляем информацию об исключенных чатах
+    if (folder.excludedChatIds && folder.excludedChatIds.length > 0) {
+        details.push(`🚫 Исключенных чатов: ${folder.excludedChatIds.length}`);
+    }
+
+    popupMessage.value = {
+        title: `Папка: ${folder.title}`,
+        desc: details.join('\n'),
+    };
+    isPopupVisible.value = true;
+}
+
+function closePopup() {
+    isPopupVisible.value = false;
+}
+</script>
+
+<template>
+    <div v-if="hasFolders" class="folder-cards-container">
+        <div class="folder-header">
+            <h3>📂 Папки</h3>
+            <span class="folder-count">{{ folders.length }}</span>
+        </div>
+
+        <div class="folder-grid">
+            <div
+                v-for="(folder, index) in folders"
+                :key="folder.id"
+                class="folder-card"
+                @click="showFolderDetails(folder)"
+            >
+                <div class="folder-icon">{{ getFolderIcon(index) }}</div>
+                <div class="folder-title">{{ folder.title }}</div>
+                <div class="folder-badge">
+                    {{ dialogStore.foldersState.dialogsIdByFolderId[folder.id]?.length || 0 }}
+                </div>
+            </div>
+        </div>
+
+        <DetailPopup :message="popupMessage" :is-visible="isPopupVisible" @close="closePopup" />
+    </div>
+</template>
+
+<style scoped>
+.folder-cards-container {
+    width: 100%;
+    max-width: 750px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 10px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: var(--color-background);
+}
+
+.folder-header {
+    background-color: var(--vt-bt-background-color);
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.folder-header h3 {
+    color: var(--vt-c-white);
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    user-select: none;
+}
+
+.folder-count {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--vt-c-white);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    user-select: none;
+}
+
+.folder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    padding: 15px;
+}
+
+.folder-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 10px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    min-height: 100px;
+    user-select: none;
+}
+
+.folder-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f2ff 100%);
+}
+
+.folder-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.folder-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-heading);
+    text-align: center;
+    word-break: break-word;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.folder-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .folder-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .folder-card {
+        min-height: 90px;
+        padding: 12px 8px;
+    }
+
+    .folder-icon {
+        font-size: 32px;
+    }
+
+    .folder-title {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .folder-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .folder-card {
+        min-height: 85px;
+        padding: 10px 6px;
+    }
+
+    .folder-icon {
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .folder-title {
+        font-size: 12px;
+    }
+
+    .folder-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        top: 6px;
+        right: 6px;
+    }
+
+    .folder-header h3 {
+        font-size: 16px;
+    }
+
+    .folder-count {
+        font-size: 12px;
+        padding: 3px 8px;
+    }
+}
+</style>
