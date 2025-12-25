@@ -17,11 +17,11 @@ const tableHeaderLoc = computed(() => {
 const allColumns = [
     { key: 'title', label: 'Наименование' },
     { key: 'type', label: 'Тип' },
-    { key: 'id', label: 'Id' },
+    { key: 'id', label: 'ID' },
     { key: 'folderId', label: 'Папка' },
     { key: 'pinned', label: 'Закреплен' },
     { key: 'unreadCount', label: 'Непрочитанные' },
-    { key: 'mute', label: 'Заглушен до' },
+    { key: 'mute', label: 'Заглушен' },
     { key: 'date', label: 'Дата обновления' },
     { key: 'creator', label: 'Вы создатель' },
     { key: 'archived', label: 'В архиве' },
