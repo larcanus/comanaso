@@ -250,8 +250,14 @@ function handleSearchInput() {
                     </thead>
                     <tbody>
                         <tr v-for="row in paginatedData" :key="row.id.value">
-                            <td v-for="column in visibleColumns" :id="column" :key="column">
-                                {{ row[column].loc }}
+                            <td
+                                v-for="column in visibleColumns"
+                                :id="column"
+                                :key="column"
+                                :class="{ 'cell-title': column === 'title' }"
+                                :title="column === 'title' ? row[column].loc : ''"
+                            >
+                                <span class="cell-content">{{ row[column].loc }}</span>
                             </td>
                         </tr>
                     </tbody>
@@ -381,13 +387,40 @@ function handleSearchInput() {
 .styled-table th,
 .styled-table td {
     border: 1px solid rgba(102, 126, 234, 0.2);
-    padding: 12px;
+    padding: 0 12px 0 12px;
     text-align: center;
 }
 
 .styled-table tbody td {
     color: #2c3e50;
     font-weight: 500;
+    height: 60px;
+    min-height: 60px;
+    max-height: 60px;
+    vertical-align: middle;
+}
+
+.styled-table tbody td .cell-content {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.styled-table tbody td.cell-title {
+    max-width: 250px;
+    overflow: hidden;
+}
+
+.styled-table tbody td.cell-title .cell-content {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    line-height: 1.4;
 }
 
 .styled-table th {
@@ -550,6 +583,12 @@ function handleSearchInput() {
         padding: 10px 8px;
         font-size: 14px;
     }
+
+    .styled-table tbody td {
+        height: 55px;
+        min-height: 55px;
+        max-height: 55px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -592,6 +631,16 @@ function handleSearchInput() {
     .styled-table td {
         padding: 8px 6px;
         font-size: 13px;
+    }
+
+    .styled-table tbody td {
+        height: 50px;
+        min-height: 50px;
+        max-height: 50px;
+    }
+
+    .styled-table tbody td.cell-title {
+        max-width: 150px;
     }
 }
 </style>
