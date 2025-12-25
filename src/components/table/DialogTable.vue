@@ -386,6 +386,7 @@ function handleSearchInput() {
 
 .styled-table th {
     border: 1px solid rgba(102, 126, 234, 0.2);
+    min-width: 100px;
     padding: 6px 12px 6px 12px;
     text-align: center;
     user-select: none;
