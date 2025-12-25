@@ -11,11 +11,8 @@ const hasFolders = computed(() => folders.value.length > 0);
 const isPopupVisible = ref(false);
 const popupMessage = ref(null);
 
-// Иконки для папок (можно расширить)
-const folderIcons = ['📁', '📂', '🗂️', '📋', '📌', '⭐', '💼', '🎯', '🔖'];
-
-function getFolderIcon(index) {
-    return folderIcons[index % folderIcons.length];
+function getFolderIcon(folder) {
+    return folder.emoji || '📁';
 }
 
 function getUnreadCount(folder) {
@@ -86,7 +83,7 @@ function closePopup() {
                 class="folder-card"
                 @click="showFolderDetails(folder)"
             >
-                <div class="folder-icon">{{ getFolderIcon(index) }}</div>
+                <div class="folder-icon">{{ getFolderIcon(folder) }}</div>
                 <div class="folder-title">{{ folder.title }}</div>
                 <div v-if="getUnreadCount(folder) > 0" class="folder-badge">
                     {{ getUnreadCount(folder) }}
@@ -139,6 +136,8 @@ function closePopup() {
     font-size: 36px;
     margin-bottom: 8px;
     line-height: 1;
+    filter: grayscale(1);
+    opacity: 0.8;
 }
 
 .folder-title {
@@ -165,7 +164,7 @@ function closePopup() {
     font-size: 11px;
     font-weight: 700;
     padding: 3px 7px;
-    border-radius: 10px;
+    border-radius: 4px;
     min-width: 20px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
