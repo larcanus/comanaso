@@ -273,6 +273,260 @@ export function useDialogAnalytics() {
         return Array.from(folderMap.values()).filter((folder) => folder.count > 0);
     });
 
+    // =====================================================
+    // ВТОРОЙ ЭТАП: НОВЫЕ АНАЛИТИКИ
+    // =====================================================
+
+    /**
+     * Данные для пузырьковой диаграммы: размер vs активность сообществ
+     * X-ось: количество участников
+     * Y-ось: дней с последнего сообщения
+     * Размер пузырька: количество непрочитанных
+     */
+    const communitiesData = computed(() => {
+        // Фильтруем группы, супергруппы и каналы
+        const communities = dialogs.value.filter((d) =>
+            ['group', 'supergroup', 'channel'].includes(d.type)
+        );
+
+        return communities
+            .map((dialog) => {
+                const participantsCount = dialog.entity?.participantsCount || 0;
+
+                // Вычисляем дней с последнего сообщения
+                let daysInactive = 0;
+                if (dialog.date) {
+                    const lastMessageDate = new Date(dialog.date);
+                    const now = new Date();
+                    daysInactive = Math.floor((now - lastMessageDate) / (1000 * 60 * 60 * 24));
+                }
+
+                const unreadCount = dialog.unreadCount || 0;
+
+                return {
+                    name: getDialogName(dialog),
+                    x: participantsCount,
+                    y: daysInactive,
+                    r: Math.max(5, Math.min(30, unreadCount / 5)), // Размер от 5 до 30
+                    unreadCount,
+                    type: dialog.type,
+                    id: dialog.id,
+                };
+            })
+            .filter((item) => item.x > 0); // Только с известным количеством участников
+    });
+
+    /**
+     * Данные для группированной диаграммы уведомлений
+     * Группы: Личные, Группы, Каналы
+     * Столбцы: Включены (со звуком), Без звука, Выключены (muted)
+     */
+    const notificationsData = computed(() => {
+        const stats = {
+            user: { enabled: 0, silent: 0, muted: 0 },
+            group: { enabled: 0, silent: 0, muted: 0 },
+            channel: { enabled: 0, silent: 0, muted: 0 },
+        };
+
+        dialogs.value.forEach((dialog) => {
+            let category = dialog.type;
+
+            // Объединяем supergroup в group
+            if (category === 'supergroup') category = 'group';
+            // Ботов считаем как личные
+            if (category === 'bot') category = 'user';
+
+            if (!stats[category]) return;
+
+            // Используем isMuted из store (уже вычисленное значение)
+            const isMuted = dialog.isMuted === true;
+
+            if (isMuted) {
+                // Заглушено до времени - выключены
+                stats[category].muted++;
+            } else {
+                const notifySettings = dialog.notifySettings || {};
+                const isSilent = notifySettings.silent === true;
+
+                if (isSilent) {
+                    // Уведомления есть, но без звука
+                    stats[category].silent++;
+                } else {
+                    // Включены (дефолт или явно со звуком)
+                    stats[category].enabled++;
+                }
+            }
+        });
+
+        const total =
+            stats.user.enabled +
+            stats.user.silent +
+            stats.user.muted +
+            stats.group.enabled +
+            stats.group.silent +
+            stats.group.muted +
+            stats.channel.enabled +
+            stats.channel.silent +
+            stats.channel.muted;
+
+        return {
+            enabled: [stats.user.enabled, stats.group.enabled, stats.channel.enabled],
+            silent: [stats.user.silent, stats.group.silent, stats.channel.silent],
+            muted: [stats.user.muted, stats.group.muted, stats.channel.muted],
+            total,
+        };
+    });
+
+    /**
+     * Данные для временной шкалы: возраст групп и каналов
+     * Используем дату последнего сообщения (date) для анализа активности по годам
+     */
+    const groupsAgeTimeline = computed(() => {
+        const communities = dialogs.value.filter(
+            (d) => ['group', 'supergroup', 'channel'].includes(d.type) && d.date
+        );
+
+        if (communities.length === 0) {
+            return {
+                labels: [],
+                groups: [],
+                channels: [],
+                supergroups: [],
+                total: 0,
+                totalGroups: 0,
+                totalChannels: 0,
+                totalSupergroups: 0,
+            };
+        }
+
+        // Группируем по годам последней активности
+        const yearMap = new Map();
+
+        communities.forEach((dialog) => {
+            const year = new Date(dialog.date).getFullYear();
+            if (!yearMap.has(year)) {
+                yearMap.set(year, { groups: 0, channels: 0, supergroups: 0 });
+            }
+
+            const stats = yearMap.get(year);
+            if (dialog.type === 'channel') {
+                stats.channels++;
+            } else if (dialog.type === 'supergroup') {
+                stats.supergroups++;
+            } else {
+                stats.groups++;
+            }
+        });
+
+        // Преобразуем в массив и сортируем по годам
+        const years = Array.from(yearMap.keys()).sort();
+        const groupsData = years.map((year) => yearMap.get(year).groups);
+        const channelsData = years.map((year) => yearMap.get(year).channels);
+        const supergroupsData = years.map((year) => yearMap.get(year).supergroups);
+
+        return {
+            labels: years.map((y) => y.toString()),
+            groups: groupsData,
+            channels: channelsData,
+            supergroups: supergroupsData,
+            total: communities.length,
+            totalGroups: groupsData.reduce((sum, val) => sum + val, 0),
+            totalChannels: channelsData.reduce((sum, val) => sum + val, 0),
+            totalSupergroups: supergroupsData.reduce((sum, val) => sum + val, 0),
+        };
+    });
+
+    /**
+     * Данные для круговой диаграммы: онлайн-статусы контактов
+     */
+    const contactsStatus = computed(() => {
+        const users = dialogs.value.filter((d) => d.type === 'user' && !d.entity?.isBot);
+
+        const statuses = {
+            online: 0,
+            recently: 0,
+            lastWeek: 0,
+            lastMonth: 0,
+            offline: 0,
+        };
+
+        users.forEach((dialog) => {
+            const statusType = dialog.entity?.status?.type;
+            if (statusType && Object.prototype.hasOwnProperty.call(statuses, statusType)) {
+                statuses[statusType]++;
+            } else {
+                statuses.offline++;
+            }
+        });
+
+        return {
+            labels: ['Онлайн', 'Недавно', 'На этой неделе', 'В этом месяце', 'Давно'],
+            data: [
+                statuses.online,
+                statuses.recently,
+                statuses.lastWeek,
+                statuses.lastMonth,
+                statuses.offline,
+            ],
+            colors: ['#64f586', '#64adf5', '#f5a742', '#cc64f5', '#95a5a6'],
+        };
+    });
+
+    /**
+     * Данные для тепловой карты: активность по часам и дням недели
+     * Анализируем время последних сообщений
+     */
+    const activityHeatmap = computed(() => {
+        // Инициализируем матрицу 7 дней x 24 часа
+        const heatmapData = Array(7)
+            .fill(0)
+            .map(() => Array(24).fill(0));
+
+        const daysLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        const hoursLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+
+        dialogs.value.forEach((dialog) => {
+            if (!dialog.date) return;
+
+            const msgDate = new Date(dialog.date);
+            let dayOfWeek = msgDate.getDay(); // 0 = воскресенье
+            // Преобразуем в формат Пн=0, Вс=6
+            dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            const hour = msgDate.getHours();
+
+            heatmapData[dayOfWeek][hour]++;
+        });
+
+        // Вычисляем общее количество сообщений
+        let totalMessages = 0;
+        let peakValue = 0;
+        let peakDay = 0;
+        let peakHour = 0;
+
+        for (let day = 0; day < 7; day++) {
+            for (let hour = 0; hour < 24; hour++) {
+                const value = heatmapData[day][hour];
+                totalMessages += value;
+
+                if (value > peakValue) {
+                    peakValue = value;
+                    peakDay = day;
+                    peakHour = hour;
+                }
+            }
+        }
+
+        return {
+            daysLabels,
+            hoursLabels,
+            data: heatmapData,
+            totalMessages,
+            peakDay,
+            peakHour,
+            peakValue,
+        };
+    });
+
     /**
      * Получить имя диалога
      */
@@ -318,5 +572,11 @@ export function useDialogAnalytics() {
         activityTimeline,
         folderDistribution,
         getDialogTypesDescription,
+        // Второй этап
+        communitiesData,
+        notificationsData,
+        groupsAgeTimeline,
+        contactsStatus,
+        activityHeatmap,
     };
 }

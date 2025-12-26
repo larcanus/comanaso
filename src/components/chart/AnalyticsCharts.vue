@@ -4,6 +4,10 @@ import DialogTypePieChart from '@/components/chart/DialogTypePie.vue';
 import FoldersBarChart from '@/components/chart/FoldersBarChart.vue';
 import TopUnreadChart from '@/components/chart/UnreadTopChart.vue';
 import ActivityLineChart from '@/components/chart/ActivityLineChart.vue';
+import CommunitiesBubbleChart from '@/components/chart/CommunitiesBubbleChart.vue';
+import NotificationsGroupedChart from '@/components/chart/NotificationsGroupedChart.vue';
+import GroupsAgeTimeline from '@/components/chart/GroupsAgeTimeline.vue';
+import ActivityHeatmapChart from '@/components/chart/ActivityHeatmapChart.vue';
 </script>
 
 <template>
@@ -30,6 +34,26 @@ import ActivityLineChart from '@/components/chart/ActivityLineChart.vue';
         <!-- Блок 4: График активности -->
         <section class="chart-section full-width">
             <ActivityLineChart />
+        </section>
+
+        <!-- Блок 5: Тепловая карта активности -->
+        <section class="chart-section full-width">
+            <ActivityHeatmapChart />
+        </section>
+
+        <!-- Блок 6: Сообщества и уведомления -->
+        <section class="chart-section">
+            <CommunitiesBubbleChart />
+        </section>
+
+        <!-- Блок 7: уведомления -->
+        <section class="chart-section">
+            <NotificationsGroupedChart />
+        </section>
+
+        <!-- Блок 8: Временная шкала возраста сообществ -->
+        <section class="chart-section full-width">
+            <GroupsAgeTimeline />
         </section>
     </div>
 </template>
@@ -77,7 +101,7 @@ import ActivityLineChart from '@/components/chart/ActivityLineChart.vue';
     }
 }
 
-@media (max-width: 750px) {
+@media (max-width: 768px) {
     .analytics-charts {
         gap: 20px;
         margin-top: 20px;
