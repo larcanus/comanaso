@@ -2,11 +2,11 @@
 import { ref, watch, onMounted, computed } from 'vue';
 import DialogTable from '@/components/table/DialogTable.vue';
 import UpdateButton from '@/components/button/UpdateButton.vue';
-import DialogPie from '@/components/chart/DialogPie.vue';
 import AccountSelector from '@/components/selector/AccountSelector.vue';
 import LoadingProgress from '@/components/progress/LoadingProgress.vue';
 import UserInfoCard from '@/components/card/UserInfoCard.vue';
 import FolderCards from '@/components/card/FolderCards.vue';
+import AnalyticsCharts from '@/components/chart/AnalyticsCharts.vue';
 import useAccountStore from '@/store/account.js';
 import useDialogStore from '@/store/dialogs.js';
 import useUserStore from '@/store/user.js';
@@ -109,6 +109,7 @@ async function loadAnalyticsData(accountId) {
     try {
         const data = await analyticsService.loadAllData(accountId, handleProgress);
         console.log('loadAllData: ', data);
+
         // Сохраняем данные профиля в user store
         if (data.accountInfo) {
             userStore.setUserData(data.accountInfo);
@@ -203,10 +204,11 @@ async function refreshAnalytics() {
 
             <!-- Блок диалогов -->
             <DialogTable v-if="hasDialogsData" />
-            <DialogPie v-if="hasDialogsData" />
 
-            <!-- TODO: Блок AI анализа -->
+            <!-- Графики и диаграммы -->
+            <AnalyticsCharts v-if="hasDialogsData" />
 
+            <!-- Кнопка обновления -->
             <UpdateButton :is-disabled="!isAccountOnline" @refresh="refreshAnalytics" />
         </div>
 

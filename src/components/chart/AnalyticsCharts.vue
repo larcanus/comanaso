@@ -1,0 +1,94 @@
+<script setup>
+import MetricsCards from '@/components/card/MetricsCards.vue';
+import DialogTypePieChart from '@/components/chart/DialogTypePie.vue';
+import FoldersBarChart from '@/components/chart/FoldersBarChart.vue';
+import TopUnreadChart from '@/components/chart/UnreadTopChart.vue';
+import ActivityLineChart from '@/components/chart/ActivityLineChart.vue';
+</script>
+
+<template>
+    <div class="analytics-charts">
+        <!-- Блок 1: Сводные метрики -->
+        <section class="chart-section full-width">
+            <MetricsCards />
+        </section>
+
+        <!-- Блок 2: Типы диалогов и папки -->
+        <section class="chart-section">
+            <DialogTypePieChart />
+        </section>
+
+        <section class="chart-section">
+            <FoldersBarChart />
+        </section>
+
+        <!-- Блок 3: ТОП-10 непрочитанных -->
+        <section class="chart-section full-width">
+            <TopUnreadChart />
+        </section>
+
+        <!-- Блок 4: График активности -->
+        <section class="chart-section full-width">
+            <ActivityLineChart />
+        </section>
+    </div>
+</template>
+
+<style scoped>
+.analytics-charts {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.chart-section {
+    background: rgba(44, 62, 80, 0.3);
+    border-radius: 3px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.chart-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border-color: rgba(52, 152, 219, 0.3);
+}
+
+/* Ряд с двумя графиками */
+.charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* Секция на всю ширину */
+.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 750px) {
+    .analytics-charts {
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .chart-section {
+        padding: 20px;
+    }
+
+    .charts-row {
+        gap: 20px;
+    }
+}
+</style>
