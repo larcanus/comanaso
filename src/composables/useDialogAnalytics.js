@@ -32,7 +32,7 @@ export function useDialogAnalytics() {
                 (d.notifySettings?.muteUntil && d.notifySettings.muteUntil > Date.now() / 1000)
             );
         }).length;
-        const drafts = dialogs.value.filter((d) => d.draft?.text).length;
+        const drafts = dialogs.value.filter((d) => d.draft?.message).length;
 
         // Права администрирования
         const admin = dialogs.value.filter((d) => d.entity?.isAdmin).length;
@@ -563,6 +563,289 @@ export function useDialogAnalytics() {
         return `У вас ${total} диалогов. Больше всего ${maxType.toLowerCase()} - ${maxCount} (${percentage}%)`;
     };
 
+    /**
+     * Воронка прочтения (Chart 11)
+     * Этапы: Всего диалогов → С непрочитанными → С упоминаниями → С реакциями
+     * Каждый этап - подмножество предыдущего
+     */
+    const readingFunnel = computed(() => {
+        const total = dialogs.value.length;
+        const withUnread = dialogs.value.filter((d) => (d.unreadCount || 0) > 0).length;
+        const withMentions = dialogs.value.filter((d) => (d.unreadMentionsCount || 0) > 0).length;
+        const withReactions = dialogs.value.filter(
+            (d) => (d.unreadReactionsCount || 0) > 0
+        ).length;
+
+        return {
+            labels: ['Всего диалогов', 'Непрочитанные', 'Упоминания', 'Реакции'],
+            data: [total, withUnread, withMentions, withReactions],
+            // Процент от ВСЕХ диалогов
+            percentagesFromTotal: [
+                100,
+                total > 0 ? ((withUnread / total) * 100).toFixed(1) : 0,
+                total > 0 ? ((withMentions / total) * 100).toFixed(1) : 0,
+                total > 0 ? ((withReactions / total) * 100).toFixed(1) : 0,
+            ],
+            // Процент от ПРЕДЫДУЩЕГО этапа (конверсия между этапами)
+            conversionRates: [
+                100, // Первый этап всегда 100%
+                100, // От всех к непрочитанным (базовый уровень)
+                withUnread > 0 ? ((withMentions / withUnread) * 100).toFixed(1) : 0,
+                withMentions > 0 ? ((withReactions / withMentions) * 100).toFixed(1) : 0,
+            ],
+            // Общая конверсия (от начала до конца)
+            totalConversion: total > 0 ? ((withReactions / total) * 100).toFixed(2) : 0,
+        };
+    });
+
+    /**
+     * Профиль участия - радарная диаграмма (Chart 12)
+     * Метрики: Админ, Создатель, Закреплённые, Заглушённые, Архивные, С черновиками
+     */
+    const participationProfile = computed(() => {
+        const total = dialogs.value.length;
+        if (total === 0) {
+            return {
+                labels: [],
+                data: [],
+                percentages: [],
+            };
+        }
+
+        const admin = dialogs.value.filter((d) => d.entity?.isAdmin).length;
+        const creator = dialogs.value.filter((d) => d.entity?.isCreator).length;
+        const pinned = dialogs.value.filter((d) => d.isPinned).length;
+        const muted = dialogs.value.filter((d) => d.isMuted === true).length;
+        const archived = dialogs.value.filter((d) => d.isArchived).length;
+        const drafts = dialogs.value.filter((d) => d.draft?.message).length;
+
+        return {
+            labels: ['Админ', 'Создатель', 'Закреплено', 'Заглушено', 'Архив', 'Черновики'],
+            data: [admin, creator, pinned, muted, archived, drafts],
+            percentages: [
+                ((admin / total) * 100).toFixed(1),
+                ((creator / total) * 100).toFixed(1),
+                ((pinned / total) * 100).toFixed(1),
+                ((muted / total) * 100).toFixed(1),
+                ((archived / total) * 100).toFixed(1),
+                ((drafts / total) * 100).toFixed(1),
+            ],
+        };
+    });
+
+    /**
+     * Поток уведомлений - диаграмма Санки (Chart 13)
+     * Поток: Тип диалога → Статус уведомлений → Статус прочтения
+     */
+    const notificationFlow = computed(() => {
+        const flows = [];
+
+        // Типы диалогов
+        const types = ['user', 'bot', 'group', 'supergroup', 'channel'];
+        const typeLabels = {
+            user: 'Личные',
+            bot: 'Боты',
+            group: 'Группы',
+            supergroup: 'Супергруппы',
+            channel: 'Каналы',
+        };
+
+        // Статусы уведомлений
+        const notifyStates = ['enabled', 'silent', 'muted'];
+        const notifyLabels = {
+            enabled: 'Включены',
+            silent: 'Без звука',
+            muted: 'Выключены',
+        };
+
+        // Статусы прочтения
+        const readStates = ['read', 'unread'];
+        const readLabels = {
+            read: 'Прочитано',
+            unread: 'Непрочитано',
+        };
+
+        dialogs.value.forEach((dialog) => {
+            let type = dialog.type;
+            if (type === 'supergroup') type = 'group';
+            if (type === 'bot') type = 'user';
+            if (!types.includes(type)) return;
+
+            // Определяем статус уведомлений
+            let notifyState = 'enabled';
+            if (dialog.isMuted === true) {
+                notifyState = 'muted';
+            } else if (dialog.notifySettings?.silent === true) {
+                notifyState = 'silent';
+            }
+
+            // Определяем статус прочтения
+            const readState = (dialog.unreadCount || 0) > 0 ? 'unread' : 'read';
+
+            // Поток: Тип → Уведомления
+            flows.push({
+                source: typeLabels[type],
+                target: notifyLabels[notifyState],
+                value: 1,
+            });
+
+            // Поток: Уведомления → Прочтение
+            flows.push({
+                source: notifyLabels[notifyState],
+                target: readLabels[readState],
+                value: 1,
+            });
+        });
+
+        // Агрегируем потоки
+        const aggregated = {};
+        flows.forEach((flow) => {
+            const key = `${flow.source}→${flow.target}`;
+            aggregated[key] = (aggregated[key] || 0) + flow.value;
+        });
+
+        const links = Object.entries(aggregated).map(([key, value]) => {
+            const [source, target] = key.split('→');
+            return { source, target, value };
+        });
+
+        // Собираем уникальные узлы
+        const nodesSet = new Set();
+        links.forEach((link) => {
+            nodesSet.add(link.source);
+            nodesSet.add(link.target);
+        });
+        const nodes = Array.from(nodesSet).map((name) => ({ name }));
+
+        return { nodes, links };
+    });
+
+    /**
+     * Таймлайн черновиков (Chart 14)
+     * Распределение черновиков по датам последнего изменения
+     */
+    const draftsTimeline = computed(() => {
+        const dialogsWithDrafts = dialogs.value.filter((d) => d.draft?.message);
+
+        if (dialogsWithDrafts.length === 0) {
+            return {
+                labels: [],
+                data: [],
+                total: 0,
+                oldest: null,
+                newest: null,
+            };
+        }
+
+        // Группируем по датам (последние 30 дней)
+        const now = new Date();
+        const daysAgo30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+        const days = [];
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+            days.push({
+                date: date.toISOString().split('T')[0],
+                count: 0,
+            });
+        }
+
+        let oldestDate = null;
+        let newestDate = null;
+
+        dialogsWithDrafts.forEach((dialog) => {
+            // Используем дату последнего сообщения как приблизительную дату черновика
+            if (!dialog.date) return;
+
+            const draftDate = new Date(dialog.date);
+
+            if (!oldestDate || draftDate < oldestDate) oldestDate = draftDate;
+            if (!newestDate || draftDate > newestDate) newestDate = draftDate;
+
+            if (draftDate < daysAgo30) return;
+
+            const dateStr = draftDate.toISOString().split('T')[0];
+            const dayIndex = days.findIndex((d) => d.date === dateStr);
+
+            if (dayIndex !== -1) {
+                days[dayIndex].count++;
+            }
+        });
+
+        return {
+            labels: days.map((d) => {
+                const date = new Date(d.date);
+                return `${date.getDate()}.${date.getMonth() + 1}`;
+            }),
+            data: days.map((d) => d.count),
+            total: dialogsWithDrafts.length,
+            oldest: oldestDate,
+            newest: newestDate,
+        };
+    });
+
+    /**
+     * Матрица корреляций (Chart 15)
+     * Связи между свойствами диалогов: непрочитанные, закреплённые, заглушённые, архивные
+     */
+    const correlationMatrix = computed(() => {
+        const properties = ['unread', 'pinned', 'muted', 'archived', 'draft'];
+        const labels = ['Непрочитанные', 'Закреплённые', 'Заглушённые', 'Архивные', 'Черновики'];
+
+        // Создаём бинарные векторы для каждого свойства
+        const vectors = {
+            unread: dialogs.value.map((d) => ((d.unreadCount || 0) > 0 ? 1 : 0)),
+            pinned: dialogs.value.map((d) => (d.isPinned ? 1 : 0)),
+            muted: dialogs.value.map((d) => (d.isMuted === true ? 1 : 0)),
+            archived: dialogs.value.map((d) => (d.isArchived ? 1 : 0)),
+            draft: dialogs.value.map((d) => (d.draft?.message ? 1 : 0)),
+        };
+
+        // Вычисляем корреляцию Пирсона между каждой парой
+        const matrix = [];
+        for (let i = 0; i < properties.length; i++) {
+            const row = [];
+            for (let j = 0; j < properties.length; j++) {
+                if (i === j) {
+                    row.push(1); // Диагональ = 1
+                } else {
+                    const correlation = calculateCorrelation(
+                        vectors[properties[i]],
+                        vectors[properties[j]]
+                    );
+                    row.push(correlation);
+                }
+            }
+            matrix.push(row);
+        }
+
+        return {
+            labels,
+            data: matrix,
+        };
+    });
+
+    /**
+     * Вычисление коэффициента корреляции Пирсона
+     */
+    function calculateCorrelation(x, y) {
+        const n = x.length;
+        if (n === 0) return 0;
+
+        const sumX = x.reduce((a, b) => a + b, 0);
+        const sumY = y.reduce((a, b) => a + b, 0);
+        const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+        const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
+        const sumY2 = y.reduce((sum, yi) => sum + yi * yi, 0);
+
+        const numerator = n * sumXY - sumX * sumY;
+        const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+
+        if (denominator === 0) return 0;
+
+        return numerator / denominator;
+    }
+
     return {
         dialogs,
         folders,
@@ -572,11 +855,16 @@ export function useDialogAnalytics() {
         activityTimeline,
         folderDistribution,
         getDialogTypesDescription,
-        // Второй этап
         communitiesData,
         notificationsData,
         groupsAgeTimeline,
         contactsStatus,
         activityHeatmap,
+
+        readingFunnel,
+        participationProfile,
+        notificationFlow,
+        draftsTimeline,
+        correlationMatrix,
     };
 }

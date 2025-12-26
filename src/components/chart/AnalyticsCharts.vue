@@ -8,6 +8,11 @@ import CommunitiesBubbleChart from '@/components/chart/CommunitiesBubbleChart.vu
 import NotificationsGroupedChart from '@/components/chart/NotificationsGroupedChart.vue';
 import GroupsAgeTimeline from '@/components/chart/GroupsAgeTimeline.vue';
 import ActivityHeatmapChart from '@/components/chart/ActivityHeatmapChart.vue';
+import FunnelChart from '@/components/chart/FunnelChart.vue';
+import RadarChart from '@/components/chart/RadarChart.vue';
+import SankeyChart from '@/components/chart/SankeyChart.vue';
+import DraftsTimelineChart from '@/components/chart/DraftsTimelineChart.vue';
+import CorrelationMatrixChart from '@/components/chart/CorrelationMatrixChart.vue';
 </script>
 
 <template>
@@ -54,6 +59,31 @@ import ActivityHeatmapChart from '@/components/chart/ActivityHeatmapChart.vue';
         <!-- Блок 8: Временная шкала возраста сообществ -->
         <section class="chart-section full-width">
             <GroupsAgeTimeline />
+        </section>
+
+        <!-- 9. Воронка прочтения -->
+        <section class="chart-section">
+            <FunnelChart />
+        </section>
+
+        <!-- 10. Радарная диаграмма - профиль участия -->
+        <section class="chart-section">
+            <RadarChart />
+        </section>
+
+        <!-- 11. Диаграмма Санки - поток уведомлений -->
+        <section class="chart-section">
+            <SankeyChart />
+        </section>
+
+        <!-- 12. Таймлайн черновиков -->
+        <section class="chart-section">
+            <DraftsTimelineChart />
+        </section>
+
+        <!-- 13. Матрица корреляций -->
+        <section class="chart-section">
+            <CorrelationMatrixChart />
         </section>
     </div>
 </template>
