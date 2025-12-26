@@ -11,10 +11,10 @@ export function useDialogAnalytics() {
     // Получаем все диалоги из store
     const dialogs = computed(() => dialogStore.state || []);
 
-    // ✅ Правильное получение папок из foldersState
+    // Правильное получение папок из foldersState
     const folders = computed(() => dialogStore.foldersState.rawFoldersData || []);
 
-    // ✅ Получаем связи диалогов с папками
+    // Получаем связи диалогов с папками
     const dialogsByFolder = computed(() => dialogStore.foldersState.dialogsIdByFolderId || {});
 
     /**
@@ -177,7 +177,7 @@ export function useDialogAnalytics() {
             });
         });
 
-        // ✅ Добавляем "Главная" папку для диалогов без folderId
+        // Добавляем "Главная" папку для диалогов без folderId
         folderMap.set(null, {
             id: null,
             name: 'Главная',
@@ -185,7 +185,7 @@ export function useDialogAnalytics() {
             unread: 0,
         });
 
-        // ✅ Добавляем "Архив" если есть архивные диалоги
+        // Добавляем "Архив" если есть архивные диалоги
         const hasArchived = dialogs.value.some((d) => d.isArchived);
         if (hasArchived) {
             folderMap.set('archive', {
@@ -196,7 +196,7 @@ export function useDialogAnalytics() {
             });
         }
 
-        // ✅ Подсчитываем диалоги по папкам
+        // Подсчитываем диалоги по папкам
         dialogs.value.forEach((dialog) => {
             const dialogId = String(dialog.id);
 
