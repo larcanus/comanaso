@@ -21,7 +21,6 @@ const dialogState = ref(dialogStore.getPreparedDialogs());
 dialogStore.$onAction(({ name, after }) => {
     after(() => {
         if (name === 'setDialogs') {
-            console.log('$onAction', name, after);
             dialogState.value = dialogStore.getPreparedDialogs();
 
             state.value.chartData = {
@@ -138,9 +137,6 @@ function getColor() {
         : ['#64adf5', '#cc64f5', '#64f586', '#ec6060'];
 }
 
-onUpdated(() => {
-    console.log('updated chart');
-});
 
 const state = ref({
     chartData: {
@@ -167,9 +163,6 @@ const state = ref({
     },
 });
 
-function onClick() {
-    console.log('onClick');
-}
 </script>
 
 <template>

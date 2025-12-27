@@ -70,7 +70,7 @@ const paginatedData = computed(() => {
     const end = start + rowsPerPage;
     const res = dialogsFiltered.value.slice(start, end);
     const preparedData = res.map((item) => toRaw(item));
-    console.log('paginatedData', res, preparedData);
+
     return preparedData;
 });
 

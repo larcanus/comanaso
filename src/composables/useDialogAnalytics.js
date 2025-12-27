@@ -743,8 +743,6 @@ export function useDialogAnalytics() {
             column: nodeColumns[name],
         }));
 
-        console.log('notificationFlow computed:', { nodes, links });
-
         return { nodes, links };
     });
 

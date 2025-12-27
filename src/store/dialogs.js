@@ -9,14 +9,11 @@ const useDialogStore = defineStore('dialog', () => {
     });
 
     function setDialogs(data) {
-        console.log('setDialogs', data);
         state.value = data;
         return state.value;
     }
 
     function setFolders(data) {
-        console.log('setFolders', data);
-
         // Если data - это массив, используем его напрямую
         // Если это объект с полем filters, используем filters
         const foldersArray = Array.isArray(data) ? data : data?.filters || [];

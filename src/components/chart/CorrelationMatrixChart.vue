@@ -162,11 +162,11 @@ const strongestCorrelation = computed(() => {
                             v-for="(label, index) in correlationMatrix.labels"
                             :key="`col-${index}`"
                             :x="padding + index * cellSize + cellSize / 2"
-                            :y="padding - 30"
+                            :y="padding - 40"
                             text-anchor="start"
                             dominant-baseline="middle"
                             class="label-text"
-                            :transform="`rotate(-45, ${padding + index * cellSize + cellSize / 2}, ${padding - 30})`"
+                            :transform="`rotate(-45, ${padding + index * cellSize + cellSize / 2}, ${padding - 40})`"
                         >
                             {{ label }}
                         </text>
