@@ -28,19 +28,23 @@ async function onClickContainer() {
     const resultConfirm = await showConfirm();
     if (resultConfirm) {
         state.isGettingData = true;
-        // Эмитим событие только после подтверждения
-        emit('refresh');
-        // Сбрасываем состояние загрузки через некоторое время
-        setTimeout(() => {
+
+        try {
+            // Эмитим событие только после подтверждения
+            emit('refresh');
+
+            // Ждем завершения операции (можно настроить таймаут)
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        } finally {
             state.isGettingData = false;
-        }, 2000);
+        }
     }
 }
 
 let resolveConfirmPromise;
 function showConfirm() {
     state.modalConfirmMessage =
-        'Вы действительно хотите сделать повторный запрос данных? Текущие будут удалены.';
+        'Вы действительно хотите обновить данные? Это может занять некоторое время.';
     state.isModalConfirmVisible = true;
 
     return new Promise((resolve) => {

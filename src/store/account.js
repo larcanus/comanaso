@@ -19,12 +19,17 @@ export const useAccountStore = defineStore('account', () => {
         errorMessage: '',
         createdAt: '',
         updatedAt: '',
+        dataLoadedAt: null, // timestamp последней загрузки данных
+        hasAnalyticsData: false, // флаг наличия загруженных данных
     };
 
     // State
     const state = ref({});
     const isLoading = ref(false);
     const error = ref(null);
+
+    // Константа для TTL кэша
+    const CACHE_TTL = 30 * 60 * 1000; // 30 минут
 
     // Actions
     function setAccountsDataFromLocalStore(accountsData) {
@@ -56,6 +61,8 @@ export const useAccountStore = defineStore('account', () => {
                 accountsObject[account.id] = validate({
                     ...defaultStateModel,
                     ...account,
+                    dataLoadedAt: state.value[account.id]?.dataLoadedAt || null,
+                    hasAnalyticsData: state.value[account.id]?.hasAnalyticsData || false,
                 });
             });
 
@@ -95,7 +102,7 @@ export const useAccountStore = defineStore('account', () => {
 
             await setAccountLocalStore(state.value);
 
-            return { ...state.value[createdAccount.id] };
+            return createdAccount;
         } catch (err) {
             error.value = err.userMessage || err.message;
             throw err;
@@ -238,6 +245,86 @@ export const useAccountStore = defineStore('account', () => {
         return account?.status === 'online';
     }
 
+    /**
+     * Проверить, загружены ли данные аналитики для аккаунта
+     * @param {number} accountId - ID аккаунта
+     * @param {boolean} checkTTL - Проверять ли актуальность по времени
+     * @returns {boolean}
+     */
+    function hasAnalyticsData(accountId, checkTTL = false) {
+        const account = state.value[accountId];
+
+        if (!account || !account.hasAnalyticsData) {
+            return false;
+        }
+
+        // Если не нужно проверять TTL, возвращаем просто флаг
+        if (!checkTTL) {
+            return true;
+        }
+
+        // Проверяем актуальность данных по времени
+        if (!account.dataLoadedAt) {
+            return false;
+        }
+
+        const now = Date.now();
+        const timeSinceLoad = now - account.dataLoadedAt;
+
+        return timeSinceLoad < CACHE_TTL;
+    }
+
+    /**
+     * Отметить, что данные аналитики загружены для аккаунта
+     * @param {number} accountId - ID аккаунта
+     */
+    async function markAnalyticsDataLoaded(accountId) {
+        if (state.value[accountId]) {
+            state.value[accountId].hasAnalyticsData = true;
+            state.value[accountId].dataLoadedAt = Date.now();
+            await updateAccountLocalStore(state.value);
+        }
+    }
+
+    /**
+     * Очистить флаг загруженности данных для аккаунта
+     * @param {number} accountId - ID аккаунта
+     */
+    async function clearAnalyticsData(accountId) {
+        if (state.value[accountId]) {
+            state.value[accountId].hasAnalyticsData = false;
+            state.value[accountId].dataLoadedAt = null;
+            await updateAccountLocalStore(state.value);
+        }
+    }
+
+    /**
+     * Получить время последней загрузки данных
+     * @param {number} accountId - ID аккаунта
+     * @returns {number|null} timestamp или null
+     */
+    function getDataLoadedAt(accountId) {
+        return state.value[accountId]?.dataLoadedAt || null;
+    }
+
+    /**
+     * Проверить, устарели ли данные
+     * @param {number} accountId - ID аккаунта
+     * @returns {boolean}
+     */
+    function isDataStale(accountId) {
+        const loadedAt = getDataLoadedAt(accountId);
+
+        if (!loadedAt) {
+            return true;
+        }
+
+        const now = Date.now();
+        const timeSinceLoad = now - loadedAt;
+
+        return timeSinceLoad >= CACHE_TTL;
+    }
+
     return {
         // State
         state,
@@ -264,6 +351,12 @@ export const useAccountStore = defineStore('account', () => {
         onlineAccounts,
         offlineAccounts,
         isOnline,
+
+        hasAnalyticsData,
+        markAnalyticsDataLoaded,
+        clearAnalyticsData,
+        getDataLoadedAt,
+        isDataStale,
     };
 });
 

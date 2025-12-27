@@ -54,6 +54,28 @@ const accountStatus = computed(() => {
     return accountStore.getAccountStatus(selectedAccountId.value);
 });
 
+// Проверка наличия загруженных данных
+const hasLoadedData = computed(() => {
+    if (!selectedAccountId.value) return false;
+    return accountStore.hasAnalyticsData(selectedAccountId.value);
+});
+
+// Информация о времени последней загрузки
+const lastLoadedTime = computed(() => {
+    if (!selectedAccountId.value) return null;
+    const timestamp = accountStore.getDataLoadedAt(selectedAccountId.value);
+    if (!timestamp) return null;
+
+    const date = new Date(timestamp);
+    return date.toLocaleString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+});
+
 // Автоматически выбираем первый аккаунт при монтировании
 onMounted(async () => {
     if (accountStore.accountIds.length > 0) {
@@ -63,9 +85,22 @@ onMounted(async () => {
 
 // Загружаем данные при изменении выбранного аккаунта
 watch(selectedAccountId, async (newAccountId) => {
-    if (newAccountId && accountStore.isOnline(newAccountId)) {
-        await loadAnalyticsData(newAccountId);
+    if (!newAccountId || !accountStore.isOnline(newAccountId)) {
+        return;
     }
+
+    // Проверяем, есть ли уже загруженные данные
+    const hasData = accountStore.hasAnalyticsData(newAccountId);
+
+    if (hasData) {
+        console.log(`[AnalyticsView] Data already loaded for account ${newAccountId}`);
+        toastStore.addToast('info', 'Используются ранее загруженные данные');
+        return;
+    }
+
+    // Если данных нет - загружаем
+    console.log(`[AnalyticsView] Loading data for account ${newAccountId}`);
+    await loadAnalyticsData(newAccountId, false);
 });
 
 /**
@@ -85,8 +120,10 @@ function handleProgress(progressData) {
 
 /**
  * Загрузка данных аналитики для выбранного аккаунта
+ * @param {number} accountId - ID аккаунта
+ * @param {boolean} force - Принудительная загрузка (игнорировать кэш)
  */
-async function loadAnalyticsData(accountId) {
+async function loadAnalyticsData(accountId, force = false) {
     if (!accountStore.isOnline(accountId)) {
         toastStore.addToast(
             'warning',
@@ -95,12 +132,18 @@ async function loadAnalyticsData(accountId) {
         return;
     }
 
+    // Если не принудительная загрузка и данные уже есть - пропускаем
+    if (!force && accountStore.hasAnalyticsData(accountId)) {
+        console.log(`[AnalyticsView] Data already exists for account ${accountId}, skipping load`);
+        return;
+    }
+
     isLoadingAnalytics.value = true;
 
     // Сбрасываем прогресс
     loadingProgress.value = {
         step: 0,
-        total: 3,
+        total: 4,
         progress: 0,
         label: 'Начало загрузки...',
         status: 'loading',
@@ -129,13 +172,24 @@ async function loadAnalyticsData(accountId) {
             dialogStore.setDialogs(data.dialogs.dialogs);
         }
 
-        toastStore.addToast('success', 'Данные аналитики успешно загружены');
+        // Отмечаем, что данные загружены
+        await accountStore.markAnalyticsDataLoaded(accountId);
+
+        const message = force
+            ? 'Данные аналитики успешно обновлены'
+            : 'Данные аналитики успешно загружены';
+
+        toastStore.addToast('success', message);
     } catch (error) {
         console.error('[AnalyticsView] Error loading analytics:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка загрузки данных аналитики');
 
         // Очищаем данные при ошибке
         dialogStore.$reset();
+        userStore.$reset();
+
+        // Очищаем флаг загруженности
+        await accountStore.clearAnalyticsData(accountId);
     } finally {
         isLoadingAnalytics.value = false;
     }
@@ -149,11 +203,16 @@ function handleAccountSelected(accountId) {
 }
 
 /**
- * Обновить данные для текущего аккаунта
+ * Обновить данные для текущего аккаунта (принудительно)
  */
 async function refreshAnalytics() {
     if (selectedAccountId.value) {
-        await loadAnalyticsData(selectedAccountId.value);
+        // Очищаем существующие данные
+        dialogStore.$reset();
+        userStore.clearUser();
+
+        // Загружаем с флагом force=true
+        await loadAnalyticsData(selectedAccountId.value, true);
     }
 }
 </script>
@@ -162,6 +221,9 @@ async function refreshAnalytics() {
     <div class="view-container">
         <div class="header-container">
             <h1>Аналитика</h1>
+            <p v-if="lastLoadedTime" class="last-update">
+                Последнее обновление: {{ lastLoadedTime }}
+            </p>
         </div>
 
         <AccountSelector
@@ -169,7 +231,9 @@ async function refreshAnalytics() {
             @account-selected="handleAccountSelected"
         />
 
-        <div v-if="!hasSelectedAccount" class="empty-state"></div>
+        <div v-if="!hasSelectedAccount" class="empty-state">
+            <p>Выберите аккаунт для просмотра аналитики</p>
+        </div>
 
         <div v-else-if="!isAccountOnline" class="offline-state">
             <p>🔌 Аккаунт не подключен</p>
@@ -236,6 +300,12 @@ async function refreshAnalytics() {
     justify-content: center;
     text-align: center;
     margin: 25px 0;
+}
+
+.last-update {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
 }
 
 p,
