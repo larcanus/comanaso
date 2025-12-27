@@ -197,18 +197,6 @@ function onMenuClick() {
     height: 45px;
 }
 
-.menu-enter-active {
-    transition: all 0.3s ease-out;
-}
-.menu-leave-active {
-    transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-.menu-enter-from,
-.menu-leave-to {
-    transform: rotate(0.3turn);
-    opacity: 0;
-}
-
 .menu-cancel-div img {
     width: 35px;
     height: 35px;

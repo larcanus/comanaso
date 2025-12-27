@@ -1,15 +1,38 @@
-<script setup></script>
+<script setup>
+import { ref, computed } from 'vue';
+import packageJson from '../../../package.json';
+
+const showEmail = ref(false);
+const versionApp = packageJson.version;
+
+const toggleEmail = () => {
+    showEmail.value = !showEmail.value;
+};
+
+const displayText = computed(() => {
+    const baseText = `© 2025 | Author: AlexRulSer | v${versionApp}`;
+
+    if (showEmail.value) {
+        return `${baseText} | alex.rulser@gmail.com`;
+    }
+
+    return baseText;
+});
+</script>
 
 <template>
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-copyright">
-                <p>copyright © 2024</p>
-                <p>| author Rylkov A. |</p>
-                <p>v1.0.0</p>
-            </div>
-            <p>Связь со мной:</p>
-            <a href="mailto:larcanus@yandex.ru" class="footer-email">larcanus@yandex.ru</a>
+            <p class="author-info">
+                {{ displayText }}
+                <button
+                    class="email-toggle"
+                    :aria-label="showEmail ? 'Скрыть email' : 'Показать email'"
+                    @click="toggleEmail"
+                >
+                    {{ showEmail ? ' [Скрыть]' : ' [Контакты]' }}
+                </button>
+            </p>
         </div>
     </footer>
 </template>
@@ -23,37 +46,46 @@
     width: 100%;
 }
 
-.footer p {
-    text-align: center;
-    margin: 0 3px 0 3px;
-    font-size: 14px;
-}
-
 .footer-content {
     max-width: 800px;
     margin: 0 auto;
 }
 
-.footer-copyright {
+.author-info {
+    margin: 0;
+    font-size: 14px;
     display: flex;
-    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
+    gap: 4px;
 }
 
-.footer-email {
+.email-toggle {
+    background: none;
+    border: none;
     color: #467e91;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
     text-decoration: none;
     transition: color 0.3s;
+    font-family: inherit;
 }
 
-.footer-email:hover {
+.email-toggle:hover {
     color: #ff4500;
 }
 
+.email-toggle:focus {
+    outline: 2px solid #467e91;
+    outline-offset: 2px;
+}
+
 @media (max-width: 450px) {
-    .footer-copyright {
+    .author-info {
         flex-direction: column;
+        gap: 8px;
     }
 }
 </style>
