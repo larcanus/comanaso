@@ -99,8 +99,6 @@ const sankeyData = computed(() => {
     });
 
     // Берём максимальную высоту колонки + отступы
-    console.log('columns', columns);
-    console.log('columnHe', columnHeights);
     const maxColumnHeight = Math.max(...columnHeights);
     const height = maxColumnHeight + padding * 2;
 

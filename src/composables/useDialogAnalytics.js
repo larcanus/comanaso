@@ -760,8 +760,11 @@ export function useDialogAnalytics() {
                 labels: [],
                 data: [],
                 total: 0,
+                inRange: 0,
                 oldest: null,
                 newest: null,
+                periodStart: null,
+                periodEnd: null,
             };
         }
 
@@ -780,17 +783,49 @@ export function useDialogAnalytics() {
 
         let oldestDate = null;
         let newestDate = null;
+        let inRangeCount = 0;
 
         dialogsWithDrafts.forEach((dialog) => {
-            // Используем дату последнего сообщения как приблизительную дату черновика
-            if (!dialog.date) return;
+            let draftDate = null;
 
-            const draftDate = new Date(dialog.date);
+            // Дата черновика в формате ISO строки
+            if (dialog.draft?.date) {
+                if (typeof dialog.draft.date === 'string') {
+                    draftDate = new Date(dialog.draft.date);
+                } else if (typeof dialog.draft.date === 'number') {
+                    draftDate = new Date(dialog.draft.date * 1000);
+                } else if (dialog.draft.date instanceof Date) {
+                    draftDate = dialog.draft.date;
+                }
+            }
+
+            // Fallback на дату последнего сообщения
+            if (!draftDate || isNaN(draftDate.getTime())) {
+                if (dialog.date) {
+                    if (typeof dialog.date === 'string') {
+                        draftDate = new Date(dialog.date);
+                    } else if (typeof dialog.date === 'number') {
+                        draftDate = new Date(dialog.date * 1000);
+                    } else if (dialog.date instanceof Date) {
+                        draftDate = dialog.date;
+                    }
+                }
+            }
+
+            // Если дата всё ещё невалидна, пропускаем
+            if (!draftDate || isNaN(draftDate.getTime())) {
+                return;
+            }
 
             if (!oldestDate || draftDate < oldestDate) oldestDate = draftDate;
             if (!newestDate || draftDate > newestDate) newestDate = draftDate;
 
-            if (draftDate < daysAgo30) return;
+            // Проверяем, попадает ли дата в диапазон последних 30 дней
+            if (draftDate < daysAgo30) {
+                return;
+            }
+
+            inRangeCount++;
 
             const dateStr = draftDate.toISOString().split('T')[0];
             const dayIndex = days.findIndex((d) => d.date === dateStr);
@@ -802,13 +837,16 @@ export function useDialogAnalytics() {
 
         return {
             labels: days.map((d) => {
-                const date = new Date(d.date);
-                return `${date.getDate()}.${date.getMonth() + 1}`;
+                const [year, month, day] = d.date.split('-');
+                return `${day}.${month}`;
             }),
             data: days.map((d) => d.count),
             total: dialogsWithDrafts.length,
+            inRange: inRangeCount,
             oldest: oldestDate,
             newest: newestDate,
+            periodStart: daysAgo30,
+            periodEnd: now,
         };
     });
 

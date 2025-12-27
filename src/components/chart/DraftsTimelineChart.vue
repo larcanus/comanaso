@@ -114,9 +114,15 @@ const formatDate = (date) => {
 };
 
 const avgDraftsPerDay = computed(() => {
-    if (!draftsTimeline.value || draftsTimeline.value.data.length === 0) return 0;
-    const sum = draftsTimeline.value.data.reduce((a, b) => a + b, 0);
-    return (sum / draftsTimeline.value.data.length).toFixed(1);
+    if (!draftsTimeline.value || draftsTimeline.value.inRange === 0) return 0;
+    return (draftsTimeline.value.inRange / 30).toFixed(1);
+});
+
+const periodText = computed(() => {
+    if (!draftsTimeline.value?.periodStart || !draftsTimeline.value?.periodEnd) return '';
+    const start = formatDate(draftsTimeline.value.periodStart);
+    const end = formatDate(draftsTimeline.value.periodEnd);
+    return `${start} - ${end}`;
 });
 </script>
 
@@ -124,10 +130,17 @@ const avgDraftsPerDay = computed(() => {
     <div class="chart-wrapper">
         <div class="chart-header">
             <h2 class="chart-title">Таймлайн черновиков</h2>
+            <p v-if="draftsTimeline && draftsTimeline.total > 0" class="period-info">
+                Период: {{ periodText }} (последние 30 дней)
+            </p>
             <div v-if="draftsTimeline && draftsTimeline.total > 0" class="stats-summary">
                 <div class="stat-item">
-                    <span class="stat-label">Всего:</span>
+                    <span class="stat-label">Всего черновиков:</span>
                     <span class="stat-value">{{ draftsTimeline.total }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">На графике:</span>
+                    <span class="stat-value">{{ draftsTimeline.inRange }}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Среднее/день:</span>
@@ -163,14 +176,22 @@ const avgDraftsPerDay = computed(() => {
 .chart-title {
     font-size: 24px;
     color: #ffffff;
-    margin: 0 0 20px 0;
+    margin: 0 0 10px 0;
     text-align: center;
+}
+
+.period-info {
+    text-align: center;
+    color: #95a5a6;
+    font-size: 13px;
+    margin: 0 0 20px 0;
+    font-style: italic;
 }
 
 .stats-summary {
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: 25px;
     flex-wrap: wrap;
 }
 
@@ -182,7 +203,7 @@ const avgDraftsPerDay = computed(() => {
 }
 
 .stat-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #95a5a6;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -222,6 +243,14 @@ const avgDraftsPerDay = computed(() => {
 
     .stats-summary {
         gap: 15px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+    }
+
+    .stat-value {
+        font-size: 16px;
     }
 }
 </style>
