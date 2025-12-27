@@ -1,20 +1,24 @@
 <script setup>
 import { computed } from 'vue';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
 
 const { correlationMatrix } = useDialogAnalytics();
+const { width: containerWidth } = useResponsiveWidth();
 
-const cellSize = 80;
-const padding = 120;
+const isMobile = computed(() => containerWidth.value <= 500);
+
+const cellSize = computed(() => (isMobile.value ? 40 : 80));
+const padding = computed(() => (isMobile.value ? 100 : 140));
 
 const svgWidth = computed(() => {
     if (!correlationMatrix.value) return 0;
-    return correlationMatrix.value.labels.length * cellSize + padding * 2;
+    return correlationMatrix.value.labels.length * cellSize.value + padding.value * 2;
 });
 
 const svgHeight = computed(() => {
     if (!correlationMatrix.value) return 0;
-    return correlationMatrix.value.labels.length * cellSize + padding * 2;
+    return correlationMatrix.value.labels.length * cellSize.value + padding.value + 10;
 });
 
 // Функция для получения цвета на основе корреляции
@@ -42,8 +46,8 @@ const matrixCells = computed(() => {
     data.forEach((row, i) => {
         row.forEach((value, j) => {
             cells.push({
-                x: padding + j * cellSize,
-                y: padding + i * cellSize,
+                x: padding.value + j * cellSize.value,
+                y: padding.value + i * cellSize.value,
                 value: value.toFixed(2),
                 color: getColor(value),
                 rowLabel: labels[i],
@@ -98,70 +102,77 @@ const strongestCorrelation = computed(() => {
         </div>
 
         <div v-if="correlationMatrix" class="matrix-container">
-            <svg :width="svgWidth" :height="svgHeight" class="matrix-svg">
-                <!-- Ячейки матрицы -->
-                <g class="cells">
-                    <g
-                        v-for="(cell, index) in matrixCells"
-                        :key="`cell-${index}`"
-                        class="matrix-cell"
-                    >
-                        <rect
-                            :x="cell.x"
-                            :y="cell.y"
-                            :width="cellSize"
-                            :height="cellSize"
-                            :fill="cell.color"
-                            stroke="#2c3e50"
-                            stroke-width="1"
+            <div class="svg-wrapper">
+                <svg :width="svgWidth" :height="svgHeight" class="matrix-svg">
+                    <!-- Ячейки матрицы -->
+                    <g class="cells">
+                        <g
+                            v-for="(cell, index) in matrixCells"
+                            :key="`cell-${index}`"
+                            class="matrix-cell"
                         >
-                            <title>{{ cell.rowLabel }} × {{ cell.colLabel }}: {{ cell.value }}</title>
-                        </rect>
+                            <rect
+                                :x="cell.x"
+                                :y="cell.y"
+                                :width="cellSize"
+                                :height="cellSize"
+                                :fill="cell.color"
+                                stroke="#2c3e50"
+                                stroke-width="1"
+                            >
+                                <title>
+                                    {{ cell.rowLabel }} × {{ cell.colLabel }}: {{ cell.value }}
+                                </title>
+                            </rect>
+                            <text
+                                :x="cell.x + cellSize / 2"
+                                :y="cell.y + cellSize / 2"
+                                text-anchor="middle"
+                                dominant-baseline="middle"
+                                class="cell-text"
+                                :class="{
+                                    'text-dark':
+                                        parseFloat(cell.value) > 0.5 ||
+                                        parseFloat(cell.value) < -0.5,
+                                }"
+                            >
+                                {{ cell.value }}
+                            </text>
+                        </g>
+                    </g>
+
+                    <!-- Метки строк -->
+                    <g class="row-labels">
                         <text
-                            :x="cell.x + cellSize / 2"
-                            :y="cell.y + cellSize / 2"
-                            text-anchor="middle"
+                            v-for="(label, index) in correlationMatrix.labels"
+                            :key="`row-${index}`"
+                            :x="padding - 10"
+                            :y="padding + index * cellSize + cellSize / 2"
+                            text-anchor="end"
                             dominant-baseline="middle"
-                            class="cell-text"
-                            :class="{ 'text-dark': parseFloat(cell.value) > 0.5 || parseFloat(cell.value) < -0.5 }"
+                            class="label-text"
                         >
-                            {{ cell.value }}
+                            {{ label }}
                         </text>
                     </g>
-                </g>
 
-                <!-- Метки строк -->
-                <g class="row-labels">
-                    <text
-                        v-for="(label, index) in correlationMatrix.labels"
-                        :key="`row-${index}`"
-                        :x="padding - 10"
-                        :y="padding + index * cellSize + cellSize / 2"
-                        text-anchor="end"
-                        dominant-baseline="middle"
-                        class="label-text"
-                    >
-                        {{ label }}
-                    </text>
-                </g>
-
-                <!-- Метки столбцов -->
-                <g class="col-labels">
-                    <text
-                        v-for="(label, index) in correlationMatrix.labels"
-                        :key="`col-${index}`"
-                        :x="padding + index * cellSize + cellSize / 2"
-                        :y="padding - 10"
-                        text-anchor="middle"
-                        dominant-baseline="baseline"
-                        class="label-text"
-                        transform-origin="center"
-                        :transform="`rotate(-45, ${padding + index * cellSize + cellSize / 2}, ${padding - 10})`"
-                    >
-                        {{ label }}
-                    </text>
-                </g>
-            </svg>
+                    <!-- Метки столбцов -->
+                    <g class="col-labels">
+                        <text
+                            v-for="(label, index) in correlationMatrix.labels"
+                            :key="`col-${index}`"
+                            :x="padding + index * cellSize + cellSize / 2"
+                            :y="padding - 30"
+                            text-anchor="start"
+                            dominant-baseline="middle"
+                            class="label-text"
+                            :transform="`rotate(-45, ${padding + index * cellSize + cellSize / 2}, ${padding - 30})`"
+                        >
+                            {{ label }}
+                        </text>
+                    </g>
+                </svg>
+            </div>
 
             <div class="legend">
                 <h4>Шкала корреляции</h4>
@@ -235,12 +246,17 @@ const strongestCorrelation = computed(() => {
     border: 2px solid #364fa1;
     background: rgba(54, 79, 161, 0.2);
     padding: 20px;
-    overflow-x: auto;
+}
+
+.svg-wrapper {
+    width: 100%;
+    max-height: 600px;
+    overflow: auto;
 }
 
 .matrix-svg {
     display: block;
-    margin: 0 auto;
+    min-width: 100%;
 }
 
 .matrix-cell {
@@ -287,11 +303,12 @@ const strongestCorrelation = computed(() => {
 
 .gradient-bar {
     height: 30px;
-    background: linear-gradient(to right, 
-        rgb(255, 0, 0) 0%, 
-        rgb(255, 128, 128) 25%, 
-        rgb(255, 255, 255) 50%, 
-        rgb(128, 128, 255) 75%, 
+    background: linear-gradient(
+        to right,
+        rgb(255, 0, 0) 0%,
+        rgb(255, 128, 128) 25%,
+        rgb(255, 255, 255) 50%,
+        rgb(128, 128, 255) 75%,
         rgb(0, 0, 255) 100%
     );
     border-radius: 4px;
@@ -323,13 +340,33 @@ const strongestCorrelation = computed(() => {
     color: #e3e2e2;
 }
 
-@media (max-width: 750px) {
+@media (max-width: 768px) {
     .chart-wrapper {
         padding: 20px;
     }
 
     .stats-summary {
         gap: 15px;
+    }
+
+    .svg-wrapper {
+        max-height: 450px;
+    }
+
+    .cell-text {
+        font-size: 11px;
+    }
+
+    .label-text {
+        font-size: 10px;
+    }
+
+    .legend h4 {
+        font-size: 14px;
+    }
+
+    .legend-description {
+        font-size: 12px;
     }
 }
 </style>
