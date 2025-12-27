@@ -1,28 +1,16 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
 import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
 
 const { notificationFlow } = useDialogAnalytics();
-
-// Используем composable для адаптивности
 const { width: containerWidth } = useResponsiveWidth({
     mobileBreakpoint: 768,
     desktopWidthRatio: 0.85,
     mobileWidthRatio: 0.95,
 });
 
-// Адаптивные размеры на основе ширины контейнера
-const svgWidth = computed(() => {
-    const w = containerWidth.value;
-    return w < 768 ? Math.min(w - 40, 600) : Math.min(w - 60, 800);
-});
-
-const svgHeight = computed(() => {
-    return containerWidth.value < 768 ? 400 : 500;
-});
-
-const isMobile = computed(() => containerWidth.value < 768);
+const isMobile = computed(() => containerWidth.value <= 768);
 
 // Цвета для узлов
 const nodeColors = {
@@ -39,39 +27,62 @@ const nodeColors = {
 };
 
 const sankeyData = computed(() => {
-    if (!notificationFlow.value || !notificationFlow.value.links || notificationFlow.value.links.length === 0) {
-        return null;
-    }
+    if (!notificationFlow.value) return null;
 
     const { nodes, links } = notificationFlow.value;
+    if (!nodes || !links || nodes.length === 0 || links.length === 0) return null;
 
-    // Адаптивные параметры
-    const nodeWidth = isMobile.value ? 100 : 160;
-    const nodeSpacing = isMobile.value ? 150 : 250;
-    const fontSize = isMobile.value ? 11 : 14;
-    const width = svgWidth.value;
-    const height = svgHeight.value;
+    // Параметры для расчёта
+    const nodeWidth = isMobile.value ? 100 : 140;
+    const nodeSpacing = isMobile.value ? 180 : 250;
+    const width = isMobile.value ? 600 : 800;
+    const padding = 40;
+    const nodeGap = isMobile.value ? 15 : 25;
+    const minNodeHeight = isMobile.value ? 50 : 60;
+
+    // Добавляем цвета к узлам
+    const processedNodes = nodes.map((node) => ({
+        ...node,
+        color: nodeColors[node.name] || '#95a5a6',
+        value: node.value || 0,
+        column: node.column !== undefined ? node.column : 0,
+    }));
+
+    // Группируем узлы по колонкам
+    const columns = [[], [], []];
+    processedNodes.forEach((node) => {
+        const col = Math.max(0, Math.min(2, node.column));
+        columns[col].push(node);
+    });
+
+    // Рассчитываем необходимую высоту для каждой колонки по значению
+    const columnHeightsByValue = columns.map((columnNodes) => {
+        if (columnNodes.length === 0) return 0;
+        const totalValue = columnNodes.reduce((sum, n) => sum + (n.value || 0), 0);
+        const avgNodeHeight = totalValue > 0 ? Math.max(minNodeHeight, 80) : minNodeHeight;
+        return columnNodes.length * avgNodeHeight + (columnNodes.length - 1) * nodeGap;
+    });
 
     // Позиционирование узлов
-    const columns = [
-        nodes.filter((n) => n.column === 0),
-        nodes.filter((n) => n.column === 1),
-        nodes.filter((n) => n.column === 2),
-    ];
+    const columnX = [padding, padding + nodeSpacing, padding + nodeSpacing * 2];
 
-    const padding = isMobile.value ? 20 : 40;
-    const usableHeight = height - padding * 2;
-
-    const positionedNodes = [];
     columns.forEach((columnNodes, colIndex) => {
-        const x = padding + colIndex * nodeSpacing;
-        const totalValue = columnNodes.reduce((sum, n) => sum + n.value, 0);
+        if (columnNodes.length === 0) return;
+
+        const totalValue = columnNodes.reduce((sum, n) => sum + (n.value || 0), 0);
         let currentY = padding;
-        const nodeGap = isMobile.value ? 5 : 10;
 
         columnNodes.forEach((node) => {
-            const nodeHeight = Math.max((node.value / totalValue) * usableHeight, 20);
-            node.x = x;
+            // Рассчитываем высоту узла пропорционально его значению
+            const nodeHeight =
+                totalValue > 0
+                    ? Math.max(
+                          (node.value / totalValue) * columnHeightsByValue[colIndex],
+                          minNodeHeight
+                      )
+                    : minNodeHeight;
+
+            node.x = columnX[colIndex] || padding;
             node.y = currentY;
             node.height = nodeHeight;
             node.width = nodeWidth;
@@ -79,36 +90,49 @@ const sankeyData = computed(() => {
         });
     });
 
+    // Рассчитываем необходимую высоту для каждой колонки по значению
+    const columnHeights = columns.map((columnNodes) => {
+        if (columnNodes.length === 0) return 0;
+        const totalValue = columnNodes.reduce((sum, n) => sum + nodeGap + (n.height || 0), 0);
+
+        return Math.round(totalValue, 10);
+    });
+
+    // Берём максимальную высоту колонки + отступы
+    console.log('columns', columns);
+    console.log('columnHe', columnHeights);
+    const maxColumnHeight = Math.max(...columnHeights);
+    const height = maxColumnHeight + padding * 2;
+
     // Создаём пути для связей
     const paths = links
         .map((link) => {
-            const source = positionedNodes.find((n) => n.name === link.source);
-            const target = positionedNodes.find((n) => n.name === link.target);
+            const source = processedNodes.find((n) => n.name === link.source);
+            const target = processedNodes.find((n) => n.name === link.target);
 
-            if (!source || !target) return null;
+            if (!source || !target || !source.x || !target.x) return null;
 
-            const x1 = source.x + 80;
+            const x1 = source.x + source.width;
             const y1 = source.y + source.height / 2;
-            const x2 = target.x - 80;
+            const x2 = target.x;
             const y2 = target.y + target.height / 2;
-
             const midX = (x1 + x2) / 2;
 
             return {
                 d: `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`,
-                value: link.value,
+                value: link.value || 0,
                 color: source.color,
                 opacity: 0.3,
             };
         })
         .filter(Boolean);
 
-    return { nodes: positionedNodes, paths, width, height };
+    return { nodes: processedNodes, paths, width, height };
 });
 
 const totalFlow = computed(() => {
-    if (!notificationFlow.value) return 0;
-    return notificationFlow.value.links.reduce((sum, link) => sum + link.value, 0);
+    if (!notificationFlow.value || !notificationFlow.value.links) return 0;
+    return notificationFlow.value.links.reduce((sum, link) => sum + (link.value || 0), 0);
 });
 </script>
 
@@ -125,66 +149,65 @@ const totalFlow = computed(() => {
         </div>
 
         <div v-if="sankeyData" class="sankey-container">
-            <svg
-                v-if="sankeyData"
-                :width="sankeyData.width"
-                :height="sankeyData.height"
-                class="sankey-svg"
-                :viewBox="`0 0 ${sankeyData.width} ${sankeyData.height}`"
-                preserveAspectRatio="xMidYMid meet"
-            >
-                <!-- Связи (пути) -->
-                <g class="links">
-                    <path
-                        v-for="(path, index) in sankeyData.paths"
-                        :key="`path-${index}`"
-                        :d="path.d"
-                        :stroke="path.color"
-                        :stroke-opacity="path.opacity"
-                        :stroke-width="Math.max(2, path.value * 2)"
-                        fill="none"
-                        class="sankey-path"
-                    >
-                        <title>{{ path.value }} диалогов</title>
-                    </path>
-                </g>
-
-                <!-- Узлы -->
-                <g class="nodes">
-                    <g
-                        v-for="(node, index) in sankeyData.nodes"
-                        :key="`node-${index}`"
-                        :transform="`translate(${node.x - (isMobile.value ? 50 : 80)}, ${node.y})`"
-                        class="sankey-node"
-                    >
-                        <rect
-                            :width="isMobile.value ? 100 : 160"
-                            :height="node.height"
-                            :fill="node.color"
-                            rx="6"
-                            class="node-rect"
-                        />
-                        <text
-                            :x="isMobile.value ? 50 : 80"
-                            :y="node.height / 2 - (isMobile.value ? 6 : 10)"
-                            text-anchor="middle"
-                            class="node-text"
-                            :style="{ fontSize: isMobile.value ? '11px' : '14px' }"
+            <div class="svg-wrapper">
+                <svg
+                    :width="sankeyData.width"
+                    :height="sankeyData.height"
+                    class="sankey-svg"
+                    :viewBox="`0 0 ${sankeyData.width} ${sankeyData.height}`"
+                    preserveAspectRatio="xMidYMid meet"
+                >
+                    <!-- Связи -->
+                    <g class="links">
+                        <path
+                            v-for="(path, index) in sankeyData.paths"
+                            :key="`path-${index}`"
+                            :d="path.d"
+                            :stroke="path.color"
+                            :stroke-opacity="path.opacity"
+                            :stroke-width="Math.max(2, path.value * 0.5)"
+                            fill="none"
+                            class="sankey-path"
                         >
-                            {{ node.name }}
-                        </text>
-                        <text
-                            :x="isMobile.value ? 50 : 80"
-                            :y="node.height / 2 + (isMobile.value ? 8 : 10)"
-                            text-anchor="middle"
-                            class="node-text"
-                            :style="{ fontSize: isMobile.value ? '10px' : '12px', fill: 'rgba(255, 255, 255, 0.8)' }"
-                        >
-                            {{ node.value }}
-                        </text>
+                            <title>{{ path.value }} диалогов</title>
+                        </path>
                     </g>
-                </g>
-            </svg>
+
+                    <!-- Узлы -->
+                    <g class="nodes">
+                        <g
+                            v-for="(node, index) in sankeyData.nodes"
+                            :key="`node-${index}`"
+                            :transform="`translate(${node.x}, ${node.y})`"
+                            class="sankey-node"
+                        >
+                            <rect
+                                :width="node.width"
+                                :height="node.height"
+                                :fill="node.color"
+                                rx="6"
+                                class="node-rect"
+                            />
+                            <text
+                                :x="node.width / 2"
+                                :y="node.height / 2 - 8"
+                                text-anchor="middle"
+                                class="node-text node-name"
+                            >
+                                {{ node.name }}
+                            </text>
+                            <text
+                                :x="node.width / 2"
+                                :y="node.height / 2 + 10"
+                                text-anchor="middle"
+                                class="node-text node-value"
+                            >
+                                {{ node.value }}
+                            </text>
+                        </g>
+                    </g>
+                </svg>
+            </div>
 
             <div class="legend">
                 <div class="legend-section">
@@ -259,7 +282,6 @@ const totalFlow = computed(() => {
     display: flex;
     justify-content: center;
     gap: 30px;
-    flex-wrap: wrap;
 }
 
 .stat-item {
@@ -283,20 +305,20 @@ const totalFlow = computed(() => {
 }
 
 .sankey-container {
-    width: 100%;
-    max-width: 100%;
     border: 2px solid #364fa1;
     background: rgba(54, 79, 161, 0.2);
     padding: 20px;
-    overflow: hidden;
-    position: relative;
+}
+
+.svg-wrapper {
+    width: 100%;
+    overflow: auto;
+    max-height: 700px;
 }
 
 .sankey-svg {
     display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    height: auto;
+    min-width: 100%;
 }
 
 .sankey-path {
@@ -323,9 +345,17 @@ const totalFlow = computed(() => {
 
 .node-text {
     fill: #ffffff;
-    font-size: 14px;
     font-weight: 600;
     pointer-events: none;
+}
+
+.node-name {
+    font-size: 14px;
+}
+
+.node-value {
+    font-size: 12px;
+    fill: rgba(255, 255, 255, 0.8);
 }
 
 .legend {
@@ -361,7 +391,6 @@ const totalFlow = computed(() => {
     width: 20px;
     height: 20px;
     border-radius: 4px;
-    display: inline-block;
 }
 
 .empty-state {
@@ -373,21 +402,6 @@ const totalFlow = computed(() => {
     color: #95a5a6;
 }
 
-.empty-state p {
-    font-size: 16px;
-    margin: 0;
-}
-
-@media (max-width: 750px) {
-    .chart-wrapper {
-        padding: 20px;
-    }
-
-    .legend {
-        gap: 20px;
-    }
-}
-
 @media (max-width: 768px) {
     .chart-wrapper {
         padding: 15px;
@@ -395,11 +409,6 @@ const totalFlow = computed(() => {
 
     .chart-title {
         font-size: 18px;
-        margin-bottom: 15px;
-    }
-
-    .stats-summary {
-        gap: 15px;
     }
 
     .stat-label {
@@ -407,11 +416,23 @@ const totalFlow = computed(() => {
     }
 
     .stat-value {
-        font-size: 14px;
+        font-size: 18px;
     }
 
     .sankey-container {
         padding: 10px;
+    }
+
+    .svg-wrapper {
+        max-height: 500px;
+    }
+
+    .node-name {
+        font-size: 11px;
+    }
+
+    .node-value {
+        font-size: 10px;
     }
 
     .legend {
@@ -428,29 +449,8 @@ const totalFlow = computed(() => {
     }
 
     .legend-color {
-        width: 12px;
-        height: 12px;
-    }
-}
-
-@media (max-width: 410px) {
-    .stats-summary {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .stat-item {
-        flex-direction: row;
-        justify-content: space-between;
-        width: 100%;
-        padding: 8px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 4px;
-    }
-
-    .legend {
-        flex-direction: column;
-        gap: 15px;
+        width: 16px;
+        height: 16px;
     }
 }
 </style>

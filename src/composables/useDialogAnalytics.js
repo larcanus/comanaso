@@ -667,8 +667,8 @@ export function useDialogAnalytics() {
 
         dialogs.value.forEach((dialog) => {
             let type = dialog.type;
-            if (type === 'supergroup') type = 'group';
-            if (type === 'bot') type = 'user';
+            if (type === 'supergroup') type = 'supergroup'; // Оставляем отдельно
+            if (type === 'bot') type = 'bot'; // Оставляем отдельно
             if (!types.includes(type)) return;
 
             // Определяем статус уведомлений
@@ -709,13 +709,41 @@ export function useDialogAnalytics() {
             return { source, target, value };
         });
 
-        // Собираем уникальные узлы
-        const nodesSet = new Set();
-        links.forEach((link) => {
-            nodesSet.add(link.source);
-            nodesSet.add(link.target);
+        // Собираем уникальные узлы с подсчетом значений и назначением колонок
+        const nodeValues = {};
+        const nodeColumns = {};
+
+        // Определяем колонки для каждого типа узлов
+        Object.values(typeLabels).forEach((label) => {
+            nodeColumns[label] = 0; // Типы диалогов - колонка 0
         });
-        const nodes = Array.from(nodesSet).map((name) => ({ name }));
+        Object.values(notifyLabels).forEach((label) => {
+            nodeColumns[label] = 1; // Статусы уведомлений - колонка 1
+        });
+        Object.values(readLabels).forEach((label) => {
+            nodeColumns[label] = 2; // Статусы прочтения - колонка 2
+        });
+
+        // Подсчитываем значения для каждого узла
+        links.forEach((link) => {
+            // Для source узлов считаем исходящие потоки
+            nodeValues[link.source] = (nodeValues[link.source] || 0) + link.value;
+        });
+
+        // Для target узлов в последней колонке считаем входящие потоки
+        links.forEach((link) => {
+            if (nodeColumns[link.target] === 2) {
+                nodeValues[link.target] = (nodeValues[link.target] || 0) + link.value;
+            }
+        });
+
+        const nodes = Object.keys(nodeColumns).map((name) => ({
+            name,
+            value: nodeValues[name] || 0,
+            column: nodeColumns[name],
+        }));
+
+        console.log('notificationFlow computed:', { nodes, links });
 
         return { nodes, links };
     });
