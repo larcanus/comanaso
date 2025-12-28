@@ -1,4 +1,5 @@
 import useAuthStore from '@/store/auth.js';
+import { cryptoService } from '@/services/crypto.service.js';
 
 /**
  * Сервис для работы с API
@@ -7,17 +8,27 @@ class ApiService {
     constructor() {
         this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
         this.timeout = parseInt(import.meta.env.VITE_API_TIMEOUT) || 10000;
-        this.onAuthError = null; // Callback для обработки ошибок авторизации
+        this.onAuthError = null;
     }
 
     /**
-     * Получение текущего токена
-     * @returns {string|null} Текущий токен
+     * Получение текущего токена с дешифрованием
+     * @returns {Promise<string|null>} Расшифрованный токен
      */
-    getToken() {
+    async getToken() {
         const authStore = useAuthStore();
+        const encryptedToken = authStore.token;
+        if (!encryptedToken) {
+            return null;
+        }
 
-        return authStore.token;
+        try {
+            // Дешифруем токен перед использованием
+            return await cryptoService.decrypt(encryptedToken);
+        } catch (error) {
+            console.error('Ошибка дешифрования токена:', error);
+            return null;
+        }
     }
 
     /**
@@ -179,8 +190,9 @@ class ApiService {
      * @returns {Promise<Response>}
      */
     async authRequest(endpoint, options = {}) {
-        const token = this.getToken();
-        console.log('authRequest', endpoint, options, token);
+        const token = await this.getToken();
+        console.log('authRequest', endpoint, options, token ? '🔐 TOKEN_DECRYPTED' : 'NO_TOKEN');
+
         if (!token) {
             const error = {
                 error: 'NO_TOKEN',

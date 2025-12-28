@@ -85,6 +85,7 @@ async function onClickSave() {
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_UPDATE);
     } catch (error) {
         console.error('Update account error:', error);
+        // TODO добавить обработку ошибок типа VALIDATION_ERROR Input should be a valid integer, unable to parse string as an integer
         toastStore.addToast('error', error.userMessage || 'Ошибка обновления аккаунта');
     } finally {
         uiState.isLoading = false;

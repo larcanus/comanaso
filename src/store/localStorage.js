@@ -2,6 +2,7 @@ import { logoutAllStore } from '@/store/storeController.js';
 import router from '@/router/index.js';
 
 import { useAuthStore } from '@/store/auth';
+import { cryptoService } from '@/services/crypto.service.js';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
@@ -13,6 +14,11 @@ let storage = null;
 
 async function initLocalStore() {
     setStorage();
+
+    // Инициализируем шифрование
+    if (!cryptoService.isSupported()) {
+        console.warn('⚠️ Web Crypto API недоступен');
+    }
 
     const token = await checkAuthToken();
     if (token) {
@@ -82,7 +88,6 @@ function createMemoryStorage() {
 
 async function checkAuthToken() {
     const currentToken = await getAuthToken();
-    console.log('checkAuthToken currentToken', currentToken);
     if (currentToken && !isTokenExpired(currentToken.timeStamp)) {
         return currentToken;
     } else {
@@ -160,34 +165,73 @@ const isTokenExpired = (timeStamp) => {
     return diff > TOKEN_TTL_MS;
 };
 
+/**
+ * Получение зашифрованного токена из localStorage
+ * @returns {Promise<Object|null>}
+ */
 async function getAuthToken() {
-    const token = safeGetItem(TOKEN_KEY);
-    return token ? JSON.parse(token) : null;
+    try {
+        const data = safeGetItem(TOKEN_KEY);
+        if (!data) return null;
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Ошибка получения токена:', error);
+        safeRemoveItem(TOKEN_KEY);
+        return null;
+    }
 }
 
+/**
+ * Получение данных пользователя
+ * @returns {Promise<Object|null>}
+ */
 async function getUserData() {
-    const data = safeGetItem(USER_KEY);
-    return data ? JSON.parse(data) : null;
+    try {
+        const data = safeGetItem(USER_KEY);
+        if (!data) return null;
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Ошибка получения данных пользователя:', error);
+        safeRemoveItem(USER_KEY);
+        return null;
+    }
 }
 
-function setAuthToken(token) {
-    safeSetItem(
-        TOKEN_KEY,
-        JSON.stringify({
-            value: token,
+/**
+ * Сохранение зашифрованного токена
+ * @param {string} encryptedToken - Уже зашифрованный токен
+ */
+async function setAuthToken(encryptedToken) {
+    try {
+        const dataToStore = {
+            value: encryptedToken, // Уже зашифрованный
             timeStamp: new Date().getTime(),
-        })
-    );
+        };
+
+        safeSetItem(TOKEN_KEY, JSON.stringify(dataToStore));
+    } catch (error) {
+        console.error('Ошибка сохранения токена:', error);
+        throw error;
+    }
 }
 
-function setUserData(userData) {
-    safeSetItem(USER_KEY, JSON.stringify(userData));
+/**
+ * Сохранение данных пользователя
+ * @param {Object} userData
+ */
+async function setUserData(userData) {
+    try {
+        safeSetItem(USER_KEY, JSON.stringify(userData));
+    } catch (error) {
+        console.error('Ошибка сохранения данных пользователя:', error);
+        throw error;
+    }
 }
 
 function clearLocalStorage() {
-    console.log('clearLocalStorage');
     safeRemoveItem(TOKEN_KEY);
     safeRemoveItem(USER_KEY);
+    cryptoService.clearKey();
 }
 
 function getStorageType() {

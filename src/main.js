@@ -12,10 +12,11 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-app.use(router);
+
 // Обработчик критических ошибок авторизации
 apiService.setAuthErrorHandler(forceLogout);
 
 localStorageUtils.initLocalStore().catch(console.error);
 
+app.use(router);
 app.mount('#app');

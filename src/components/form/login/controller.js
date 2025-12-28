@@ -1,5 +1,6 @@
 import { logInAllStore } from '@/store/storeController.js';
 import { authService } from '@/services/auth.service.js';
+import { cryptoService } from '@/services/crypto.service.js';
 
 export class Controller {
     /**
@@ -13,7 +14,12 @@ export class Controller {
         try {
             const data = await authService.login({ login, password });
 
-            await this.setStoreUserData(data);
+            const encryptedToken = await cryptoService.encrypt(data.token);
+
+            await this.setStoreUserData({
+                ...data,
+                token: encryptedToken,
+            });
 
             return {
                 ok: true,
@@ -41,7 +47,12 @@ export class Controller {
         try {
             const data = await authService.register({ login, password });
 
-            await this.setStoreUserData(data);
+            const encryptedToken = await cryptoService.encrypt(data.token);
+
+            await this.setStoreUserData({
+                ...data,
+                token: encryptedToken,
+            });
 
             return {
                 ok: true,
@@ -69,8 +80,8 @@ export class Controller {
             user: {
                 id: responseData.user?.id,
                 login: responseData.user?.login,
-                name: responseData.user?.login, // Используем login как имя
-                email: responseData.user?.login, // Для совместимости
+                name: responseData.user?.login,
+                email: responseData.user?.login,
                 createdAt: responseData.user?.createdAt,
             },
         };
