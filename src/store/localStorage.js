@@ -2,7 +2,6 @@ import { logoutAllStore } from '@/store/storeController.js';
 import router from '@/router/index.js';
 
 import { useAuthStore } from '@/store/auth';
-import { useUserStore } from '@/store/user';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
@@ -96,6 +95,14 @@ async function setAuthTokenToStore(currentToken) {
     authStore.setToken(currentToken.value);
 }
 
+async function setUserDataToStore() {
+    const userAuthData = await getUserData();
+    if (userAuthData) {
+        const authStore = useAuthStore();
+        authStore.setUser(userAuthData);
+    }
+}
+
 // Безопасное получение данных из хранилища
 function safeGetItem(key) {
     const store = setStorage();
@@ -128,14 +135,6 @@ function safeRemoveItem(key) {
     } catch (e) {
         console.error(`Ошибка удаления ${key} из ${storageType}:`, e);
         return false;
-    }
-}
-
-async function setUserDataToStore() {
-    const userData = await getUserData();
-    if (userData) {
-        const userStore = useUserStore();
-        userStore.setUserData(userData);
     }
 }
 

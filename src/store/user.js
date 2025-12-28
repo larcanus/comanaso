@@ -108,7 +108,6 @@ export const useUserStore = defineStore('user', () => {
      * @param {Object} userData - Данные пользователя (сырые или нормализованные)
      */
     function setUserData(userData) {
-        // Нормализуем данные
         const normalized = normalizeUserData(userData);
 
         if (!normalized) {

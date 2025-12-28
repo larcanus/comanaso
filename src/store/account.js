@@ -1,10 +1,5 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import {
-    deleteAccountLocalStore,
-    setAccountLocalStore,
-    updateAccountLocalStore,
-} from '@/store/storeController.js';
 import { accountService } from '@/services/account.service.js';
 
 export const useAccountStore = defineStore('account', () => {
@@ -54,7 +49,7 @@ export const useAccountStore = defineStore('account', () => {
 
         try {
             const accounts = await accountService.getAccounts();
-            console.log('accounts', accounts);
+
             // Преобразуем массив в объект с ключами по id
             const accountsObject = {};
             accounts.forEach((account) => {
@@ -67,7 +62,6 @@ export const useAccountStore = defineStore('account', () => {
             });
 
             state.value = accountsObject;
-            await setAccountLocalStore(state.value);
 
             return accountsObject;
         } catch (err) {
@@ -100,8 +94,6 @@ export const useAccountStore = defineStore('account', () => {
                 ...createdAccount,
             });
 
-            await setAccountLocalStore(state.value);
-
             return createdAccount;
         } catch (err) {
             error.value = err.userMessage || err.message;
@@ -124,7 +116,6 @@ export const useAccountStore = defineStore('account', () => {
 
             // Удаляем из локального состояния
             delete state.value[id];
-            await deleteAccountLocalStore(state.value);
 
             return { ...state.value };
         } catch (err) {
@@ -161,8 +152,6 @@ export const useAccountStore = defineStore('account', () => {
                 ...updatedAccount,
             });
 
-            await updateAccountLocalStore(state.value);
-
             return { ...state.value[accountData.id] };
         } catch (err) {
             error.value = err.userMessage || err.message;
@@ -179,7 +168,6 @@ export const useAccountStore = defineStore('account', () => {
         if (state.value[id]) {
             state.value[id].status = status;
             state.value[id].errorMessage = errorMessage;
-            await updateAccountLocalStore(state.value);
         }
 
         return { id, status, errorMessage };
@@ -282,7 +270,6 @@ export const useAccountStore = defineStore('account', () => {
         if (state.value[accountId]) {
             state.value[accountId].hasAnalyticsData = true;
             state.value[accountId].dataLoadedAt = Date.now();
-            await updateAccountLocalStore(state.value);
         }
     }
 
@@ -294,7 +281,6 @@ export const useAccountStore = defineStore('account', () => {
         if (state.value[accountId]) {
             state.value[accountId].hasAnalyticsData = false;
             state.value[accountId].dataLoadedAt = null;
-            await updateAccountLocalStore(state.value);
         }
     }
 

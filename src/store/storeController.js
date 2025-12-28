@@ -21,7 +21,7 @@ export async function logInAllStore(userData) {
         const toastStore = useToastStore();
 
         if (!userData?.token || !userData?.user) {
-            throw new Error('Неверный формат данных пользователя');
+            return new Error('Неверный формат данных пользователя');
         }
 
         // Сбрасываем флаг при успешном входе
@@ -63,10 +63,8 @@ export async function logInAllStore(userData) {
 
 /**
  * Выход из системы
- * @param {boolean} showNotification - Показывать ли уведомление
  */
-export async function logoutAllStore(showNotification = true) {
-    console.log('logoutAllStore', showNotification);
+export async function logoutAllStore() {
     const authStore = useAuthStore();
     const userStore = useUserStore();
     const accountStore = useAccountStore();
@@ -79,13 +77,10 @@ export async function logoutAllStore(showNotification = true) {
         userStore.clearUser();
         accountStore.clearAccounts();
         dialogsStore.clear();
+        toastStore.clear();
 
         // Очищаем localStorage
         localStorageUtils.clearLocalStorage();
-
-        if (showNotification) {
-            toastStore.addToast('info', 'Вы вышли из системы');
-        }
 
         console.log('=== logoutAllStore: все данные очищены ===');
 
@@ -133,7 +128,7 @@ export async function forceLogout(error) {
     }
 
     try {
-        // Выполняем выход без уведомления (покажем свое)
+        // Выполняем выход без уведомления
         await logoutAllStore(false);
 
         // Показываем уведомление
@@ -149,35 +144,5 @@ export async function forceLogout(error) {
         setTimeout(() => {
             isLoggingOut = false;
         }, 1000);
-    }
-}
-
-export async function setAccountLocalStore(state) {
-    try {
-        // TODO: Реализовать логику сохранения аккаунта в localStorage
-        // localStorageUtils.setAccountData(state);
-        console.log('setAccountLocalStore:', state);
-    } catch (e) {
-        console.error('setAccountLocalStore error:', e);
-    }
-}
-
-export async function deleteAccountLocalStore(state) {
-    try {
-        // TODO: Реализовать логику удаления аккаунта из localStorage
-        // localStorageUtils.deleteAccountData(state);
-        console.log('deleteAccountLocalStore:', state);
-    } catch (e) {
-        console.error('deleteAccountLocalStore error:', e);
-    }
-}
-
-export async function updateAccountLocalStore(state) {
-    try {
-        // TODO: Реализовать логику обновления аккаунта в localStorage
-        // localStorageUtils.updateAccountData(state);
-        console.log('updateAccountLocalStore:', state);
-    } catch (e) {
-        console.error('updateAccountLocalStore error:', e);
     }
 }

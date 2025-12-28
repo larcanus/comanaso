@@ -42,11 +42,11 @@ export const useToastStore = defineStore('toast', () => {
         }, TOAST_TIME);
     }
 
-    function clearAll() {
+    function clear() {
         state.value = [];
     }
 
-    return { state, addToast, removeToast, clearAll };
+    return { state, addToast, removeToast, clear };
 });
 
 export default useToastStore;

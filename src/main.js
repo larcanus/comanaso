@@ -13,8 +13,7 @@ const pinia = createPinia();
 
 app.use(pinia);
 app.use(router);
-
-// Устанавливаем обработчик критических ошибок авторизации
+// Обработчик критических ошибок авторизации
 apiService.setAuthErrorHandler(forceLogout);
 
 localStorageUtils.initLocalStore().catch(console.error);

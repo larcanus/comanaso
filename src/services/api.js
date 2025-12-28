@@ -51,7 +51,7 @@ class ApiService {
      * @param {Object} error - Объект ошибки
      */
     async handleAuthError(error) {
-        console.warn('🔴 Критическая ошибка авторизации:', error);
+        console.info('🔴 Критическая ошибка авторизации:', error);
 
         if (this.onAuthError) {
             try {
