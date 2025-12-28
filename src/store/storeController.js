@@ -66,6 +66,7 @@ export async function logInAllStore(userData) {
  * @param {boolean} showNotification - Показывать ли уведомление
  */
 export async function logoutAllStore(showNotification = true) {
+    console.log('logoutAllStore', showNotification);
     const authStore = useAuthStore();
     const userStore = useUserStore();
     const accountStore = useAccountStore();
@@ -74,10 +75,10 @@ export async function logoutAllStore(showNotification = true) {
 
     try {
         // Очищаем все stores
-        authStore.clearAuthData();
+        authStore.clear();
         userStore.clearUser();
         accountStore.clearAccounts();
-        dialogsStore.$reset();
+        dialogsStore.clear();
 
         // Очищаем localStorage
         localStorageUtils.clearLocalStorage();
@@ -149,15 +150,6 @@ export async function forceLogout(error) {
             isLoggingOut = false;
         }, 1000);
     }
-}
-
-/**
- * Получение токена для API запросов
- * @returns {string|null} Токен аутентификации
- */
-export function getAuthToken() {
-    const authStore = useAuthStore();
-    return authStore.token;
 }
 
 export async function setAccountLocalStore(state) {

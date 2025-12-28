@@ -28,18 +28,16 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null;
     }
 
-    function clearAuthData() {
+    function clear() {
         token.value = null;
         user.value = null;
         isAuth.value = false;
         error.value = null;
-
-        authService.logout();
     }
 
     async function checkAuth() {
         if (!token.value) {
-            clearAuthData();
+            clear();
             return false;
         }
 
@@ -58,12 +56,12 @@ export const useAuthStore = defineStore('auth', () => {
                 error.value = null;
                 return true;
             } else {
-                clearAuthData();
+                clear();
                 return false;
             }
         } catch (error) {
             console.error('Ошибка проверки токена:', error);
-            clearAuthData();
+            clear();
             return false;
         } finally {
             isLoading.value = false;
@@ -96,7 +94,7 @@ export const useAuthStore = defineStore('auth', () => {
         setToken,
         setUser,
         setAuthData,
-        clearAuthData,
+        clear,
         checkAuth,
         setError,
         clearError,

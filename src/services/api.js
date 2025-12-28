@@ -183,6 +183,7 @@ class ApiService {
      * @returns {Promise<Response>}
      */
     async authRequest(endpoint, options = {}) {
+        console.log('authRequest', endpoint, options);
         if (!this.authToken) {
             const error = {
                 error: 'NO_TOKEN',

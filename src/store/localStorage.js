@@ -3,16 +3,36 @@ import router from '@/router/index.js';
 
 import { useAuthStore } from '@/store/auth';
 import { useUserStore } from '@/store/user';
-import useAccountStore from '@/store/account.js';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
-const ACC_KEY = 'acc_data';
 const TOKEN_TTL_MS = 3600000 * 2; // 2 hours
 
 // Определяем доступное хранилище
 let storageType = 'none';
 let storage = null;
+
+async function initLocalStore() {
+    setStorage();
+
+    const token = await checkAuthToken();
+    if (token) {
+        await setAuthTokenToStore(token);
+        await setUserDataToStore();
+    } else {
+        clearLocalStorage();
+    }
+    bindListener();
+}
+
+function setStorage() {
+    if (!storage) {
+        if (!isLocalStorageAvailable()) {
+            isSessionStorageAvailable();
+        }
+    }
+    return storage;
+}
 
 // Проверка доступности localStorage
 function isLocalStorageAvailable() {
@@ -61,21 +81,24 @@ function createMemoryStorage() {
     };
 }
 
-// Инициализация хранилища
-function initStorage() {
-    if (!storage) {
-        if (!isLocalStorageAvailable()) {
-            if (!isSessionStorageAvailable()) {
-                // Уже установлено memory storage
-            }
-        }
+async function checkAuthToken() {
+    const currentToken = await getAuthToken();
+    console.log('checkAuthToken currentToken', currentToken);
+    if (currentToken && !isTokenExpired(currentToken.timeStamp)) {
+        return currentToken;
+    } else {
+        return null;
     }
-    return storage;
+}
+
+async function setAuthTokenToStore(currentToken) {
+    const authStore = useAuthStore();
+    authStore.setToken(currentToken.value);
 }
 
 // Безопасное получение данных из хранилища
 function safeGetItem(key) {
-    const store = initStorage();
+    const store = setStorage();
     try {
         return store.getItem(key);
     } catch (e) {
@@ -86,7 +109,7 @@ function safeGetItem(key) {
 
 // Безопасная запись данных в хранилище
 function safeSetItem(key, value) {
-    const store = initStorage();
+    const store = setStorage();
     try {
         store.setItem(key, value);
         return true;
@@ -98,7 +121,7 @@ function safeSetItem(key, value) {
 
 // Безопасное удаление данных из хранилища
 function safeRemoveItem(key) {
-    const store = initStorage();
+    const store = setStorage();
     try {
         store.removeItem(key);
         return true;
@@ -108,49 +131,11 @@ function safeRemoveItem(key) {
     }
 }
 
-async function initLocalStore() {
-    // Инициализируем хранилище
-    initStorage();
-
-    console.log(`📦 Используется хранилище: ${storageType}`);
-
-    await setAuthTokenToStore();
-    bindListener();
-}
-
-async function setAuthTokenToStore() {
-    const currentToken = await getAuthToken();
-    if (currentToken && !isTokenExpired(currentToken.timeStamp)) {
-        const authStore = useAuthStore();
-        authStore.setToken(currentToken.value);
-
-        await setUserDataToStore();
-        await setAccountDataToStore();
-    } else {
-        await setAccountDataToStore();
-
-        // TODO: Здесь будет запрос на сервер для отключения всех аккаунтов
-        const accStore = useAccountStore();
-        const accountIds = accStore.accountIds;
-        console.log('Accounts to disconnect:', accountIds);
-
-        await logoutAllStore();
-    }
-}
-
 async function setUserDataToStore() {
     const userData = await getUserData();
     if (userData) {
         const userStore = useUserStore();
         userStore.setUserData(userData);
-    }
-}
-
-async function setAccountDataToStore() {
-    const accData = await getAccountData();
-    if (accData) {
-        const accStore = useAccountStore();
-        accStore.setAccountsDataFromLocalStore(accData);
     }
 }
 
@@ -176,7 +161,6 @@ const isTokenExpired = (timeStamp) => {
     return diff > TOKEN_TTL_MS;
 };
 
-// Экспорт функций для использования в других модулях
 async function getAuthToken() {
     const token = safeGetItem(TOKEN_KEY);
     return token ? JSON.parse(token) : null;
@@ -185,11 +169,6 @@ async function getAuthToken() {
 async function getUserData() {
     const data = safeGetItem(USER_KEY);
     return data ? JSON.parse(data) : null;
-}
-
-async function getAccountData() {
-    const data = safeGetItem(ACC_KEY);
-    return data ? JSON.parse(data) : [];
 }
 
 function setAuthToken(token) {
@@ -206,15 +185,10 @@ function setUserData(userData) {
     safeSetItem(USER_KEY, JSON.stringify(userData));
 }
 
-function setAccountData(accountData) {
-    safeSetItem(ACC_KEY, JSON.stringify(accountData));
-}
-
 function clearLocalStorage() {
     console.log('clearLocalStorage');
     safeRemoveItem(TOKEN_KEY);
     safeRemoveItem(USER_KEY);
-    safeRemoveItem(ACC_KEY);
 }
 
 function getStorageType() {
@@ -225,10 +199,8 @@ export default {
     initLocalStore,
     getAuthToken,
     getUserData,
-    getAccountData,
     setAuthToken,
     setUserData,
-    setAccountData,
     clearLocalStorage,
     isLocalStorageAvailable,
     getStorageType,

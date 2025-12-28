@@ -48,14 +48,14 @@ const useDialogStore = defineStore('dialog', () => {
         return validateDialogs(state.value, foldersState);
     }
 
-    function $reset() {
+    function clear() {
         state.value = [];
     }
 
     return {
         state,
         foldersState,
-        $reset,
+        clear,
         setDialogs,
         getPreparedDialogs,
         setFolders,
