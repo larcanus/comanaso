@@ -126,7 +126,7 @@ async function onClickCreateAccount() {
     });
 
     if (res.ok) {
-        showRegistrationSuccessful();
+        await showRegistrationSuccessful();
     } else {
         // Используем сообщение об ошибке от API
         state.value.messageRegistrationError = res.error || props.messageRegistrationError;
@@ -156,9 +156,9 @@ function showRegistrationError() {
     }, 3000);
 }
 
-function showRegistrationSuccessful() {
+async function showRegistrationSuccessful() {
     state.value.isSuccessfulRegistration = true;
-
+    await router.push('/main');
     clearTimeout(state.value.tooltipBigTimeout);
     state.value.tooltipBigTimeout = setTimeout(() => {
         state.value.isSuccessfulRegistration = false;
