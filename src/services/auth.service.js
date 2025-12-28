@@ -67,31 +67,31 @@ export class AuthService {
         }
     }
 
-    /**
-     * Проверка валидности токена
-     * @param {string} token - JWT токен для проверки
-     * @returns {Promise<Object>} Результат проверки
-     */
-    async verifyToken(token) {
-        try {
-            // Временно устанавливаем токен для проверки
-            // const previousToken = apiService.authToken;
-            // apiService.setAuthToken(token);
-            //
-            // const result = await apiService.authRequest('/auth/verify');
-            //
-            // // Восстанавливаем предыдущий токен
-            // apiService.setAuthToken(previousToken);
-
-            // return result;
-        } catch (error) {
-            if (error.error === 'INVALID_TOKEN') {
-                return { valid: false, error: error.message };
-            }
-
-            return { valid: false, error: 'Ошибка проверки токена' };
-        }
-    }
+    // /**
+    //  * Проверка валидности токена
+    //  * @param {string} token - JWT токен для проверки
+    //  * @returns {Promise<Object>} Результат проверки
+    //  */
+    // async verifyToken(token) {
+    //     try {
+    //         // Временно устанавливаем токен для проверки
+    //         const previousToken = apiService.authToken;
+    //         apiService.setAuthToken(token);
+    //
+    //         const result = await apiService.authRequest('/auth/verify');
+    //
+    //         // Восстанавливаем предыдущий токен
+    //         apiService.setAuthToken(previousToken);
+    //
+    //         // return result;
+    //     } catch (error) {
+    //         if (error.error === 'INVALID_TOKEN') {
+    //             return { valid: false, error: error.message };
+    //         }
+    //
+    //         return { valid: false, error: 'Ошибка проверки токена' };
+    //     }
+    // }
 
     /**
      * Выход из системы

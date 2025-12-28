@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { authService } from '@/services/auth.service.js';
+// import { authService } from '@/services/auth.service.js';
 import { ref, computed } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -31,38 +31,38 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null;
     }
 
-    async function checkAuth() {
-        if (!token.value) {
-            clear();
-            return false;
-        }
-
-        isLoading.value = true;
-
-        try {
-            const result = await authService.verifyToken(token.value);
-
-            if (result.valid) {
-                // Обновляем данные пользователя если нужно
-                if (result.user && result.user.id !== user.value?.id) {
-                    user.value = { ...user.value, ...result.user };
-                }
-
-                isAuth.value = true;
-                error.value = null;
-                return true;
-            } else {
-                clear();
-                return false;
-            }
-        } catch (error) {
-            console.error('Ошибка проверки токена:', error);
-            clear();
-            return false;
-        } finally {
-            isLoading.value = false;
-        }
-    }
+    // async function checkAuth() {
+    //     if (!token.value) {
+    //         clear();
+    //         return false;
+    //     }
+    //
+    //     isLoading.value = true;
+    //
+    //     try {
+    //         const result = await authService.verifyToken(token.value);
+    //
+    //         if (result.valid) {
+    //             // Обновляем данные пользователя если нужно
+    //             if (result.user && result.user.id !== user.value?.id) {
+    //                 user.value = { ...user.value, ...result.user };
+    //             }
+    //
+    //             isAuth.value = true;
+    //             error.value = null;
+    //             return true;
+    //         } else {
+    //             clear();
+    //             return false;
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка проверки токена:', error);
+    //         clear();
+    //         return false;
+    //     } finally {
+    //         isLoading.value = false;
+    //     }
+    // }
 
     function setError(errorMessage) {
         error.value = errorMessage;
@@ -91,7 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
         setUser,
         setAuthData,
         clear,
-        checkAuth,
+        // checkAuth,
         setError,
         clearError,
 

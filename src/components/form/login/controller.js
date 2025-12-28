@@ -12,7 +12,7 @@ export class Controller {
     async sendRestAuthentication({ login, password }) {
         try {
             const data = await authService.login({ login, password });
-            // Сохраняем данные пользователя в store
+
             await this.setStoreUserData(data);
 
             return {
@@ -39,10 +39,8 @@ export class Controller {
      */
     async sendRestRegistration({ login, password }) {
         try {
-            // Новый API не принимает name, используем только login и password
             const data = await authService.register({ login, password });
-            console.log('sendRestRegistration data', data);
-            // Сохраняем данные пользователя в store
+
             await this.setStoreUserData(data);
 
             return {
@@ -78,14 +76,5 @@ export class Controller {
         };
 
         await logInAllStore(userData);
-    }
-
-    /**
-     * Проверка валидности токена
-     * @param {string} token - Токен для проверки
-     * @returns {Promise<Object>} Результат проверки
-     */
-    async verifyToken(token) {
-        return await authService.verifyToken(token);
     }
 }
