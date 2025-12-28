@@ -1,3 +1,5 @@
+import useAuthStore from '@/store/auth.js';
+
 /**
  * Сервис для работы с API
  */
@@ -5,8 +7,17 @@ class ApiService {
     constructor() {
         this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
         this.timeout = parseInt(import.meta.env.VITE_API_TIMEOUT) || 10000;
-        this.authToken = null;
         this.onAuthError = null; // Callback для обработки ошибок авторизации
+    }
+
+    /**
+     * Получение текущего токена
+     * @returns {string|null} Текущий токен
+     */
+    getToken() {
+        const authStore = useAuthStore();
+
+        return authStore.token;
     }
 
     /**
@@ -162,29 +173,15 @@ class ApiService {
     }
 
     /**
-     * Установка токена авторизации
-     * @param {string} token - JWT токен
-     */
-    setAuthToken(token) {
-        this.authToken = token;
-    }
-
-    /**
-     * Очистка токена авторизации
-     */
-    clearAuthToken() {
-        this.authToken = null;
-    }
-
-    /**
      * Авторизованный запрос
      * @param {string} endpoint - Конечная точка API
      * @param {Object} options - Опции fetch
      * @returns {Promise<Response>}
      */
     async authRequest(endpoint, options = {}) {
-        console.log('authRequest', endpoint, options);
-        if (!this.authToken) {
+        const token = this.getToken();
+        console.log('authRequest', endpoint, options, token);
+        if (!token) {
             const error = {
                 error: 'NO_TOKEN',
                 message: 'Токен авторизации отсутствует',
@@ -199,7 +196,7 @@ class ApiService {
             ...options,
             headers: {
                 ...options.headers,
-                Authorization: `Bearer ${this.authToken}`,
+                Authorization: `Bearer ${token}`,
             },
         });
     }

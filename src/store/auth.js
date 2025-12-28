@@ -12,10 +12,6 @@ export const useAuthStore = defineStore('auth', () => {
     function setToken(tokenValue) {
         token.value = tokenValue;
         isAuth.value = !!tokenValue;
-
-        if (tokenValue) {
-            authService.setToken(tokenValue);
-        }
     }
 
     function setUser(userData) {

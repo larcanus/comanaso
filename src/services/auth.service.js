@@ -18,11 +18,6 @@ export class AuthService {
                 body: JSON.stringify({ login, password }),
             });
 
-            // Сохраняем токен в сервисе
-            if (data.token) {
-                apiService.setAuthToken(data.token);
-            }
-
             return data;
         } catch (error) {
             // Преобразуем ошибки API в понятные сообщения
@@ -58,11 +53,6 @@ export class AuthService {
                 body: JSON.stringify({ login, password }),
             });
 
-            // Сохраняем токен в сервисе
-            if (data.token) {
-                apiService.setAuthToken(data.token);
-            }
-
             return data;
         } catch (error) {
             console.error('login error', error);
@@ -85,15 +75,15 @@ export class AuthService {
     async verifyToken(token) {
         try {
             // Временно устанавливаем токен для проверки
-            const previousToken = apiService.authToken;
-            apiService.setAuthToken(token);
+            // const previousToken = apiService.authToken;
+            // apiService.setAuthToken(token);
+            //
+            // const result = await apiService.authRequest('/auth/verify');
+            //
+            // // Восстанавливаем предыдущий токен
+            // apiService.setAuthToken(previousToken);
 
-            const result = await apiService.authRequest('/auth/verify');
-
-            // Восстанавливаем предыдущий токен
-            apiService.setAuthToken(previousToken);
-
-            return result;
+            // return result;
         } catch (error) {
             if (error.error === 'INVALID_TOKEN') {
                 return { valid: false, error: error.message };
@@ -114,37 +104,16 @@ export class AuthService {
                 method: 'POST',
             });
 
-            // Очищаем токен локально
-            apiService.clearAuthToken();
-
             return {
                 ok: true,
                 message: 'Успешный выход из системы',
             };
         } catch (error) {
-            apiService.clearAuthToken();
-
             return {
                 ok: false,
                 error: error.message || 'Ошибка при выходе из системы',
             };
         }
-    }
-
-    /**
-     * Получение текущего токена
-     * @returns {string|null} Текущий токен
-     */
-    getToken() {
-        return apiService.authToken;
-    }
-
-    /**
-     * Получение текущего токена
-     * @param {string|null} token
-     */
-    setToken(token) {
-        return apiService.setAuthToken(token);
     }
 }
 
