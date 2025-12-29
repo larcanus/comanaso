@@ -3,6 +3,8 @@ import { computed } from 'vue';
 import { Pie } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -49,11 +51,15 @@ const chartOptions = {
 };
 
 const description = computed(() => getDialogTypesDescription());
+const chartInfo = CHART_DESCRIPTIONS.dialogTypes;
 </script>
 
 <template>
     <div class="chart-container">
-        <h2 class="section-title">Типы диалогов</h2>
+        <div class="chart-header">
+            <h2 class="section-title">Типы диалогов</h2>
+            <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+        </div>
         <div class="chart-wrapper">
             <div class="chart-canvas">
                 <Pie :data="chartData" :options="chartOptions" />
@@ -71,11 +77,19 @@ const description = computed(() => getDialogTypesDescription());
     margin: 30px 0;
 }
 
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; /* Вместо center */
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
 .section-title {
     color: #e3e2e2;
     font-size: 24px;
-    margin-bottom: 20px;
-    text-align: center;
+    margin: 0;
+    line-height: 1.2; /* Добавляем для точного выравнивания */
 }
 
 .chart-wrapper {
@@ -110,6 +124,10 @@ const description = computed(() => getDialogTypesDescription());
 }
 
 @media (max-width: 750px) {
+    .chart-header {
+        flex-wrap: wrap;
+    }
+
     .chart-wrapper {
         padding: 20px;
     }

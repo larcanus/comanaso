@@ -66,6 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = null;
         user.value = null;
         isAuth.value = false;
+        aiPrivacySettings.value = false;
         error.value = null;
     }
 

@@ -11,6 +11,8 @@ import {
     Legend,
 } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -96,11 +98,16 @@ function getTypeLabel(type) {
     };
     return labels[type] || type;
 }
+
+const chartInfo = CHART_DESCRIPTIONS.topUnread;
 </script>
 
 <template>
     <div class="chart-container">
-        <h2 class="section-title">ТОП-10 непрочитанных</h2>
+        <div class="chart-header">
+            <h2 class="section-title">ТОП-10 непрочитанных</h2>
+            <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+        </div>
 
         <div v-if="!hasData" class="empty-state">
             <p>Нет непрочитанных сообщений!</p>
@@ -121,11 +128,18 @@ function getTypeLabel(type) {
     margin: 30px 0;
 }
 
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
 .section-title {
     color: #e3e2e2;
     font-size: 24px;
-    margin-bottom: 20px;
-    text-align: center;
+    margin: 0;
 }
 
 .chart-wrapper {
@@ -136,16 +150,14 @@ function getTypeLabel(type) {
 }
 
 .chart-canvas {
-    width: 100%;
     height: 500px;
 }
 
 .empty-state {
-    background: rgba(76, 175, 80, 0.1);
-    border: 2px dashed rgba(76, 175, 80, 0.3);
-    border-radius: 12px;
-    padding: 40px;
     text-align: center;
+    padding: 40px;
+    background: rgba(46, 204, 113, 0.1);
+    border-radius: 3px;
 }
 
 .empty-state p {
@@ -159,9 +171,9 @@ function getTypeLabel(type) {
     color: #999;
 }
 
-@media (max-width: 750px) {
-    .chart-wrapper {
-        padding: 20px;
+@media (max-width: 768px) {
+    .chart-header {
+        flex-wrap: wrap;
     }
 
     .chart-canvas {
