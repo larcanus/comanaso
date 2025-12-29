@@ -115,6 +115,52 @@ export class AuthService {
             };
         }
     }
+
+    /**
+     * Удаление учетной записи пользователя
+     * @returns {Promise<Object>} Результат удаления
+     */
+    async deleteAccount() {
+        try {
+            const data = await apiService.authRequest('/auth/delete-account', {
+                method: 'DELETE',
+            });
+
+            return {
+                ok: true,
+                data,
+            };
+        } catch (error) {
+            console.error('deleteAccount error', error);
+
+            // Преобразуем ошибки API в понятные сообщения
+            if (error.error === 'UNAUTHORIZED') {
+                throw {
+                    ...error,
+                    userMessage: 'Требуется авторизация',
+                };
+            }
+
+            if (error.error === 'USER_NOT_FOUND') {
+                throw {
+                    ...error,
+                    userMessage: 'Пользователь не найден',
+                };
+            }
+
+            if (error.error === 'DELETE_FAILED') {
+                throw {
+                    ...error,
+                    userMessage: 'Не удалось удалить учетную запись',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Ошибка при удалении учетной записи',
+            };
+        }
+    }
 }
 
 // Экспортируем синглтон экземпляр

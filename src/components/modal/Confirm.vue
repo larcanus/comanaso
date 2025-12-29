@@ -77,7 +77,9 @@ function handleKeyDown(event) {
                 />
                 <div class="modal-buttons">
                     <button class="btn-cancel" @click="cancel">Отмена</button>
-                    <button class="btn-confirm" @click="confirm">Отправить</button>
+                    <button class="btn-confirm" @click="confirm">
+                        {{ isInput ? 'Отправить' : 'Подтвердить' }}
+                    </button>
                 </div>
             </div>
         </div>
