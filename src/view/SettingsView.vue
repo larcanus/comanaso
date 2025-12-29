@@ -123,7 +123,7 @@ async function savePrivacySettings() {
 
     try {
         await authService.updateAiPrivacySettings(localPrivacySettings.value);
-        authStore.updateAiPrivacySetting(localPrivacySettings.value);
+        authStore.setAiPrivacySettings(localPrivacySettings.value);
         toastStore.addToast('ok', 'Настройки приватности сохранены');
     } catch (error) {
         console.error('Save privacy settings error:', error);
@@ -254,11 +254,7 @@ function cancelPrivacyChanges() {
                         ⚠️ Перед удалением необходимо отключить все активные аккаунты
                     </p>
                 </div>
-                <button
-                    class="btn-delete"
-                    :disabled="isDeleting"
-                    @click="openDeleteConfirm"
-                >
+                <button class="btn-delete" :disabled="isDeleting" @click="openDeleteConfirm">
                     {{ isDeleting ? 'Удаление...' : 'Удалить учетную запись' }}
                 </button>
             </div>

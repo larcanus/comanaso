@@ -56,6 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
      * @param {boolean} value - Новое значение
      */
     function updateAiPrivacySetting(key, value) {
+        console.log('updateAiPrivacySetting', key, value);
         if (key in aiPrivacySettings.value) {
             aiPrivacySettings.value[key] = Boolean(value);
         }
