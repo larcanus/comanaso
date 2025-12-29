@@ -9,6 +9,14 @@ export const useAuthStore = defineStore('auth', () => {
     const isLoading = ref(false);
     const error = ref(null);
 
+    // Настройки приватности для AI-аналитики
+    const aiPrivacySettings = ref({
+        shareUserName: true, // Имя пользователя (firstName, lastName)
+        shareNickname: true, // Username (@nickname)
+        shareMessageText: true, // Текст последних сообщений
+        shareDialogTitles: true, // Названия диалогов
+    });
+
     function setToken(tokenValue) {
         token.value = tokenValue;
         isAuth.value = !!tokenValue;
@@ -22,6 +30,35 @@ export const useAuthStore = defineStore('auth', () => {
         setToken(data.token);
         setUser(data.user);
         error.value = null;
+    }
+
+    /**
+     * Устанавливает настройки приватности AI
+     * @param {Object} settings - Объект с настройками приватности
+     */
+    function setAiPrivacySettings(settings) {
+        if (!settings || typeof settings !== 'object') {
+            console.warn('[AuthStore] Invalid AI privacy settings:', settings);
+            return;
+        }
+
+        aiPrivacySettings.value = {
+            shareUserName: settings.shareUserName ?? true,
+            shareNickname: settings.shareNickname ?? true,
+            shareMessageText: settings.shareMessageText ?? true,
+            shareDialogTitles: settings.shareDialogTitles ?? true,
+        };
+    }
+
+    /**
+     * Обновляет отдельную настройку приватности
+     * @param {string} key - Ключ настройки
+     * @param {boolean} value - Новое значение
+     */
+    function updateAiPrivacySetting(key, value) {
+        if (key in aiPrivacySettings.value) {
+            aiPrivacySettings.value[key] = Boolean(value);
+        }
     }
 
     function clear() {
@@ -83,6 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
         token,
         isAuth,
         user,
+        aiPrivacySettings,
         isLoading,
         error,
 
@@ -90,6 +128,8 @@ export const useAuthStore = defineStore('auth', () => {
         setToken,
         setUser,
         setAuthData,
+        setAiPrivacySettings,
+        updateAiPrivacySetting,
         clear,
         // checkAuth,
         setError,

@@ -44,7 +44,7 @@ export class AuthService {
      * @param {Object} credentials - Данные для входа
      * @param {string} credentials.login - Логин пользователя
      * @param {string} credentials.password - Пароль пользователя
-     * @returns {Promise<Object>} Данные пользователя и токен
+     * @returns {Promise<Object>} Данные пользователя, токен и настройки
      */
     async login({ login, password }) {
         try {
@@ -52,6 +52,11 @@ export class AuthService {
                 method: 'POST',
                 body: JSON.stringify({ login, password }),
             });
+
+            // Нормализуем настройки приватности AI, если они пришли с сервера
+            if (data.aiPrivacySettings) {
+                data.aiPrivacySettings = this.normalizeAiPrivacySettings(data.aiPrivacySettings);
+            }
 
             return data;
         } catch (error) {
@@ -160,6 +165,55 @@ export class AuthService {
                 userMessage: error.message || 'Ошибка при удалении учетной записи',
             };
         }
+    }
+
+    /**
+     * Обновление настроек приватности AI
+     * @param {Object} settings - Новые настройки приватности
+     * @returns {Promise<Object>} Результат обновления
+     */
+    async updateAiPrivacySettings(settings) {
+        try {
+            // TODO: Реализовать запрос на сервер после создания endpoint
+            // const data = await apiService.authRequest('/auth/ai-privacy-settings', {
+            //     method: 'PUT',
+            //     body: JSON.stringify(settings),
+            // });
+
+            // Временная заглушка - имитация успешного ответа
+            console.log('[AuthService] Обновление настроек AI (заглушка):', settings);
+
+            await new Promise(resolve => setTimeout(resolve, 500)); // Имитация задержки сети
+
+            return {
+                ok: true,
+                data: {
+                    message: 'Настройки приватности успешно обновлены',
+                    settings: this.normalizeAiPrivacySettings(settings),
+                },
+            };
+        } catch (error) {
+            console.error('updateAiPrivacySettings error', error);
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Не удалось обновить настройки приватности',
+            };
+        }
+    }
+
+    /**
+     * Нормализует настройки приватности AI
+     * @param {Object} settings - Сырые настройки
+     * @returns {Object} Нормализованные настройки
+     */
+    normalizeAiPrivacySettings(settings) {
+        return {
+            shareUserName: settings.shareUserName ?? true,
+            shareNickname: settings.shareNickname ?? true,
+            shareMessageText: settings.shareMessageText ?? true,
+            shareDialogTitles: settings.shareDialogTitles ?? true,
+        };
     }
 }
 
