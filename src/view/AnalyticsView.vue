@@ -13,6 +13,8 @@ import useUserStore from '@/store/user.js';
 import useToastStore from '@/store/toast.js';
 import { analyticsService } from '@/services/analytics.service.js';
 import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
+import { authService } from '@/services/auth.service.js';
+import { accountService } from '@/services/account.service.js';
 
 const accountStore = useAccountStore();
 const dialogStore = useDialogStore();
@@ -185,13 +187,20 @@ async function loadAnalyticsData(accountId, force = false) {
         toastStore.addToast('error', error.userMessage || 'Ошибка загрузки данных аналитики');
 
         // Очищаем данные при ошибке
-        dialogStore.$reset();
-        userStore.$reset();
+        dialogStore.clear();
+        userStore.clearUser();
 
         // Очищаем флаг загруженности
         await accountStore.clearAnalyticsData(accountId);
+        propagateError(accountId, error);
     } finally {
         isLoadingAnalytics.value = false;
+    }
+}
+
+function propagateError(accountId, error) {
+    if (error.code === 'ACCOUNT_NOT_CONNECTED') {
+        accountService.logoutAccount(accountId);
     }
 }
 
@@ -208,7 +217,7 @@ function handleAccountSelected(accountId) {
 async function refreshAnalytics() {
     if (selectedAccountId.value) {
         // Очищаем существующие данные
-        dialogStore.$reset();
+        dialogStore.clear();
         userStore.clearUser();
 
         // Загружаем с флагом force=true
@@ -277,7 +286,7 @@ async function refreshAnalytics() {
         </div>
 
         <div v-else class="empty-state">
-            <p>📊 Нет данных для отображения</p>
+            <p>Нет данных для отображения</p>
             <p class="hint">Нажмите кнопку обновления для загрузки данных</p>
             <UpdateButton :is-disabled="!isAccountOnline" @refresh="refreshAnalytics" />
         </div>

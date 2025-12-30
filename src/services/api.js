@@ -49,9 +49,9 @@ class ApiService {
         if (error.status === 401) {
             return true;
         }
-
+        console.log('isAuthError', error);
         // 403 - Forbidden
-        if (error.status === 403) {
+        if (error.status === 403 && error.error !== 'ACCOUNT_NOT_CONNECTED') {
             return true;
         }
 
