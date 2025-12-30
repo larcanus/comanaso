@@ -3,6 +3,10 @@ import { computed, ref } from 'vue';
 import useUserStore from '@/store/user.js';
 import { getColorFromString, getFirstLetter } from '@/utils/colorUtils.js';
 import DetailPopup from '@/components/modal/DetailPopup.vue';
+import {
+    USER_FIELD_DESCRIPTIONS,
+    USER_FIELD_CATEGORIES,
+} from '@/constants/userFieldDescriptions.js';
 
 const userStore = useUserStore();
 
@@ -110,173 +114,151 @@ const yesNoFormatter = (value) => (value ? 'Да' : 'Нет');
 
 const detailedFields = computed(() => [
     {
-        category: 'Социальные связи',
+        category: USER_FIELD_CATEGORIES.socialConnections,
         fields: [
             {
-                label: 'В контактах',
+                label: USER_FIELD_DESCRIPTIONS.socialConnections.isContact.label,
                 value: yesNoFormatter(userStore.userIsContact),
-                description:
-                    'Показывает, добавлен ли пользователь в ваш список контактов.\n\nВозможные значения:\n• Да - пользователь в контактах\n• Нет - не добавлен',
+                description: USER_FIELD_DESCRIPTIONS.socialConnections.isContact.description,
             },
             {
-                label: 'Взаимный контакт',
+                label: USER_FIELD_DESCRIPTIONS.socialConnections.isMutualContact.label,
                 value: yesNoFormatter(userStore.userIsMutualContact),
-                description:
-                    'Взаимный контакт означает, что вы добавили друг друга в контакты.\n\nЭто важный показатель для анализа социальных связей - такие контакты обычно являются реальными знакомыми.\n\nВозможные значения:\n• Да - взаимные контакты\n• Нет - только с одной стороны',
+                description: USER_FIELD_DESCRIPTIONS.socialConnections.isMutualContact.description,
             },
             {
-                label: 'Близкий друг',
+                label: USER_FIELD_DESCRIPTIONS.socialConnections.isCloseFriend.label,
                 value: yesNoFormatter(userStore.userIsCloseFriend),
-                description:
-                    'Функция Telegram, позволяющая отметить определенных пользователей как близких друзей.\n\nТакие пользователи могут иметь приоритет в уведомлениях и видеть специальный контент.\n\nВозможные значения:\n• Да - отмечен как близкий друг\n• Нет - обычный контакт',
+                description: USER_FIELD_DESCRIPTIONS.socialConnections.isCloseFriend.description,
             },
             {
-                label: 'Требуется Premium для связи',
+                label: USER_FIELD_DESCRIPTIONS.socialConnections.isContactRequirePremium.label,
                 value: yesNoFormatter(userStore.userIsContactRequirePremium),
                 description:
-                    'Настройка приватности Telegram Premium.\n\nПользователи с Premium могут ограничить возможность связи только для других Premium-пользователей.\n\nВозможные значения:\n• Да - нужна Premium подписка для контакта\n• Нет - доступен для всех',
+                    USER_FIELD_DESCRIPTIONS.socialConnections.isContactRequirePremium.description,
             },
         ],
     },
     {
-        category: 'Истории (Stories)',
+        category: USER_FIELD_CATEGORIES.stories,
         fields: [
             {
-                label: 'Истории скрыты',
+                label: USER_FIELD_DESCRIPTIONS.stories.isStoriesHidden.label,
                 value: yesNoFormatter(userStore.userIsStoriesHidden),
-                description:
-                    'Настройка приватности историй (Stories) в Telegram.\n\nЕсли включено, истории этого пользователя не отображаются в вашей ленте.\n\nВозможные значения:\n• Да - истории скрыты от вас\n• Нет - истории видны',
+                description: USER_FIELD_DESCRIPTIONS.stories.isStoriesHidden.description,
             },
             {
-                label: 'Истории недоступны',
+                label: USER_FIELD_DESCRIPTIONS.stories.isStoriesUnavailable.label,
                 value: yesNoFormatter(userStore.userIsStoriesUnavailable),
-                description:
-                    'Показывает техническую доступность историй.\n\nМожет быть недоступно из-за:\n• Настроек приватности пользователя\n• Блокировки\n• Отключения функции\n\nВозможные значения:\n• Да - истории недоступны\n• Нет - истории доступны',
+                description: USER_FIELD_DESCRIPTIONS.stories.isStoriesUnavailable.description,
             },
             {
-                label: 'ID последней истории',
+                label: USER_FIELD_DESCRIPTIONS.stories.storiesMaxId.label,
                 value: userStore.userStoriesMaxId || 'Не указан',
-                description:
-                    'Уникальный идентификатор последней опубликованной истории.\n\nПолезно для:\n• Отслеживания активности\n• Определения времени последней публикации\n• Технического анализа\n\nФормат: числовой ID или "Не указан"',
+                description: USER_FIELD_DESCRIPTIONS.stories.storiesMaxId.description,
             },
             {
-                label: 'Есть активные истории',
+                label: USER_FIELD_DESCRIPTIONS.stories.hasStories.label,
                 value: yesNoFormatter(userStore.hasStories),
-                description:
-                    'Показывает наличие активных (не просмотренных или не истекших) историй.\n\nИстории в Telegram доступны 24 часа.\n\nВозможные значения:\n• Да - есть активные истории\n• Нет - нет активных историй',
+                description: USER_FIELD_DESCRIPTIONS.stories.hasStories.description,
             },
         ],
     },
     {
-        category: 'Дополнительные юзернеймы',
+        category: USER_FIELD_CATEGORIES.additionalUsernames,
         fields: [
             {
-                label: 'Количество',
+                label: USER_FIELD_DESCRIPTIONS.additionalUsernames.count.label,
                 value: userStore.userUsernames.length > 0 ? userStore.userUsernames.length : '0',
-                description:
-                    'С февраля 2023 года Telegram позволяет иметь несколько публичных юзернеймов (@username).\n\nЭто полезно для:\n• Бизнес-аккаунтов с разными направлениями\n• Брендов с несколькими проектами\n• Повышения узнаваемости\n\nМаксимум: до 10 дополнительных юзернеймов',
+                description: USER_FIELD_DESCRIPTIONS.additionalUsernames.count.description,
             },
             {
-                label: 'Список',
+                label: USER_FIELD_DESCRIPTIONS.additionalUsernames.list.label,
                 value:
                     userStore.userUsernames.length > 0
                         ? userStore.userUsernames.map((u) => `@${u}`).join(', ')
                         : 'Нет',
-                description:
-                    'Полный список всех дополнительных юзернеймов пользователя.\n\nКаждый юзернейм:\n• Должен быть уникальным в Telegram\n• Может содержать буквы, цифры и подчёркивания\n• Минимум 5 символов\n\nВсе юзернеймы ведут к одному профилю.',
+                description: USER_FIELD_DESCRIPTIONS.additionalUsernames.list.description,
             },
         ],
     },
     {
-        category: 'Визуальная кастомизация',
+        category: USER_FIELD_CATEGORIES.customization,
         fields: [
             {
-                label: 'Emoji статус',
+                label: USER_FIELD_DESCRIPTIONS.customization.emojiStatus.label,
                 value: userStore.userEmojiStatus || 'Не установлен',
-                description:
-                    'Функция Telegram Premium - эмодзи рядом с именем пользователя.\n\nМожет показывать:\n• Настроение\n• Статус занятости\n• Индивидуальность\n\nДоступно только для Premium-пользователей.\n\nФормат: эмодзи или "Не установлен"',
+                description: USER_FIELD_DESCRIPTIONS.customization.emojiStatus.description,
             },
             {
-                label: 'Цвет имени',
+                label: USER_FIELD_DESCRIPTIONS.customization.color.label,
                 value: userStore.userColor || 'По умолчанию',
-                description:
-                    'Цвет отображения имени пользователя в чатах (название профиля).\n\nТелеграм использует 8 предустановленных цветов для разнообразия интерфейса.\n\nЦвет назначается автоматически на основе ID пользователя.\n\nФормат: числовой код цвета или "По умолчанию"',
+                description: USER_FIELD_DESCRIPTIONS.customization.color.description,
             },
             {
-                label: 'Цвет профиля',
+                label: USER_FIELD_DESCRIPTIONS.customization.profileColor.label,
                 value: userStore.userProfileColor || 'По умолчанию',
-                description:
-                    'Цвет оформления страницы профиля пользователя (фон шапки профиля).\n\nPremium-функция позволяет выбрать собственный цвет оформления.\n\nОбычные пользователи используют цвет по умолчанию.\n\nФормат: код цвета или "По умолчанию"',
+                description: USER_FIELD_DESCRIPTIONS.customization.profileColor.description,
             },
             {
-                label: 'Кастомные цвета',
+                label: USER_FIELD_DESCRIPTIONS.customization.hasCustomColors.label,
                 value: yesNoFormatter(userStore.hasCustomColors),
-                description:
-                    'Показывает, использует ли пользователь кастомные цвета для имени или профиля.\n\nЭто Premium-функция Telegram.\n\nПолезно для:\n• Определения Premium-пользователей\n• Анализа активности персонализации\n\nВозможные значения:\n• Да - использует кастомные цвета\n• Нет - стандартные цвета',
+                description: USER_FIELD_DESCRIPTIONS.customization.hasCustomColors.description,
             },
         ],
     },
     {
-        category: 'Безопасность и ограничения',
+        category: USER_FIELD_CATEGORIES.security,
         fields: [
             {
-                label: 'Фейковый аккаунт',
+                label: USER_FIELD_DESCRIPTIONS.security.isFake.label,
                 value: yesNoFormatter(userStore.userIsFake),
-                description:
-                    'Отметка Telegram о подозрительной активности аккаунта.\n\nПричины пометки:\n• Массовые рассылки спама\n• Накрутка подписчиков\n• Подозрительное поведение\n\n⚠️ Взаимодействие с такими аккаунтами может быть рискованным.\n\nВозможные значения:\n• Да - помечен как фейковый\n• Нет - обычный аккаунт',
+                description: USER_FIELD_DESCRIPTIONS.security.isFake.description,
             },
             {
-                label: 'Скам аккаунт',
+                label: USER_FIELD_DESCRIPTIONS.security.isScam.label,
                 value: yesNoFormatter(userStore.userIsScam),
-                description:
-                    'Официальная метка Telegram о мошенническом аккаунте.\n\nПризнаки скама:\n• Фишинговые ссылки\n• Финансовое мошенничество\n• Выдача себя за другое лицо\n\n⚠️ Крайне не рекомендуется взаимодействовать с такими аккаунтами.\n\nВозможные значения:\n• Да - подтвержденный скам\n• Нет - чистый аккаунт',
+                description: USER_FIELD_DESCRIPTIONS.security.isScam.description,
             },
             {
-                label: 'Ограничен',
+                label: USER_FIELD_DESCRIPTIONS.security.isRestricted.label,
                 value: yesNoFormatter(userStore.userIsRestricted),
-                description:
-                    'Показывает, наложены ли ограничения на аккаунт модерацией Telegram.\n\nОграничения могут включать:\n• Запрет на публичные группы\n• Ограничение отправки сообщений\n• Блокировка определенных функций\n\nВозможные значения:\n• Да - есть ограничения\n• Нет - полный доступ',
+                description: USER_FIELD_DESCRIPTIONS.security.isRestricted.description,
             },
             {
-                label: 'Причина ограничения',
+                label: USER_FIELD_DESCRIPTIONS.security.restrictionReason.label,
                 value: userStore.userRestrictionReason || 'Нет',
-                description:
-                    'Официальная причина ограничений от модерации Telegram.\n\nВозможные причины:\n• Спам\n• Нарушение правил сообщества\n• Жалобы пользователей\n• Распространение запрещенного контента\n\nФормат: текстовое описание или "Нет"',
+                description: USER_FIELD_DESCRIPTIONS.security.restrictionReason.description,
             },
             {
-                label: 'Удален',
+                label: USER_FIELD_DESCRIPTIONS.security.isDeleted.label,
                 value: yesNoFormatter(userStore.userIsDeleted),
-                description:
-                    'Показывает, удален ли аккаунт пользователем или администрацией Telegram.\n\nУдаленный аккаунт:\n• Недоступен для контакта\n• Отображается как "Deleted Account"\n• Потерял всю персональную информацию\n\nВозможные значения:\n• Да - аккаунт удален\n• Нет - активный аккаунт',
+                description: USER_FIELD_DESCRIPTIONS.security.isDeleted.description,
             },
             {
-                label: 'Официальная поддержка',
+                label: USER_FIELD_DESCRIPTIONS.security.isSupport.label,
                 value: yesNoFormatter(userStore.userIsSupport),
-                description:
-                    'Официальный аккаунт технической поддержки Telegram.\n\nПризнаки:\n• Специальная верификация\n• Прямая связь с командой Telegram\n• Помощь пользователям\n\n⚠️ Будьте осторожны: мошенники могут выдавать себя за поддержку.\n\nВозможные значения:\n• Да - официальная поддержка\n• Нет - обычный пользователь',
+                description: USER_FIELD_DESCRIPTIONS.security.isSupport.description,
             },
         ],
     },
     {
-        category: 'Техническая информация',
+        category: USER_FIELD_CATEGORIES.technical,
         fields: [
             {
-                label: 'Дата-центр фото',
+                label: USER_FIELD_DESCRIPTIONS.technical.photoDcId.label,
                 value: userStore.photoDcId || 'Не указан',
-                description:
-                    'ID дата-центра Telegram, где хранится фотография профиля.\n\nTelegram использует 5 основных дата-центров:\n• DC1-DC5 (разные географические локации)\n\nЭта информация полезна для:\n• Технического анализа\n• Определения географии серверов\n• Оптимизации загрузки\n\nФормат: число 1-5 или "Не указан"',
+                description: USER_FIELD_DESCRIPTIONS.technical.photoDcId.description,
             },
             {
-                label: 'ID фото',
+                label: USER_FIELD_DESCRIPTIONS.technical.photoId.label,
                 value: userStore.userPhoto?.photoId || 'Нет фото',
-                description:
-                    'Уникальный идентификатор фотографии профиля пользователя.\n\nКаждое фото имеет уникальный ID для:\n• Кэширования\n• Загрузки\n• Версионирования\n\nПри смене фото ID меняется.\n\nФормат: длинное числовое значение или "Нет фото"',
+                description: USER_FIELD_DESCRIPTIONS.technical.photoId.description,
             },
             {
-                label: 'Видео в фото',
+                label: USER_FIELD_DESCRIPTIONS.technical.hasVideo.label,
                 value: userStore.userPhoto?.hasVideo ? 'Да' : 'Нет',
-                description:
-                    'Показывает, является ли фото профиля анимированным (видео).\n\nС 2021 года Telegram позволяет устанавливать короткие видео вместо статичной фотографии профиля.\n\nОсобенности:\n• Длительность до 10 секунд\n• Зацикленное воспроизведение\n• Премиум-функция\n\nВозможные значения:\n• Да - анимированное фото\n• Нет - статичное изображение',
+                description: USER_FIELD_DESCRIPTIONS.technical.hasVideo.description,
             },
         ],
     },
