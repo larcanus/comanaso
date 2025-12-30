@@ -5,6 +5,7 @@ import AccountView from '@/view/AccountView.vue';
 import AnalyticsView from '@/view/AnalyticsView.vue';
 import SettingsView from '@/view/SettingsView.vue';
 import { useAuthStore } from '@/store/auth.js';
+import { useAccountStore } from '@/store/account.js';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,7 @@ const router = createRouter({
                     component: AnalyticsView,
                     meta: {
                         requiresAuth: true,
+                        requiresAccounts: true,
                     },
                 },
                 {
@@ -79,11 +81,41 @@ router.beforeEach(async (to, from, next) => {
         return;
     }
 
+    // Проверка наличия аккаунтов для страниц, которым они нужны
+    if (to.meta.requiresAccounts && isAuthenticated) {
+        const accountStore = useAccountStore();
+        const hasAccounts = accountStore.accountIds && accountStore.accountIds.length > 0;
+
+        if (!hasAccounts) {
+            console.info('⚠️ Загрузка аккаунтов для доступа к странице:', to.name);
+
+            try {
+                await accountStore.loadAccountsFromServer();
+
+                // Проверяем снова после загрузки
+                const accountsLoaded =
+                    accountStore.accountIds && accountStore.accountIds.length > 0;
+
+                if (!accountsLoaded) {
+                    console.warn(
+                        '⚠️ Нет доступных аккаунтов, перенаправление на страницу аккаунтов'
+                    );
+                    next({ name: 'account' });
+                    return;
+                }
+            } catch (error) {
+                console.error('🔴 Ошибка загрузки аккаунтов:', error);
+                next({ name: 'account' });
+                return;
+            }
+        }
+    }
+
     // Во всех остальных случаях разрешаем переход
     next();
 });
 
-// Глобальный обработчик ошибок навигации (опционально)
+// Глобальный обработчик ошибок навигации
 router.onError((error) => {
     console.error('🔴 Ошибка навигации:', error);
 });

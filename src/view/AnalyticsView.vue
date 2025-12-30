@@ -13,7 +13,6 @@ import useUserStore from '@/store/user.js';
 import useToastStore from '@/store/toast.js';
 import { analyticsService } from '@/services/analytics.service.js';
 import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
-import { authService } from '@/services/auth.service.js';
 import { accountService } from '@/services/account.service.js';
 
 const accountStore = useAccountStore();
@@ -54,12 +53,6 @@ const isAccountOnline = computed(() => {
 const accountStatus = computed(() => {
     if (!selectedAccountId.value) return 'offline';
     return accountStore.getAccountStatus(selectedAccountId.value);
-});
-
-// Проверка наличия загруженных данных
-const hasLoadedData = computed(() => {
-    if (!selectedAccountId.value) return false;
-    return accountStore.hasAnalyticsData(selectedAccountId.value);
 });
 
 // Информация о времени последней загрузки
