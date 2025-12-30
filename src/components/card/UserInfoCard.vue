@@ -758,7 +758,6 @@ const detailedFields = computed(() => [
 .info-icon:hover {
     background-color: var(--vt-bt-background-color);
     color: var(--vt-c-white);
-    transform: scale(1.1);
 }
 
 .info-icon:active {

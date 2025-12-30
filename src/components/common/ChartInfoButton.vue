@@ -31,9 +31,7 @@ function closeModal() {
 
 <template>
     <div class="chart-info-wrapper">
-        <button class="info-icon" title="Информация о диаграмме" @click="openModal">
-            ?
-        </button>
+        <button class="info-icon" title="Информация о диаграмме" @click="openModal">?</button>
 
         <DetailPopup
             :message="modalMessage"
@@ -47,11 +45,12 @@ function closeModal() {
 <style scoped>
 .chart-info-wrapper {
     display: inline-block;
+    padding-bottom: 1px;
 }
 
 .info-icon {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     border-radius: 50%;
     border: 1.5px solid var(--color-text);
     background-color: transparent;
@@ -72,18 +71,13 @@ function closeModal() {
     background-color: var(--vt-bt-background-color);
     color: var(--vt-c-white);
     border-color: var(--vt-bt-background-color);
-    transform: scale(1.1);
-}
-
-.info-icon:active {
-    transform: scale(0.95);
 }
 
 @media (max-width: 768px) {
     .info-icon {
-        width: 16px;
-        height: 16px;
-        font-size: 10px;
+        width: 19px;
+        height: 19px;
+        font-size: 11px;
     }
 }
 </style>

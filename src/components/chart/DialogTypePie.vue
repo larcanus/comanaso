@@ -80,7 +80,7 @@ const chartInfo = CHART_DESCRIPTIONS.dialogTypes;
 .chart-header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline; /* Вместо center */
+    align-items: end;
     margin-bottom: 20px;
     gap: 10px;
 }
@@ -89,7 +89,7 @@ const chartInfo = CHART_DESCRIPTIONS.dialogTypes;
     color: #e3e2e2;
     font-size: 24px;
     margin: 0;
-    line-height: 1.2; /* Добавляем для точного выравнивания */
+    line-height: 1.2;
 }
 
 .chart-wrapper {
