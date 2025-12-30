@@ -84,6 +84,7 @@ export function useDialogAnalytics() {
 
         return {
             labels: ['Личные', 'Боты', 'Группы', 'Супергруппы', 'Каналы'],
+            labelsGenitive: ['личных', 'ботов', 'групп', 'супергрупп', 'каналов'],
             data: [types.user, types.bot, types.group, types.supergroup, types.channel],
             colors: ['#64adf5', '#ec6060', '#cc64f5', '#bfb32c', '#64f586'],
         };
@@ -556,7 +557,7 @@ export function useDialogAnalytics() {
         if (total === 0) return 'Нет диалогов для анализа';
 
         const maxIndex = types.data.indexOf(Math.max(...types.data));
-        const maxType = types.labels[maxIndex];
+        const maxType = types.labelsGenitive[maxIndex];
         const maxCount = types.data[maxIndex];
         const percentage = ((maxCount / total) * 100).toFixed(1);
 
@@ -572,9 +573,7 @@ export function useDialogAnalytics() {
         const total = dialogs.value.length;
         const withUnread = dialogs.value.filter((d) => (d.unreadCount || 0) > 0).length;
         const withMentions = dialogs.value.filter((d) => (d.unreadMentionsCount || 0) > 0).length;
-        const withReactions = dialogs.value.filter(
-            (d) => (d.unreadReactionsCount || 0) > 0
-        ).length;
+        const withReactions = dialogs.value.filter((d) => (d.unreadReactionsCount || 0) > 0).length;
 
         return {
             labels: ['Всего диалогов', 'Непрочитанные', 'Упоминания', 'Реакции'],
@@ -651,7 +650,6 @@ export function useDialogAnalytics() {
         };
 
         // Статусы уведомлений
-        const notifyStates = ['enabled', 'silent', 'muted'];
         const notifyLabels = {
             enabled: 'Включены',
             silent: 'Без звука',
@@ -659,7 +657,6 @@ export function useDialogAnalytics() {
         };
 
         // Статусы прочтения
-        const readStates = ['read', 'unread'];
         const readLabels = {
             read: 'Прочитано',
             unread: 'Непрочитано',
