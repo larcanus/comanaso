@@ -43,7 +43,7 @@ function showFolderDetails(folder) {
         `• Контакты: ${folder.contacts ? '✅ Да' : '❌ Нет'}`,
         `• Группы: ${folder.groups ? '✅ Да' : '❌ Нет'}`,
         `• Каналы: ${folder.broadcasts ? '✅ Да' : '❌ Нет'}`,
-        `• Боты: ${folder.bots ? '✅ Да' : '❌ Nет'}`,
+        `• Боты: ${folder.bots ? '✅ Да' : '❌ Нет'}`,
         `• Исключить прочитанные: ${folder.excludeRead ? '✅ Да' : '❌ Нет'}`,
         `• Исключить заглушенные: ${folder.excludeMuted ? '✅ Да' : '❌ Нет'}`,
         `• Исключить архивные: ${folder.excludeArchived ? '✅ Да' : '❌ Нет'}`,
