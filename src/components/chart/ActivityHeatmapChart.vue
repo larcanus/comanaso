@@ -1,6 +1,8 @@
 <script setup>
 import { computed } from 'vue';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 const { activityHeatmap } = useDialogAnalytics();
 
@@ -29,16 +31,18 @@ const getColor = (value) => {
 };
 
 const daysLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+const chartInfo = CHART_DESCRIPTIONS.activityHeatmap;
 </script>
 
 <template>
     <div class="chart-wrapper">
-        <h3 class="chart-title">
-            <i class="fas fa-fire"></i>
-            Тепловая карта активности
-        </h3>
-        <p class="chart-subtitle">Активность по дням недели и часам суток (последние 30 дней)</p>
-
+        <div class="chart-header">
+            <h3 class="chart-title">Тепловая карта активности</h3>
+            <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+        </div>
+        <div class="chart-subtitle">
+            <p>Активность по дням недели и часам суток (последние 30 дней)</p>
+        </div>
         <div v-if="activityHeatmap.totalMessages > 0" class="heatmap-container">
             <!-- Заголовок с часами -->
             <div class="heatmap-grid">
@@ -105,21 +109,28 @@ const daysLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     width: 100%;
 }
 
-.chart-title {
-    color: #ecf0f1;
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 10px;
+.chart-header {
     display: flex;
-    align-items: center;
+    justify-content: center;
+    align-items: end;
+    margin-bottom: 20px;
     gap: 10px;
 }
 
-.chart-title i {
-    color: #3498db;
+.chart-title {
+    color: #e3e2e2;
+    font-size: 24px;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .chart-subtitle {
+    color: #95a5a6;
+    align-self: center;
+    display: flex;
+    justify-content: center;
+}
+.chart-subtitle p {
     color: #95a5a6;
     font-size: 14px;
     margin-bottom: 25px;

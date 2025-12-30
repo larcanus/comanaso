@@ -13,6 +13,8 @@ import {
     Filler,
 } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(
     CategoryScale,
@@ -107,11 +109,16 @@ const totalMessages = computed(() => {
     const outgoing = activityTimeline.value.outgoing.reduce((sum, val) => sum + val, 0);
     return { incoming, outgoing, total: incoming + outgoing };
 });
+
+const chartInfo = CHART_DESCRIPTIONS.activity;
 </script>
 
 <template>
     <div class="chart-container">
-        <h2 class="section-title">Активность за 30 дней</h2>
+        <div class="chart-header">
+            <h2 class="section-title">Активность за 30 дней</h2>
+            <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+        </div>
 
         <div class="stats-summary">
             <div class="stat-item">
@@ -142,11 +149,19 @@ const totalMessages = computed(() => {
     margin: 30px 0;
 }
 
+.chart-header {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
 .section-title {
     color: #e3e2e2;
     font-size: 24px;
-    margin-bottom: 20px;
     text-align: center;
+    line-height: 1.2;
 }
 
 .stats-summary {
