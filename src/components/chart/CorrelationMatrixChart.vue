@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
 import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 const { correlationMatrix } = useDialogAnalytics();
 const { width: containerWidth } = useResponsiveWidth();
@@ -81,12 +83,17 @@ const strongestCorrelation = computed(() => {
 
     return maxPair;
 });
+
+const chartInfo = CHART_DESCRIPTIONS.correlationMatrix;
 </script>
 
 <template>
     <div class="chart-wrapper">
         <div class="chart-header">
-            <h2 class="chart-title">Матрица корреляций</h2>
+            <div class="title-row">
+                <h2 class="chart-title">Матрица корреляций</h2>
+                <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+            </div>
             <div v-if="strongestCorrelation" class="stats-summary">
                 <div class="stat-item">
                     <span class="stat-label">Сильнейшая связь:</span>
@@ -207,11 +214,20 @@ const strongestCorrelation = computed(() => {
     margin-bottom: 25px;
 }
 
+.title-row {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
 .chart-title {
     font-size: 24px;
     color: #ffffff;
-    margin: 0 0 20px 0;
+    margin: 0;
     text-align: center;
+    line-height: 1.2;
 }
 
 .stats-summary {
@@ -343,6 +359,15 @@ const strongestCorrelation = computed(() => {
 @media (max-width: 768px) {
     .chart-wrapper {
         padding: 20px;
+    }
+
+    .chart-title {
+        font-size: 18px;
+        line-height: 1.4;
+    }
+
+    .title-row {
+        flex-wrap: wrap;
     }
 
     .stats-summary {

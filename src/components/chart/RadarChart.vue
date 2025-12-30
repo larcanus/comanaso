@@ -11,6 +11,8 @@ import {
     Legend,
 } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
@@ -102,12 +104,17 @@ const maxCategory = computed(() => {
         percentage: participationProfile.value.percentages[maxIndex],
     };
 });
+
+const chartInfo = CHART_DESCRIPTIONS.radar;
 </script>
 
 <template>
     <div class="chart-wrapper">
         <div class="chart-header">
-            <h2 class="chart-title">Профиль участия</h2>
+            <div class="title-row">
+                <h2 class="chart-title">Профиль участия</h2>
+                <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+            </div>
             <div v-if="maxCategory" class="stats-summary">
                 <div class="stat-item">
                     <span class="stat-label">Максимум:</span>
@@ -142,11 +149,20 @@ const maxCategory = computed(() => {
     margin-bottom: 25px;
 }
 
+.title-row {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
 .chart-title {
     font-size: 24px;
-    color: #ffffff;
-    margin: 0 0 20px 0;
+    color: #e3e2e2;
     text-align: center;
+    line-height: 1.2;
+    margin: 0;
 }
 
 .stats-summary {
@@ -196,6 +212,11 @@ const maxCategory = computed(() => {
 @media (max-width: 750px) {
     .chart-wrapper {
         padding: 20px;
+    }
+
+    .chart-title {
+        font-size: 18px;
+        line-height: 1.4;
     }
 
     .chart-canvas {

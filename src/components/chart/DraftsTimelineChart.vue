@@ -13,6 +13,8 @@ import {
     Filler,
 } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(
     CategoryScale,
@@ -124,12 +126,17 @@ const periodText = computed(() => {
     const end = formatDate(draftsTimeline.value.periodEnd);
     return `${start} - ${end}`;
 });
+
+const chartInfo = CHART_DESCRIPTIONS.draftsTimeline;
 </script>
 
 <template>
     <div class="chart-wrapper">
         <div class="chart-header">
-            <h2 class="chart-title">Таймлайн черновиков</h2>
+            <div class="title-row">
+                <h2 class="chart-title">Таймлайн черновиков</h2>
+                <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+            </div>
             <p v-if="draftsTimeline && draftsTimeline.total > 0" class="period-info">
                 Период: {{ periodText }} (последние 30 дней)
             </p>
@@ -173,11 +180,20 @@ const periodText = computed(() => {
     margin-bottom: 25px;
 }
 
+.title-row {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
 .chart-title {
     font-size: 24px;
     color: #ffffff;
-    margin: 0 0 10px 0;
+    margin: 0;
     text-align: center;
+    line-height: 1.2;
 }
 
 .period-info {
@@ -235,6 +251,15 @@ const periodText = computed(() => {
 @media (max-width: 750px) {
     .chart-wrapper {
         padding: 20px;
+    }
+
+    .chart-title {
+        font-size: 18px;
+        line-height: 1.4;
+    }
+
+    .title-row {
+        flex-wrap: wrap;
     }
 
     .chart-canvas {

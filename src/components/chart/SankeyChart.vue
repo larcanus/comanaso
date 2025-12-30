@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
 import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 const { notificationFlow } = useDialogAnalytics();
 const { width: containerWidth } = useResponsiveWidth({
@@ -132,12 +134,17 @@ const totalFlow = computed(() => {
     if (!notificationFlow.value || !notificationFlow.value.links) return 0;
     return notificationFlow.value.links.reduce((sum, link) => sum + (link.value || 0), 0);
 });
+
+const chartInfo = CHART_DESCRIPTIONS.sankey;
 </script>
 
 <template>
     <div class="chart-wrapper">
         <div class="chart-header">
-            <h2 class="chart-title">Поток уведомлений</h2>
+            <div class="title-row">
+                <h2 class="chart-title">Поток уведомлений</h2>
+                <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+            </div>
             <div class="stats-summary">
                 <div class="stat-item">
                     <span class="stat-label">Всего потоков:</span>
@@ -269,11 +276,20 @@ const totalFlow = computed(() => {
     margin-bottom: 25px;
 }
 
+.title-row {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
 .chart-title {
     font-size: 24px;
     color: #ffffff;
-    margin: 0 0 20px 0;
+    margin: 0;
     text-align: center;
+    line-height: 1.2;
 }
 
 .stats-summary {
@@ -407,6 +423,11 @@ const totalFlow = computed(() => {
 
     .chart-title {
         font-size: 18px;
+        line-height: 1.4;
+    }
+
+    .title-row {
+        flex-wrap: wrap;
     }
 
     .stat-label {
