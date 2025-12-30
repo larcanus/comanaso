@@ -79,7 +79,7 @@ const chartInfo = CHART_DESCRIPTIONS.dialogTypes;
 
 .chart-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: end;
     margin-bottom: 20px;
     gap: 10px;

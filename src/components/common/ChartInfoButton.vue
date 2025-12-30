@@ -45,7 +45,7 @@ function closeModal() {
 <style scoped>
 .chart-info-wrapper {
     display: inline-block;
-    padding-bottom: 1px;
+    padding-bottom: 1.5px;
 }
 
 .info-icon {

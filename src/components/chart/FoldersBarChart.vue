@@ -11,6 +11,8 @@ import {
     Legend,
 } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -120,12 +122,17 @@ const totalUnread = computed(() => {
     if (!folderDistribution.value) return 0;
     return folderDistribution.value.reduce((sum, folder) => sum + folder.unread, 0);
 });
+
+const chartInfo = CHART_DESCRIPTIONS.folders;
 </script>
 
 <template>
     <div class="chart-wrapper">
         <div class="chart-header">
-            <h2 class="chart-title">Распределение по папкам</h2>
+            <div class="header-top">
+                <h2 class="chart-title">Распределение по папкам</h2>
+                <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+            </div>
             <div class="stats-summary">
                 <div class="stat-item">
                     <span class="stat-label">Папок:</span>
@@ -163,11 +170,19 @@ const totalUnread = computed(() => {
     margin-bottom: 25px;
 }
 
+.header-top {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
 .chart-title {
     font-size: 24px;
     color: #ffffff;
-    margin: 0 0 20px 0;
-    text-align: center;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .stats-summary {
@@ -230,6 +245,10 @@ const totalUnread = computed(() => {
 @media (max-width: 750px) {
     .chart-wrapper {
         padding: 20px;
+    }
+
+    .header-top {
+        flex-wrap: wrap;
     }
 
     .stats-summary {
