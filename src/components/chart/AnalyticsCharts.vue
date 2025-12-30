@@ -106,12 +106,6 @@ import CorrelationMatrixChart from '@/components/chart/CorrelationMatrixChart.vu
     transition: all 0.3s ease;
 }
 
-.chart-section:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    border-color: rgba(52, 152, 219, 0.3);
-}
-
 /* Ряд с двумя графиками */
 .charts-row {
     display: grid;

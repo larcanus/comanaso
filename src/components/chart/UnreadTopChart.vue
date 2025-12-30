@@ -130,8 +130,8 @@ const chartInfo = CHART_DESCRIPTIONS.topUnread;
 
 .chart-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center;
+    align-items: end;
     margin-bottom: 20px;
     gap: 10px;
 }
@@ -140,6 +140,8 @@ const chartInfo = CHART_DESCRIPTIONS.topUnread;
     color: #e3e2e2;
     font-size: 24px;
     margin: 0;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .chart-wrapper {
