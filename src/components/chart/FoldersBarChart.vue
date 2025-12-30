@@ -262,5 +262,10 @@ const chartInfo = CHART_DESCRIPTIONS.folders;
     .chart-canvas {
         height: 350px;
     }
+
+    .chart-title {
+        font-size: 18px;
+        line-height: 1.4;
+    }
 }
 </style>

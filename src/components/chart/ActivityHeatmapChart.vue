@@ -98,7 +98,6 @@ const chartInfo = CHART_DESCRIPTIONS.activityHeatmap;
         </div>
 
         <div v-else class="no-data">
-            <i class="fas fa-chart-area"></i>
             <p>Недостаточно данных для построения карты активности</p>
         </div>
     </div>
@@ -265,6 +264,7 @@ const chartInfo = CHART_DESCRIPTIONS.activityHeatmap;
 @media (max-width: 768px) {
     .chart-title {
         font-size: 18px;
+        line-height: 1.4;
     }
 
     .chart-subtitle {

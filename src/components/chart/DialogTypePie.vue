@@ -139,5 +139,10 @@ const chartInfo = CHART_DESCRIPTIONS.dialogTypes;
     .chart-description p {
         font-size: 14px;
     }
+
+    .section-title {
+        font-size: 18px;
+        line-height: 1.4;
+    }
 }
 </style>

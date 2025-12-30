@@ -13,6 +13,8 @@ import {
     Filler,
 } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(
     CategoryScale,
@@ -117,19 +119,22 @@ const chartOptions = {
         intersect: false,
     },
 };
+
+const chartInfo = CHART_DESCRIPTIONS.groupsAge;
 </script>
 
 <template>
     <div class="chart-wrapper">
-        <h3 class="chart-title">
-            <i class="fas fa-calendar-alt"></i>
-            Активность сообществ по годам
-        </h3>
+        <div class="chart-header">
+            <div class="title-row">
+                <h3 class="chart-title">Активность сообществ по годам</h3>
+                <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+            </div>
+        </div>
         <div v-if="groupsAgeTimeline.total > 0" class="chart-container">
             <Line :data="chartData" :options="chartOptions" />
         </div>
         <div v-else class="no-data">
-            <i class="fas fa-history"></i>
             <p>Нет данных о датах создания сообществ</p>
         </div>
         <div class="chart-info">
@@ -154,18 +159,23 @@ const chartOptions = {
     width: 100%;
 }
 
-.chart-title {
-    color: #ecf0f1;
-    font-size: 20px;
-    font-weight: 600;
+.chart-header {
     margin-bottom: 20px;
+}
+
+.title-row {
     display: flex;
-    align-items: center;
+    justify-content: center;
+    align-items: end;
     gap: 10px;
 }
 
-.chart-title i {
-    color: #3498db;
+.chart-title {
+    color: #e3e2e2;
+    font-size: 24px;
+    text-align: center;
+    line-height: 1.2;
+    margin: 0;
 }
 
 .chart-container {
@@ -178,12 +188,6 @@ const chartOptions = {
     text-align: center;
     padding: 60px 20px;
     color: #7f8c8d;
-}
-
-.no-data i {
-    font-size: 48px;
-    margin-bottom: 15px;
-    opacity: 0.5;
 }
 
 .no-data p {
@@ -228,6 +232,11 @@ const chartOptions = {
 
     .chart-title {
         font-size: 18px;
+        line-height: 1.4;
+    }
+
+    .title-row {
+        flex-wrap: wrap;
     }
 
     .chart-info {

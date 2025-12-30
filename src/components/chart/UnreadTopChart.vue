@@ -181,5 +181,10 @@ const chartInfo = CHART_DESCRIPTIONS.topUnread;
     .chart-canvas {
         height: 400px;
     }
+
+    .section-title {
+        font-size: 18px;
+        line-height: 1.4;
+    }
 }
 </style>

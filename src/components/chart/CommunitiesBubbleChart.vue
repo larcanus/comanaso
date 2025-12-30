@@ -3,6 +3,8 @@ import { computed } from 'vue';
 import { Bubble } from 'vue-chartjs';
 import { Chart as ChartJS, LinearScale, PointElement, Tooltip, Legend } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
 
@@ -130,13 +132,16 @@ const summary = computed(() => {
     return `${total} сообществ. Средний размер: ${Math.round(avgParticipants)} участников. Средняя неактивность: ${Math.round(avgInactive)} дней`;
 });
 
-// Функция getPointColor больше не используется, цвета заданы в datasets
+const chartInfo = CHART_DESCRIPTIONS.communities;
 </script>
 
 <template>
     <div class="communities-bubble-chart">
         <div class="chart-header">
             <h3 class="chart-title">Сообщества: Размер vs Активность</h3>
+            <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+        </div>
+        <div class="chart-subtitle">
             <p class="chart-description">{{ summary }}</p>
         </div>
 
@@ -173,27 +178,32 @@ const summary = computed(() => {
 }
 
 .chart-header {
-    margin-bottom: 20px;
-}
-
-.chart-title {
-    color: #ecf0f1;
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 8px 0;
     display: flex;
-    align-items: center;
+    justify-content: center;
+    align-items: end;
+    margin-bottom: 20px;
     gap: 10px;
 }
 
-.icon {
+.chart-title {
+    color: #e3e2e2;
     font-size: 24px;
+    text-align: center;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.chart-subtitle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
 .chart-description {
     color: #95a5a6;
     font-size: 14px;
     margin: 0;
+    text-align: center;
 }
 
 .chart-container {
@@ -211,9 +221,13 @@ const summary = computed(() => {
     gap: 15px;
 }
 
-.no-data .icon {
+.no-data i {
     font-size: 48px;
     opacity: 0.5;
+}
+
+.no-data p {
+    font-size: 16px;
 }
 
 .chart-legend-info {
@@ -254,6 +268,11 @@ const summary = computed(() => {
 
     .chart-title {
         font-size: 18px;
+        line-height: 1.4;
+    }
+
+    .chart-description {
+        font-size: 13px;
     }
 
     .legend-note {

@@ -75,9 +75,9 @@ function closeModal() {
 
 @media (max-width: 768px) {
     .info-icon {
-        width: 19px;
-        height: 19px;
-        font-size: 11px;
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
     }
 }
 </style>

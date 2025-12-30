@@ -125,8 +125,8 @@ const chartInfo = CHART_DESCRIPTIONS.notifications;
 
 .chart-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center;
+    align-items: end;
     margin-bottom: 20px;
     gap: 10px;
 }
@@ -135,6 +135,8 @@ const chartInfo = CHART_DESCRIPTIONS.notifications;
     color: #e3e2e2;
     font-size: 24px;
     margin: 0;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .chart-wrapper {
@@ -155,6 +157,10 @@ const chartInfo = CHART_DESCRIPTIONS.notifications;
 
     .chart-canvas {
         height: 300px;
+    }
+    .section-title {
+        font-size: 18px;
+        line-height: 1.4;
     }
 }
 </style>

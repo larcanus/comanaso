@@ -11,6 +11,8 @@ import {
     Legend,
 } from 'chart.js';
 import { useDialogAnalytics } from '@/composables/useDialogAnalytics.js';
+import ChartInfoButton from '@/components/common/ChartInfoButton.vue';
+import { CHART_DESCRIPTIONS } from '@/constants/chartDescriptions.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -48,7 +50,7 @@ const chartData = computed(() => {
 const isMobile = window.innerWidth <= 410;
 
 const chartOptions = {
-    indexAxis: 'y', // Горизонтальная воронка
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -157,12 +159,17 @@ const dropoffStats = computed(() => {
         },
     ];
 });
+
+const chartInfo = CHART_DESCRIPTIONS.funnel;
 </script>
 
 <template>
     <div class="chart-wrapper">
         <div class="chart-header">
-            <h2 class="chart-title">Воронка прочтения</h2>
+            <div class="title-row">
+                <h2 class="chart-title">Воронка прочтения</h2>
+                <ChartInfoButton :title="chartInfo.title" :description="chartInfo.description" />
+            </div>
             <div class="stats-summary">
                 <div class="stat-item">
                     <span class="stat-label">Общая конверсия:</span>
@@ -183,7 +190,6 @@ const dropoffStats = computed(() => {
             <Bar :data="chartData" :options="chartOptions" />
         </div>
 
-        <!-- Детальная статистика по этапам -->
         <div v-if="dropoffStats.length > 0" class="dropoff-details">
             <h3 class="details-title">Детализация по этапам:</h3>
             <div class="dropoff-list">
@@ -214,11 +220,20 @@ const dropoffStats = computed(() => {
     margin-bottom: 25px;
 }
 
+.title-row {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
 .chart-title {
     font-size: 24px;
     color: #ffffff;
-    margin: 0 0 20px 0;
+    margin: 0;
     text-align: center;
+    line-height: 1.2;
 }
 
 .stats-summary {
@@ -248,7 +263,6 @@ const dropoffStats = computed(() => {
     color: #3498db;
 }
 
-/* Адаптивность для мобильных */
 @media (max-width: 410px) {
     .chart-wrapper {
         padding: 15px;
@@ -256,7 +270,10 @@ const dropoffStats = computed(() => {
 
     .chart-title {
         font-size: 18px;
-        margin-bottom: 15px;
+    }
+
+    .title-row {
+        flex-wrap: wrap;
     }
 
     .stats-summary {
@@ -387,6 +404,11 @@ const dropoffStats = computed(() => {
 
     .chart-canvas {
         height: 300px;
+    }
+
+    .chart-title {
+        font-size: 18px;
+        line-height: 1.4;
     }
 }
 </style>

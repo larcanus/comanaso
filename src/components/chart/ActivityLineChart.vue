@@ -229,5 +229,10 @@ const chartInfo = CHART_DESCRIPTIONS.activity;
     .chart-canvas {
         height: 300px;
     }
+
+    .section-title {
+        font-size: 18px;
+        line-height: 1.4;
+    }
 }
 </style>
