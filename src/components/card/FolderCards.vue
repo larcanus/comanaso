@@ -227,10 +227,5 @@ function closePopup() {
     .folder-header h3 {
         font-size: 16px;
     }
-
-    .folder-count {
-        font-size: 12px;
-        padding: 3px 8px;
-    }
 }
 </style>
