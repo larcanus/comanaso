@@ -2,6 +2,7 @@
 import { nextTick, ref, useTemplateRef } from 'vue';
 import { Controller } from '@/components/form/login/controller.js';
 import { useRouter } from 'vue-router';
+import { validateLogin, validatePassword, validateName } from '@/utils/validators.js';
 
 const controller = new Controller();
 const router = useRouter();
@@ -181,28 +182,25 @@ async function onClickTooltipBig() {
 }
 
 function checkValidInputs() {
+    let isValid = true;
+
     // Валидация логина
-    if (!/^[а-яА-ЯёЁa-zA-Z0-9]+$/.test(state.value.loginValue)) {
-        state.value.messageInputLoginValidError = 'Login must include letters or numbers';
+    const loginValidation = validateLogin(state.value.loginValue);
+    if (!loginValidation.isValid) {
+        state.value.messageInputLoginValidError = loginValidation.error;
         state.value.isErrorValidInputLogin = true;
-    } else if (state.value.loginValue.length < 3) {
-        state.value.messageInputLoginValidError = 'Login should be at least 3 symbols';
-        state.value.isErrorValidInputLogin = true;
-    } else if (state.value.loginValue.length > 50) {
-        state.value.messageInputLoginValidError = 'Login should be maximum 50 symbols';
-        state.value.isErrorValidInputLogin = true;
+        isValid = false;
     } else {
         state.value.messageInputLoginValidError = '';
         state.value.isErrorValidInputLogin = false;
     }
 
-    // Валидация пароля (минимум 6 символов по новому API)
-    if (!/^[a-zA-Z0-9]*$/.test(state.value.passwordValue)) {
-        state.value.messageInputPSWValidError = 'Password must include only letters and numbers';
+    // Валидация пароля
+    const passwordValidation = validatePassword(state.value.passwordValue);
+    if (!passwordValidation.isValid) {
+        state.value.messageInputPSWValidError = passwordValidation.error;
         state.value.isErrorValidInputPsw = true;
-    } else if (state.value.passwordValue.length < 6) {
-        state.value.messageInputPSWValidError = 'Password should be at least 6 symbols';
-        state.value.isErrorValidInputPsw = true;
+        isValid = false;
     } else {
         state.value.messageInputPSWValidError = '';
         state.value.isErrorValidInputPsw = false;
@@ -210,25 +208,18 @@ function checkValidInputs() {
 
     // Валидация имени (только для регистрации)
     if (state.value.isRegister) {
-        if (!/^[а-яА-ЯёЁa-zA-Z0-9\s]+$/.test(state.value.nameValue)) {
-            state.value.messageInputNameValidError = 'Name must include letters, numbers or spaces';
+        const nameValidation = validateName(state.value.nameValue);
+        if (!nameValidation.isValid) {
+            state.value.messageInputNameValidError = nameValidation.error;
             state.value.isErrorValidInputName = true;
-        } else if (state.value.nameValue.length < 2) {
-            state.value.messageInputNameValidError = 'Name should be at least 2 symbols';
-            state.value.isErrorValidInputName = true;
+            isValid = false;
         } else {
             state.value.messageInputNameValidError = '';
             state.value.isErrorValidInputName = false;
         }
-
-        return !(
-            state.value.isErrorValidInputLogin ||
-            state.value.isErrorValidInputPsw ||
-            state.value.isErrorValidInputName
-        );
     }
 
-    return !(state.value.isErrorValidInputLogin || state.value.isErrorValidInputPsw);
+    return isValid;
 }
 
 function hiddenTooltip() {

@@ -8,6 +8,7 @@ import { logoutAllStore } from '@/store/storeController.js';
 import { useToastStore } from '@/store/toast.js';
 import { useAccountStore } from '@/store/account.js';
 import { useAuthStore } from '@/store/auth.js';
+import { validateUsername, validateEmail, validatePassword } from '@/utils/validators.js';
 
 const router = useRouter();
 const toastStore = useToastStore();
@@ -18,6 +19,7 @@ const showDeleteConfirm = ref(false);
 const showActiveAccountsWarning = ref(false);
 const isDeleting = ref(false);
 const isSavingPrivacy = ref(false);
+const isSavingAccount = ref(false);
 const isLoadingSettings = ref(true);
 
 // Локальные копии настроек приватности для редактирования
@@ -28,17 +30,50 @@ const localPrivacySettings = ref({
     shareDialogTitles: true,
 });
 
+// Локальные копии основных данных учетной записи
+const originalAccountData = ref({
+    username: '',
+    email: '',
+});
+
+const localAccountData = ref({
+    username: '',
+    email: '',
+    password: '', // Новый пароль (опционально)
+});
+
+// Ошибки валидации для полей учетной записи
+const validationErrors = ref({
+    username: '',
+    email: '',
+    password: '',
+});
+
 // Загрузка данных пользователя с сервера
 const loadUserSettings = async () => {
     isLoadingSettings.value = true;
     try {
         const userData = await authService.getCurrentUser();
 
-        // Обновляем локальные настройки из данных пользователя
+        // Сохраняем данные пользователя в store
+        authStore.setUser(userData);
+
+        // Обновляем локальные настройки приватности
         if (userData.settings) {
             localPrivacySettings.value = { ...userData.settings };
-            authStore.setAiPrivacySettings(userData.settings);
         }
+
+        // Обновляем основные данные учетной записи
+        originalAccountData.value = {
+            username: userData.username || '',
+            email: userData.email || '',
+        };
+
+        localAccountData.value = {
+            username: userData.username || '',
+            email: userData.email || '',
+            password: '',
+        };
     } catch (error) {
         console.error('Load user settings error:', error);
         toastStore.addToast('error', error.userMessage || 'Не удалось загрузить настройки');
@@ -47,12 +82,21 @@ const loadUserSettings = async () => {
     }
 };
 
-// Инициализация настроек из store (запасной вариант)
+// Инициализация настроек приватности из store (запасной вариант)
 const initPrivacySettings = () => {
     const settings = authStore.aiPrivacySettings;
     if (settings) {
         localPrivacySettings.value = { ...settings };
     }
+};
+
+// Инициализация основных данных учетной записи (отмена изменений)
+const initAccountData = () => {
+    localAccountData.value = {
+        username: originalAccountData.value.username,
+        email: originalAccountData.value.email,
+        password: '',
+    };
 };
 
 // Загружаем актуальные данные при монтировании компонента
@@ -85,6 +129,15 @@ const hasPrivacyChanges = computed(() => {
         localPrivacySettings.value.shareNickname !== current.shareNickname ||
         localPrivacySettings.value.shareMessageText !== current.shareMessageText ||
         localPrivacySettings.value.shareDialogTitles !== current.shareDialogTitles
+    );
+});
+
+// Проверка изменений в основных данных учетной записи
+const hasAccountChanges = computed(() => {
+    return (
+        localAccountData.value.username !== originalAccountData.value.username ||
+        localAccountData.value.email !== originalAccountData.value.email ||
+        localAccountData.value.password.length > 0
     );
 });
 
@@ -164,6 +217,110 @@ async function savePrivacySettings() {
 function cancelPrivacyChanges() {
     initPrivacySettings();
 }
+
+async function saveAccountSettings() {
+    if (isSavingAccount.value) return;
+
+    // Сбрасываем предыдущие ошибки валидации
+    validationErrors.value = {
+        username: '',
+        email: '',
+        password: '',
+    };
+
+    // Валидация полей
+    let hasValidationError = false;
+
+    // Валидируем username, если он изменился
+    if (localAccountData.value.username !== originalAccountData.value.username) {
+        const usernameValidation = validateUsername(localAccountData.value.username);
+        if (!usernameValidation.isValid) {
+            validationErrors.value.username = usernameValidation.error;
+            hasValidationError = true;
+        }
+    }
+
+    // Валидируем email, если он изменился
+    if (localAccountData.value.email !== originalAccountData.value.email) {
+        const emailValidation = validateEmail(localAccountData.value.email);
+        if (!emailValidation.isValid) {
+            validationErrors.value.email = emailValidation.error;
+            hasValidationError = true;
+        }
+    }
+
+    // Валидируем пароль, если он заполнен (опциональная валидация)
+    if (localAccountData.value.password.length > 0) {
+        const passwordValidation = validatePassword(localAccountData.value.password, true);
+        if (!passwordValidation.isValid) {
+            validationErrors.value.password = passwordValidation.error;
+            hasValidationError = true;
+        }
+    }
+
+    // Если есть ошибки валидации, не отправляем запрос
+    if (hasValidationError) {
+        toastStore.addToast('error', 'Пожалуйста, исправьте ошибки в форме');
+        return;
+    }
+
+    isSavingAccount.value = true;
+
+    try {
+        // Формируем объект с обновлениями (только измененные поля)
+        const updates = {};
+
+        if (localAccountData.value.username !== originalAccountData.value.username) {
+            updates.username = localAccountData.value.username;
+        }
+
+        if (localAccountData.value.email !== originalAccountData.value.email) {
+            updates.email = localAccountData.value.email;
+        }
+
+        if (localAccountData.value.password.length > 0) {
+            updates.password = localAccountData.value.password;
+        }
+
+        // Проверяем, есть ли изменения
+        if (Object.keys(updates).length === 0) {
+            toastStore.addToast('info', 'Нет изменений для сохранения');
+            return;
+        }
+
+        // Отправляем запрос на обновление
+        const updatedUser = await authService.updateUserSettings(updates);
+
+        // Обновляем исходные данные
+        originalAccountData.value = {
+            username: updatedUser.username || '',
+            email: updatedUser.email || '',
+        };
+
+        // Обновляем данные пользователя в auth store
+        authStore.setUser(updatedUser);
+
+        // Очищаем поле пароля
+        localAccountData.value.password = '';
+
+        toastStore.addToast('ok', 'Данные учетной записи обновлены');
+    } catch (error) {
+        console.error('Save account settings error:', error);
+        toastStore.addToast('error', error.userMessage || 'Ошибка сохранения данных');
+    } finally {
+        isSavingAccount.value = false;
+    }
+}
+
+function cancelAccountChanges() {
+    initAccountData();
+    // Сбрасываем ошибки валидации
+    validationErrors.value = {
+        username: '',
+        email: '',
+        password: '',
+    };
+}
 </script>
 
 <template>
@@ -180,8 +337,8 @@ function cancelPrivacyChanges() {
             <section class="settings-section">
                 <h2 class="section-title">Настройки AI-анализа</h2>
                 <p class="section-description">
-                    Управляйте данными, которые передаются для AI-анализа. Отключение некоторых
-                    опций может снизить качество аналитики.
+                    Управляйте данными, которые передаются для AI-анализа. Отключение некоторых опций
+                    может снизить качество аналитики.
                 </p>
 
                 <div class="settings-list">
@@ -190,8 +347,7 @@ function cancelPrivacyChanges() {
                         <div class="setting-info">
                             <h3>Имя профиля</h3>
                             <p class="setting-description">
-                                Передавать имя и фамилию из профиля Telegram для персонализации
-                                анализа
+                                Передавать имя и фамилию из профиля Telegram для персонализации анализа
                             </p>
                         </div>
                         <label class="toggle-switch">
@@ -227,8 +383,8 @@ function cancelPrivacyChanges() {
                         <div class="setting-info">
                             <h3>Содержимое сообщений</h3>
                             <p class="setting-description">
-                                Передавать текст последних сообщений из диалогов для глубокого
-                                анализа контекста
+                                Передавать текст последних сообщений из диалогов для глубокого анализа
+                                контекста
                             </p>
                         </div>
                         <label class="toggle-switch">
@@ -269,11 +425,7 @@ function cancelPrivacyChanges() {
                     >
                         Отменить
                     </button>
-                    <button
-                        class="btn-save"
-                        :disabled="isSavingPrivacy"
-                        @click="savePrivacySettings"
-                    >
+                    <button class="btn-save" :disabled="isSavingPrivacy" @click="savePrivacySettings">
                         {{ isSavingPrivacy ? 'Сохранение...' : 'Сохранить изменения' }}
                     </button>
                 </div>
@@ -282,8 +434,85 @@ function cancelPrivacyChanges() {
             <!-- Раздел: Учетная запись -->
             <section class="settings-section">
                 <h2 class="section-title">Учетная запись</h2>
+                <p class="section-description">
+                    Управление основными данными вашей учетной записи
+                </p>
 
+                <!-- Форма редактирования данных учетной записи -->
+                <div class="account-form">
+                    <!-- Поле Username -->
+                    <div class="form-group">
+                        <label for="username" class="form-label">Имя пользователя</label>
+                        <input
+                            id="username"
+                            v-model="localAccountData.username"
+                            type="text"
+                            class="form-input"
+                            :class="{ 'input-error': validationErrors.username }"
+                            placeholder="Введите имя пользователя"
+                            :disabled="isSavingAccount"
+                        />
+                        <p v-if="validationErrors.username" class="form-error">
+                            {{ validationErrors.username }}
+                        </p>
+                        <p v-else class="form-hint">3-100 символов</p>
+                    </div>
+
+                    <!-- Поле Email -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input
+                            id="email"
+                            v-model="localAccountData.email"
+                            type="email"
+                            class="form-input"
+                            :class="{ 'input-error': validationErrors.email }"
+                            placeholder="Введите email"
+                            :disabled="isSavingAccount"
+                        />
+                        <p v-if="validationErrors.email" class="form-error">
+                            {{ validationErrors.email }}
+                        </p>
+                        <p v-else class="form-hint">Будет использоваться для восстановления доступа</p>
+                    </div>
+
+                    <!-- Поле Password -->
+                    <div class="form-group">
+                        <label for="password" class="form-label">Новый пароль</label>
+                        <input
+                            id="password"
+                            v-model="localAccountData.password"
+                            type="password"
+                            class="form-input"
+                            :class="{ 'input-error': validationErrors.password }"
+                            placeholder="Оставьте пустым, если не хотите менять"
+                            :disabled="isSavingAccount"
+                            autocomplete="new-password"
+                        />
+                        <p v-if="validationErrors.password" class="form-error">
+                            {{ validationErrors.password }}
+                        </p>
+                        <p v-else class="form-hint">Заполните только если хотите изменить пароль</p>
+                    </div>
+                </div>
+
+                <!-- Кнопки сохранения/отмены для основных данных -->
+                <div v-if="hasAccountChanges" class="account-actions">
+                    <button
+                        class="btn-cancel"
+                        :disabled="isSavingAccount"
+                        @click="cancelAccountChanges"
+                    >
+                        Отменить
+                    </button>
+                    <button class="btn-save" :disabled="isSavingAccount" @click="saveAccountSettings">
+                        {{ isSavingAccount ? 'Сохранение...' : 'Сохранить изменения' }}
+                    </button>
+                </div>
+
+                <!-- Зона удаления учетной записи -->
                 <div class="danger-zone">
+                    <h3 class="danger-title">Опасная зона</h3>
                     <div class="item-info">
                         <p class="item-description">
                             Безвозвратное удаление вашей учетной записи и всех связанных данных. Это
@@ -466,6 +695,77 @@ h1 {
     border-top: 1px solid var(--color-border);
 }
 
+/* Account Form */
+.account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-heading);
+}
+
+.form-input {
+    padding: 12px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--vt-bt-background-color);
+}
+
+.form-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form-hint {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.form-error {
+    font-size: 13px;
+    color: #ff4444;
+    margin: 0;
+    margin-top: 4px;
+}
+
+.input-error {
+    border-color: #ff4444 !important;
+}
+
+.input-error:focus {
+    outline: 2px solid rgba(255, 68, 68, 0.3);
+}
+
+/* Account Actions */
+.account-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--color-border);
+}
+
 .btn-save,
 .btn-cancel {
     padding: 10px 20px;
@@ -508,6 +808,13 @@ h1 {
     background-color: var(--color-background);
     border: 1px solid #dc3545;
     border-radius: 6px;
+}
+
+.danger-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #dc3545;
+    margin: 0 0 15px 0;
 }
 
 .item-info h3 {
@@ -581,7 +888,8 @@ h1 {
         align-self: flex-end;
     }
 
-    .privacy-actions {
+    .privacy-actions,
+    .account-actions {
         flex-direction: column;
     }
 
@@ -614,6 +922,19 @@ h1 {
 
     .warning-text {
         font-size: 12px;
+    }
+
+    .form-label {
+        font-size: 13px;
+    }
+
+    .form-input {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+
+    .form-hint {
+        font-size: 11px;
     }
 }
 </style>

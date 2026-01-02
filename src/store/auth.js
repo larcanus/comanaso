@@ -24,6 +24,10 @@ export const useAuthStore = defineStore('auth', () => {
 
     function setUser(userData) {
         user.value = userData;
+
+        if (userData && userData.settings) {
+            setAiPrivacySettings(userData.settings);
+        }
     }
 
     function setAuthData(data) {
@@ -114,7 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Getters (computed)
     const userId = computed(() => user.value?.id || null);
     const userLogin = computed(() => user.value?.login || null);
-    const userName = computed(() => user.value?.name || null);
+    const userName = computed(() => user.value?.username || null);
     const isAuthenticated = computed(() => isAuth.value);
 
     return {
