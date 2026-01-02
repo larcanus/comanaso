@@ -99,6 +99,108 @@ export class AuthService {
     // }
 
     /**
+     * Получение данных текущего пользователя
+     * @returns {Promise<Object>} Данные пользователя с настройками
+     */
+    async getCurrentUser() {
+        try {
+            const data = await apiService.authRequest('/auth/me', {
+                method: 'GET',
+            });
+
+            // Нормализуем настройки, если они есть
+            if (data.settings) {
+                data.settings = this.normalizeAiPrivacySettings(data.settings);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('getCurrentUser error', error);
+
+            if (error.error === 'UNAUTHORIZED') {
+                throw {
+                    ...error,
+                    userMessage: 'Требуется авторизация',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Не удалось загрузить данные пользователя',
+            };
+        }
+    }
+
+    /**
+     * Обновление данных пользователя (включая настройки приватности)
+     * @param {Object} updates - Объект с обновлениями
+     * @param {string} [updates.username] - Новое имя пользователя
+     * @param {string} [updates.email] - Новый email
+     * @param {Object} [updates.settings] - Настройки приватности AI
+     * @returns {Promise<Object>} Обновленные данные пользователя
+     */
+    async updateUserSettings(updates) {
+        try {
+            const data = await apiService.authRequest('/auth/me', {
+                method: 'PATCH',
+                body: JSON.stringify(updates),
+            });
+
+            // Нормализуем настройки в ответе
+            if (data.settings) {
+                data.settings = this.normalizeAiPrivacySettings(data.settings);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('updateUserSettings error', error);
+
+            // Преобразуем ошибки API в понятные сообщения
+            if (error.error === 'UNAUTHORIZED') {
+                throw {
+                    ...error,
+                    userMessage: 'Требуется авторизация',
+                };
+            }
+
+            if (error.error === 'USERNAME_EXISTS') {
+                throw {
+                    ...error,
+                    userMessage: 'Пользователь с таким именем уже существует',
+                };
+            }
+
+            if (error.error === 'EMAIL_EXISTS') {
+                throw {
+                    ...error,
+                    userMessage: 'Пользователь с таким email уже существует',
+                };
+            }
+
+            if (error.error === 'VALIDATION_ERROR') {
+                throw {
+                    ...error,
+                    userMessage: 'Неверный формат данных',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Не удалось обновить данные пользователя',
+            };
+        }
+    }
+
+    /**
+     * Обновление настроек приватности AI (обертка для updateUserSettings)
+     * @param {Object} settings - Новые настройки приватности
+     * @returns {Promise<Object>} Результат обновления
+     */
+    async updateAiPrivacySettings(settings) {
+        return this.updateUserSettings({ settings });
+    }
+
+    /**
      * Выход из системы
      * @returns {Promise<Object>} Результат выхода
      */
@@ -163,41 +265,6 @@ export class AuthService {
             throw {
                 ...error,
                 userMessage: error.message || 'Ошибка при удалении учетной записи',
-            };
-        }
-    }
-
-    /**
-     * Обновление настроек приватности AI
-     * @param {Object} settings - Новые настройки приватности
-     * @returns {Promise<Object>} Результат обновления
-     */
-    async updateAiPrivacySettings(settings) {
-        try {
-            // TODO: Реализовать запрос на сервер после создания endpoint
-            // const data = await apiService.authRequest('/auth/ai-privacy-settings', {
-            //     method: 'PUT',
-            //     body: JSON.stringify(settings),
-            // });
-
-            // Временная заглушка - имитация успешного ответа
-            console.log('[AuthService] Обновление настроек AI (заглушка):', settings);
-
-            await new Promise(resolve => setTimeout(resolve, 500)); // Имитация задержки сети
-
-            return {
-                ok: true,
-                data: {
-                    message: 'Настройки приватности успешно обновлены',
-                    settings: this.normalizeAiPrivacySettings(settings),
-                },
-            };
-        } catch (error) {
-            console.error('updateAiPrivacySettings error', error);
-
-            throw {
-                ...error,
-                userMessage: error.message || 'Не удалось обновить настройки приватности',
             };
         }
     }

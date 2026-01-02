@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Confirm from '@/components/modal/Confirm.vue';
 import DetailPopup from '@/components/modal/DetailPopup.vue';
@@ -18,6 +18,7 @@ const showDeleteConfirm = ref(false);
 const showActiveAccountsWarning = ref(false);
 const isDeleting = ref(false);
 const isSavingPrivacy = ref(false);
+const isLoadingSettings = ref(true);
 
 // Локальные копии настроек приватности для редактирования
 const localPrivacySettings = ref({
@@ -27,7 +28,26 @@ const localPrivacySettings = ref({
     shareDialogTitles: true,
 });
 
-// Инициализация настроек из store
+// Загрузка данных пользователя с сервера
+const loadUserSettings = async () => {
+    isLoadingSettings.value = true;
+    try {
+        const userData = await authService.getCurrentUser();
+
+        // Обновляем локальные настройки из данных пользователя
+        if (userData.settings) {
+            localPrivacySettings.value = { ...userData.settings };
+            authStore.setAiPrivacySettings(userData.settings);
+        }
+    } catch (error) {
+        console.error('Load user settings error:', error);
+        toastStore.addToast('error', error.userMessage || 'Не удалось загрузить настройки');
+    } finally {
+        isLoadingSettings.value = false;
+    }
+};
+
+// Инициализация настроек из store (запасной вариант)
 const initPrivacySettings = () => {
     const settings = authStore.aiPrivacySettings;
     if (settings) {
@@ -35,8 +55,10 @@ const initPrivacySettings = () => {
     }
 };
 
-// Инициализируем при загрузке
-initPrivacySettings();
+// Загружаем актуальные данные при монтировании компонента
+onMounted(() => {
+    loadUserSettings();
+});
 
 // Проверка наличия активных аккаунтов
 const hasActiveAccounts = computed(() => {
@@ -122,8 +144,14 @@ async function savePrivacySettings() {
     isSavingPrivacy.value = true;
 
     try {
-        await authService.updateAiPrivacySettings(localPrivacySettings.value);
-        authStore.setAiPrivacySettings(localPrivacySettings.value);
+        // Отправляем только настройки приватности
+        const updatedUser = await authService.updateAiPrivacySettings(localPrivacySettings.value);
+
+        // Обновляем store с актуальными настройками
+        if (updatedUser.settings) {
+            authStore.setAiPrivacySettings(updatedUser.settings);
+        }
+
         toastStore.addToast('ok', 'Настройки приватности сохранены');
     } catch (error) {
         console.error('Save privacy settings error:', error);
@@ -142,123 +170,135 @@ function cancelPrivacyChanges() {
     <div class="view-container">
         <h1>Настройки</h1>
 
-        <!-- Раздел: Настройки AI-анализа -->
-        <section class="settings-section">
-            <h2 class="section-title">Настройки AI-анализа</h2>
-            <p class="section-description">
-                Управляйте данными, которые передаются для AI-анализа. Отключение некоторых опций
-                может снизить качество аналитики.
-            </p>
+        <!-- Индикатор загрузки -->
+        <div v-if="isLoadingSettings" class="loading-container">
+            <p>Загрузка настроек...</p>
+        </div>
 
-            <div class="settings-list">
-                <!-- Имя профиля -->
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <h3>Имя профиля</h3>
-                        <p class="setting-description">
-                            Передавать имя и фамилию из профиля Telegram для персонализации анализа
+        <template v-else>
+            <!-- Раздел: Настройки AI-анализа -->
+            <section class="settings-section">
+                <h2 class="section-title">Настройки AI-анализа</h2>
+                <p class="section-description">
+                    Управляйте данными, которые передаются для AI-анализа. Отключение некоторых
+                    опций может снизить качество аналитики.
+                </p>
+
+                <div class="settings-list">
+                    <!-- Имя профиля -->
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Имя профиля</h3>
+                            <p class="setting-description">
+                                Передавать имя и фамилию из профиля Telegram для персонализации
+                                анализа
+                            </p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input
+                                v-model="localPrivacySettings.shareUserName"
+                                type="checkbox"
+                                :disabled="isSavingPrivacy"
+                            />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Username (@никнейм)</h3>
+                            <p class="setting-description">
+                                Передавать ваш @username для идентификации в анализе
+                            </p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input
+                                v-model="localPrivacySettings.shareNickname"
+                                type="checkbox"
+                                :disabled="isSavingPrivacy"
+                            />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Содержимое сообщений -->
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Содержимое сообщений</h3>
+                            <p class="setting-description">
+                                Передавать текст последних сообщений из диалогов для глубокого
+                                анализа контекста
+                            </p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input
+                                v-model="localPrivacySettings.shareMessageText"
+                                type="checkbox"
+                                :disabled="isSavingPrivacy"
+                            />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Названия диалогов -->
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Названия диалогов</h3>
+                            <p class="setting-description">
+                                Передавать названия чатов и групп для анализа структуры общения
+                            </p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input
+                                v-model="localPrivacySettings.shareDialogTitles"
+                                type="checkbox"
+                                :disabled="isSavingPrivacy"
+                            />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Кнопки сохранения/отмены -->
+                <div v-if="hasPrivacyChanges" class="privacy-actions">
+                    <button
+                        class="btn-cancel"
+                        :disabled="isSavingPrivacy"
+                        @click="cancelPrivacyChanges"
+                    >
+                        Отменить
+                    </button>
+                    <button
+                        class="btn-save"
+                        :disabled="isSavingPrivacy"
+                        @click="savePrivacySettings"
+                    >
+                        {{ isSavingPrivacy ? 'Сохранение...' : 'Сохранить изменения' }}
+                    </button>
+                </div>
+            </section>
+
+            <!-- Раздел: Учетная запись -->
+            <section class="settings-section">
+                <h2 class="section-title">Учетная запись</h2>
+
+                <div class="danger-zone">
+                    <div class="item-info">
+                        <p class="item-description">
+                            Безвозвратное удаление вашей учетной записи и всех связанных данных. Это
+                            действие нельзя отменить.
+                        </p>
+                        <p v-if="hasActiveAccounts" class="warning-text">
+                            ⚠️ Перед удалением необходимо отключить все активные аккаунты
                         </p>
                     </div>
-                    <label class="toggle-switch">
-                        <input
-                            v-model="localPrivacySettings.shareUserName"
-                            type="checkbox"
-                            :disabled="isSavingPrivacy"
-                        />
-                        <span class="toggle-slider"></span>
-                    </label>
+                    <button class="btn-delete" :disabled="isDeleting" @click="openDeleteConfirm">
+                        {{ isDeleting ? 'Удаление...' : 'Удалить учетную запись' }}
+                    </button>
                 </div>
-
-                <!-- Username -->
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <h3>Username (@никнейм)</h3>
-                        <p class="setting-description">
-                            Передавать ваш @username для идентификации в анализе
-                        </p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input
-                            v-model="localPrivacySettings.shareNickname"
-                            type="checkbox"
-                            :disabled="isSavingPrivacy"
-                        />
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <!-- Содержимое сообщений -->
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <h3>Содержимое сообщений</h3>
-                        <p class="setting-description">
-                            Передавать текст последних сообщений из диалогов для глубокого анализа
-                            контекста
-                        </p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input
-                            v-model="localPrivacySettings.shareMessageText"
-                            type="checkbox"
-                            :disabled="isSavingPrivacy"
-                        />
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <!-- Названия диалогов -->
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <h3>Названия диалогов</h3>
-                        <p class="setting-description">
-                            Передавать названия чатов и групп для анализа структуры общения
-                        </p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input
-                            v-model="localPrivacySettings.shareDialogTitles"
-                            type="checkbox"
-                            :disabled="isSavingPrivacy"
-                        />
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Кнопки сохранения/отмены -->
-            <div v-if="hasPrivacyChanges" class="privacy-actions">
-                <button
-                    class="btn-cancel"
-                    :disabled="isSavingPrivacy"
-                    @click="cancelPrivacyChanges"
-                >
-                    Отменить
-                </button>
-                <button class="btn-save" :disabled="isSavingPrivacy" @click="savePrivacySettings">
-                    {{ isSavingPrivacy ? 'Сохранение...' : 'Сохранить изменения' }}
-                </button>
-            </div>
-        </section>
-
-        <!-- Раздел: Учетная запись -->
-        <section class="settings-section">
-            <h2 class="section-title">Учетная запись</h2>
-
-            <div class="danger-zone">
-                <div class="item-info">
-                    <p class="item-description">
-                        Безвозвратное удаление вашей учетной записи и всех связанных данных. Это
-                        действие нельзя отменить.
-                    </p>
-                    <p v-if="hasActiveAccounts" class="warning-text">
-                        ⚠️ Перед удалением необходимо отключить все активные аккаунты
-                    </p>
-                </div>
-                <button class="btn-delete" :disabled="isDeleting" @click="openDeleteConfirm">
-                    {{ isDeleting ? 'Удаление...' : 'Удалить учетную запись' }}
-                </button>
-            </div>
-        </section>
+            </section>
+        </template>
 
         <!-- Модальное окно подтверждения удаления -->
         <Confirm
@@ -287,6 +327,14 @@ function cancelPrivacyChanges() {
     align-items: center;
     padding: 20px;
     background-color: var(--color-background);
+}
+
+.loading-container {
+    width: 100%;
+    max-width: 800px;
+    padding: 40px;
+    text-align: center;
+    color: var(--color-text);
 }
 
 h1 {
