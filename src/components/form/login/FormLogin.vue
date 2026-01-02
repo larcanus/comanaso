@@ -2,7 +2,7 @@
 import { nextTick, ref, useTemplateRef } from 'vue';
 import { Controller } from '@/components/form/login/controller.js';
 import { useRouter } from 'vue-router';
-import { validateLogin, validatePassword, validateName } from '@/utils/validators.js';
+import { validateLogin, validatePassword, validateEmail } from '@/utils/validators.js';
 
 const controller = new Controller();
 const router = useRouter();
@@ -20,9 +20,9 @@ const props = defineProps({
         type: String,
         default: '\u25c4 Sign'.normalize(),
     },
-    labelNameLoc: {
+    labelEmailLoc: {
         type: String,
-        default: 'Your name',
+        default: 'Email',
     },
     labelLoginLoc: {
         type: String,
@@ -36,7 +36,7 @@ const props = defineProps({
         type: String,
         default: '',
     },
-    placeholderNameLoc: {
+    placeholderEmailLoc: {
         type: String,
         default: '',
     },
@@ -68,22 +68,22 @@ const props = defineProps({
 
 const state = ref({
     isRegister: false,
-    nameValue: '',
+    emailValue: '',
     loginValue: '',
     passwordValue: '',
     isSuccessfulRegistration: false,
-    isErrorValidInputName: false,
+    isErrorValidInputEmail: false,
     isErrorValidInputLogin: false,
     isErrorValidInputPsw: false,
     isErrorLogin: false,
     isErrorRegistration: false,
     messageInputLoginValidError: '',
     messageInputPSWValidError: '',
-    messageInputNameValidError: '',
+    messageInputEmailValidError: '',
     isAllDisabled: false,
     tooltipTimeout: null,
     tooltipBigTimeout: null,
-    apiErrorMessage: '', // Для отображения ошибок API
+    apiErrorMessage: '',
 });
 
 const loginInputRef = useTemplateRef('inputLogin');
@@ -108,7 +108,6 @@ async function onClickSignIn() {
     if (res.ok) {
         await router.push('/main');
     } else {
-        // Используем сообщение об ошибке от API
         state.value.messageLoginError = res.error || props.messageLoginError;
         showLoginError();
     }
@@ -121,7 +120,7 @@ async function onClickCreateAccount() {
     state.value.apiErrorMessage = '';
 
     const res = await controller.sendRestRegistration({
-        name: state.value.nameValue,
+        email: state.value.emailValue,
         login: state.value.loginValue,
         password: state.value.passwordValue,
     });
@@ -129,7 +128,6 @@ async function onClickCreateAccount() {
     if (res.ok) {
         await showRegistrationSuccessful();
     } else {
-        // Используем сообщение об ошибке от API
         state.value.messageRegistrationError = res.error || props.messageRegistrationError;
         showRegistrationError();
     }
@@ -166,8 +164,7 @@ async function showRegistrationSuccessful() {
         state.value.isErrorLogin = false;
         state.value.isErrorRegistration = false;
         state.value.isRegister = false;
-        // Очищаем поля после успешной регистрации
-        state.value.nameValue = '';
+        state.value.emailValue = '';
         state.value.loginValue = '';
         state.value.passwordValue = '';
     }, 2000);
@@ -184,7 +181,6 @@ async function onClickTooltipBig() {
 function checkValidInputs() {
     let isValid = true;
 
-    // Валидация логина
     const loginValidation = validateLogin(state.value.loginValue);
     if (!loginValidation.isValid) {
         state.value.messageInputLoginValidError = loginValidation.error;
@@ -195,7 +191,6 @@ function checkValidInputs() {
         state.value.isErrorValidInputLogin = false;
     }
 
-    // Валидация пароля
     const passwordValidation = validatePassword(state.value.passwordValue);
     if (!passwordValidation.isValid) {
         state.value.messageInputPSWValidError = passwordValidation.error;
@@ -206,16 +201,15 @@ function checkValidInputs() {
         state.value.isErrorValidInputPsw = false;
     }
 
-    // Валидация имени (только для регистрации)
     if (state.value.isRegister) {
-        const nameValidation = validateName(state.value.nameValue);
-        if (!nameValidation.isValid) {
-            state.value.messageInputNameValidError = nameValidation.error;
-            state.value.isErrorValidInputName = true;
+        const emailValidation = validateEmail(state.value.emailValue);
+        if (!emailValidation.isValid) {
+            state.value.messageInputEmailValidError = emailValidation.error;
+            state.value.isErrorValidInputEmail = true;
             isValid = false;
         } else {
-            state.value.messageInputNameValidError = '';
-            state.value.isErrorValidInputName = false;
+            state.value.messageInputEmailValidError = '';
+            state.value.isErrorValidInputEmail = false;
         }
     }
 
@@ -227,12 +221,12 @@ function hiddenTooltip() {
     if (
         state.value.isErrorValidInputLogin ||
         state.value.isErrorValidInputPsw ||
-        state.value.isErrorValidInputName
+        state.value.isErrorValidInputEmail
     ) {
         state.value.tooltipTimeout = setTimeout(() => {
             state.value.isErrorValidInputLogin = false;
             state.value.isErrorValidInputPsw = false;
-            state.value.isErrorValidInputName = false;
+            state.value.isErrorValidInputEmail = false;
         }, 3000);
     }
 }
@@ -249,18 +243,18 @@ function hiddenTooltip() {
                     <h2>{{ state.isRegister ? h2RegLoc : h2LoginLoc }}</h2>
                 </div>
                 <div v-if="state.isRegister" class="input-container">
-                    <label for="inputName">{{ props.labelNameLoc }}</label>
+                    <label for="inputEmail">{{ props.labelEmailLoc }}</label>
                     <input
-                        id="inputName"
-                        ref="inputName"
-                        v-model="state.nameValue"
-                        type="text"
-                        :placeholder="props.placeholderNameLoc"
+                        id="inputEmail"
+                        ref="inputEmail"
+                        v-model="state.emailValue"
+                        type="email"
+                        :placeholder="props.placeholderEmailLoc"
                         :disabled="state.isAllDisabled"
                         required
                     />
-                    <div class="tooltip" :class="{ invalid: state.isErrorValidInputName }">
-                        {{ state.messageInputNameValidError }}
+                    <div class="tooltip" :class="{ invalid: state.isErrorValidInputEmail }">
+                        {{ state.messageInputEmailValidError }}
                     </div>
                     <div
                         class="tooltip tooltipBig"
@@ -337,7 +331,6 @@ function hiddenTooltip() {
 </template>
 
 <style scoped>
-/* Стили остаются без изменений */
 .background-container {
     position: fixed;
     background-color: rgba(47, 46, 46, 0.7);
@@ -402,7 +395,8 @@ p {
 }
 
 .form-container input[type='text'],
-.form-container input[type='password'] {
+.form-container input[type='password'],
+.form-container input[type='email'] {
     width: 100%;
     padding: 10px;
     margin: 10px 0;

@@ -39,13 +39,14 @@ export class Controller {
     /**
      * Регистрация нового пользователя
      * @param {Object} userData - Данные для регистрации
+     * @param {string} userData.email - Email пользователя
      * @param {string} userData.login - Логин пользователя
      * @param {string} userData.password - Пароль пользователя
      * @returns {Promise<Object>} Результат регистрации
      */
-    async sendRestRegistration({ login, password }) {
+    async sendRestRegistration({ email, login, password }) {
         try {
-            const data = await authService.register({ login, password });
+            const data = await authService.register({ email, login, password });
 
             const encryptedToken = await cryptoService.encrypt(data.token);
 
@@ -74,14 +75,13 @@ export class Controller {
      * @param {Object} responseData - Данные от сервера
      */
     async setStoreUserData(responseData) {
-        // Преобразуем данные в формат, ожидаемый store
         const userData = {
             token: responseData.token,
             user: {
                 id: responseData.user?.id,
                 login: responseData.user?.login,
                 name: responseData.user?.login,
-                email: responseData.user?.login,
+                email: responseData.user?.email,
                 createdAt: responseData.user?.createdAt,
             },
         };

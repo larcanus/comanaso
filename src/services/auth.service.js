@@ -7,24 +7,31 @@ export class AuthService {
     /**
      * Регистрация нового пользователя
      * @param {Object} credentials - Данные для регистрации
+     * @param {string} credentials.email - Email пользователя
      * @param {string} credentials.login - Логин пользователя
      * @param {string} credentials.password - Пароль пользователя
      * @returns {Promise<Object>} Данные пользователя и токен
      */
-    async register({ login, password }) {
+    async register({ email, login, password }) {
         try {
             const data = await apiService.request('/auth/register', {
                 method: 'POST',
-                body: JSON.stringify({ login, password }),
+                body: JSON.stringify({ email, login, password }),
             });
 
             return data;
         } catch (error) {
-            // Преобразуем ошибки API в понятные сообщения
             if (error.error === 'USER_EXISTS') {
                 throw {
                     ...error,
                     userMessage: 'Пользователь с таким логином уже существует',
+                };
+            }
+
+            if (error.error === 'EMAIL_EXISTS') {
+                throw {
+                    ...error,
+                    userMessage: 'Пользователь с таким email уже существует',
                 };
             }
 
@@ -53,7 +60,6 @@ export class AuthService {
                 body: JSON.stringify({ login, password }),
             });
 
-            // Нормализуем настройки приватности AI, если они пришли с сервера
             if (data.aiPrivacySettings) {
                 data.aiPrivacySettings = this.normalizeAiPrivacySettings(data.aiPrivacySettings);
             }
@@ -72,32 +78,6 @@ export class AuthService {
         }
     }
 
-    // /**
-    //  * Проверка валидности токена
-    //  * @param {string} token - JWT токен для проверки
-    //  * @returns {Promise<Object>} Результат проверки
-    //  */
-    // async verifyToken(token) {
-    //     try {
-    //         // Временно устанавливаем токен для проверки
-    //         const previousToken = apiService.authToken;
-    //         apiService.setAuthToken(token);
-    //
-    //         const result = await apiService.authRequest('/auth/verify');
-    //
-    //         // Восстанавливаем предыдущий токен
-    //         apiService.setAuthToken(previousToken);
-    //
-    //         // return result;
-    //     } catch (error) {
-    //         if (error.error === 'INVALID_TOKEN') {
-    //             return { valid: false, error: error.message };
-    //         }
-    //
-    //         return { valid: false, error: 'Ошибка проверки токена' };
-    //     }
-    // }
-
     /**
      * Получение данных текущего пользователя
      * @returns {Promise<Object>} Данные пользователя с настройками
@@ -108,7 +88,6 @@ export class AuthService {
                 method: 'GET',
             });
 
-            // Нормализуем настройки, если они есть
             if (data.settings) {
                 data.settings = this.normalizeAiPrivacySettings(data.settings);
             }
@@ -146,7 +125,6 @@ export class AuthService {
                 body: JSON.stringify(updates),
             });
 
-            // Нормализуем настройки в ответе
             if (data.settings) {
                 data.settings = this.normalizeAiPrivacySettings(data.settings);
             }
@@ -155,7 +133,6 @@ export class AuthService {
         } catch (error) {
             console.error('updateUserSettings error', error);
 
-            // Преобразуем ошибки API в понятные сообщения
             if (error.error === 'UNAUTHORIZED') {
                 throw {
                     ...error,
@@ -206,7 +183,6 @@ export class AuthService {
      */
     async logout() {
         try {
-            // Отправляем запрос на сервер для инвалидации токена
             await apiService.authRequest('/auth/logout', {
                 method: 'POST',
             });
@@ -240,7 +216,6 @@ export class AuthService {
         } catch (error) {
             console.error('deleteAccount error', error);
 
-            // Преобразуем ошибки API в понятные сообщения
             if (error.error === 'UNAUTHORIZED') {
                 throw {
                     ...error,
@@ -284,5 +259,4 @@ export class AuthService {
     }
 }
 
-// Экспортируем синглтон экземпляр
 export const authService = new AuthService();
