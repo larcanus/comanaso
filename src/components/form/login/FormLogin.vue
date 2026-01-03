@@ -10,15 +10,15 @@ const router = useRouter();
 const props = defineProps({
     h2LoginLoc: {
         type: String,
-        default: 'Sign In to your account',
+        default: 'Войдите в свой аккаунт',
     },
     h2RegLoc: {
         type: String,
-        default: 'Registration new account',
+        default: 'Регистрация нового аккаунта',
     },
     signParagraph: {
         type: String,
-        default: '\u25c4 Sign'.normalize(),
+        default: '\u25c4 Назад'.normalize(),
     },
     labelEmailLoc: {
         type: String,
@@ -26,11 +26,11 @@ const props = defineProps({
     },
     labelLoginLoc: {
         type: String,
-        default: 'Login',
+        default: 'Логин',
     },
     labelPswLoc: {
         type: String,
-        default: 'Password',
+        default: 'Пароль',
     },
     placeholderLoginLoc: {
         type: String,
@@ -46,23 +46,23 @@ const props = defineProps({
     },
     buttonLoginLoc: {
         type: String,
-        default: 'Sign In',
+        default: 'Войти',
     },
     buttonRegisterLoc: {
         type: String,
-        default: 'Create account',
+        default: 'Создать аккаунт',
     },
     messageLoginError: {
         type: String,
-        default: 'Error in login or password.\n Are you sure you entered the correct data?',
+        default: 'Ошибка в логине или пароле.\n Вы уверены, что ввели правильные данные?',
     },
     messageRegistrationError: {
         type: String,
-        default: 'This login already exists',
+        default: 'Этот логин уже существует',
     },
     messageRegistrationSuccess: {
         type: String,
-        default: 'Successfully registered. You can now log in.',
+        default: 'Регистрация успешна. Теперь вы можете войти.',
     },
 });
 

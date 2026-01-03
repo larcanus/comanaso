@@ -11,28 +11,28 @@ export function validateLogin(login) {
     if (!login || login.trim().length === 0) {
         return {
             isValid: false,
-            error: 'Login is required',
+            error: 'Логин обязателен для заполнения',
         };
     }
 
     if (!/^[а-яА-ЯёЁa-zA-Z0-9]+$/.test(login)) {
         return {
             isValid: false,
-            error: 'Login must include only letters and numbers',
+            error: 'Логин должен содержать только буквы и цифры',
         };
     }
 
     if (login.length < 3) {
         return {
             isValid: false,
-            error: 'Login should be at least 3 symbols',
+            error: 'Логин должен содержать минимум 3 символа',
         };
     }
 
     if (login.length > 100) {
         return {
             isValid: false,
-            error: 'Login should be no more than 100 symbols',
+            error: 'Логин должен содержать не более 100 символов',
         };
     }
 
@@ -59,21 +59,21 @@ export function validatePassword(password, isOptional = false) {
     if (!password || password.trim().length === 0) {
         return {
             isValid: false,
-            error: 'Password is required',
+            error: 'Пароль обязателен для заполнения',
         };
     }
 
     if (password.length < 6) {
         return {
             isValid: false,
-            error: 'Password should be at least 6 symbols',
+            error: 'Пароль должен содержать минимум 6 символов',
         };
     }
 
     if (password.length > 100) {
         return {
             isValid: false,
-            error: 'Password should be no more than 100 symbols',
+            error: 'Пароль должен содержать не более 100 символов',
         };
     }
 
@@ -92,28 +92,28 @@ export function validateName(name) {
     if (!name || name.trim().length === 0) {
         return {
             isValid: false,
-            error: 'Name is required',
+            error: 'Имя обязательно для заполнения',
         };
     }
 
     if (!/^[а-яА-ЯёЁa-zA-Z0-9\s]+$/.test(name)) {
         return {
             isValid: false,
-            error: 'Name must include letters, numbers or spaces',
+            error: 'Имя должно содержать только буквы, цифры или пробелы',
         };
     }
 
     if (name.length < 2) {
         return {
             isValid: false,
-            error: 'Name should be at least 2 symbols',
+            error: 'Имя должно содержать минимум 2 символа',
         };
     }
 
     if (name.length > 100) {
         return {
             isValid: false,
-            error: 'Name should be no more than 100 symbols',
+            error: 'Имя должно содержать не более 100 символов',
         };
     }
 
@@ -132,7 +132,7 @@ export function validateEmail(email) {
     if (!email || email.trim().length === 0) {
         return {
             isValid: false,
-            error: 'Email is required',
+            error: 'Email обязателен для заполнения',
         };
     }
 
@@ -141,14 +141,14 @@ export function validateEmail(email) {
     if (!emailRegex.test(email)) {
         return {
             isValid: false,
-            error: 'Invalid email format',
+            error: 'Неверный формат email',
         };
     }
 
     if (email.length > 255) {
         return {
             isValid: false,
-            error: 'Email should be no more than 255 symbols',
+            error: 'Email должен содержать не более 255 символов',
         };
     }
 
@@ -167,28 +167,28 @@ export function validateUsername(username) {
     if (!username || username.trim().length === 0) {
         return {
             isValid: false,
-            error: 'Username is required',
+            error: 'Имя пользователя обязательно для заполнения',
         };
     }
 
     if (!/^[а-яА-ЯёЁa-zA-Z0-9\s]+$/.test(username)) {
         return {
             isValid: false,
-            error: 'Username must include letters, numbers or spaces',
+            error: 'Имя пользователя должно содержать только буквы, цифры или пробелы',
         };
     }
 
     if (username.length < 3) {
         return {
             isValid: false,
-            error: 'Username should be at least 3 symbols',
+            error: 'Имя пользователя должно содержать минимум 3 символа',
         };
     }
 
     if (username.length > 100) {
         return {
             isValid: false,
-            error: 'Username should be no more than 100 symbols',
+            error: 'Имя пользователя должно содержать не более 100 символов',
         };
     }
 

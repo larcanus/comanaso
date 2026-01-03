@@ -17,7 +17,7 @@ const openLoginForm = () => {
 const props = defineProps({
     buttonLoginLoc: {
         type: String,
-        default: 'Login',
+        default: 'Войти',
     },
     isLoginFormShow: {
         type: Boolean,
