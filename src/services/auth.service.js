@@ -269,7 +269,7 @@ export class AuthService {
                 method: 'POST',
                 body: JSON.stringify({ email }),
             });
-
+            console.log('requestPasswordReset data', data);
             return {
                 ok: true,
                 message: data.message || 'Письмо отправлено',
@@ -302,6 +302,30 @@ export class AuthService {
             throw {
                 ...error,
                 userMessage: error.message || 'Ошибка при отправке письма',
+            };
+        }
+    }
+
+    /**
+     * Валидация токена сброса пароля
+     * @param {string} token - Токен из URL
+     * @returns {Promise<{ok: boolean, data?: {valid: boolean, email: string}, error?: string}>}
+     */
+    async validateResetToken(token) {
+        try {
+            const response = await apiService.request('/auth/password-reset/validate', {
+                params: { token },
+            });
+            console.log('validateResetToken response', response);
+            return {
+                ok: true,
+                data: response.data,
+            };
+        } catch (error) {
+            console.error('Validate reset token error:', error);
+            return {
+                ok: false,
+                error: error.response?.data?.detail || 'Ошибка проверки токена',
             };
         }
     }

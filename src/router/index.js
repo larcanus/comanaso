@@ -7,6 +7,7 @@ import SettingsView from '@/view/SettingsView.vue';
 import { useAuthStore } from '@/store/auth.js';
 import { useAccountStore } from '@/store/account.js';
 import FormForgotPassword from '@/components/form/forgot-password/FormForgotPassword.vue';
+import PageResetPassword from '@/pages/PageResetPassword.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +25,15 @@ const router = createRouter({
             name: 'ForgotPassword',
             component: FormForgotPassword,
             meta: { requiresAuth: false },
+        },
+        {
+            path: '/reset-password',
+            name: 'ResetPassword',
+            component: PageResetPassword,
+            meta: {
+                requiresAuth: false,
+                title: 'Сброс пароля',
+            },
         },
         {
             path: '/main',
