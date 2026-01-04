@@ -265,7 +265,7 @@ export class AuthService {
      */
     async requestPasswordReset(email) {
         try {
-            const data = await apiService.request('/auth/request-password-reset', {
+            const data = await apiService.request('/auth/password-reset/request', {
                 method: 'POST',
                 body: JSON.stringify({ email }),
             });
@@ -315,7 +315,7 @@ export class AuthService {
      */
     async resetPassword({ token, newPassword }) {
         try {
-            const data = await apiService.request('/auth/reset-password', {
+            const data = await apiService.request('/auth/password-reset/confirm', {
                 method: 'POST',
                 body: JSON.stringify({ token, newPassword }),
             });
