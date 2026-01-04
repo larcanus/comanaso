@@ -301,11 +301,10 @@ function hiddenTooltip() {
                     >
                         {{ state.messageLoginError }}
                     </div>
-                    <div
-                        class="tooltip tooltipBig"
-                        :class="{ successful: state.isSuccessfulRegistration }"
-                    >
-                        {{ props.messageRegistrationSuccess }}
+                    <div v-if="!state.isRegister" class="forgot-password-link">
+                        <router-link to="/forgot-password" class="forgot-link">
+                            Забыли пароль?
+                        </router-link>
                     </div>
                 </div>
                 <button
@@ -520,5 +519,22 @@ input {
 
 .disabled {
     background-color: #4a4a4a;
+}
+
+.forgot-password-link {
+    margin-top: 8px;
+    text-align: right;
+}
+
+.forgot-link {
+    font-size: 13px;
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.forgot-link:hover {
+    color: #333;
+    text-decoration: underline;
 }
 </style>

@@ -257,6 +257,103 @@ export class AuthService {
             shareDialogTitles: settings.shareDialogTitles ?? true,
         };
     }
+
+    /**
+     * Запрос на восстановление пароля
+     * @param {string} email - Email пользователя
+     * @returns {Promise<Object>} Результат отправки письма
+     */
+    async requestPasswordReset(email) {
+        try {
+            const data = await apiService.request('/auth/request-password-reset', {
+                method: 'POST',
+                body: JSON.stringify({ email }),
+            });
+
+            return {
+                ok: true,
+                message: data.message || 'Письмо отправлено',
+            };
+        } catch (error) {
+            console.error('requestPasswordReset error', error);
+
+            if (error.error === 'USER_NOT_FOUND') {
+                // Не раскрываем информацию о существовании пользователя
+                return {
+                    ok: true,
+                    message: 'Если аккаунт существует, письмо будет отправлено',
+                };
+            }
+
+            if (error.error === 'EMAIL_SEND_FAILED') {
+                throw {
+                    ...error,
+                    userMessage: 'Не удалось отправить письмо. Попробуйте позже.',
+                };
+            }
+
+            if (error.error === 'VALIDATION_ERROR') {
+                throw {
+                    ...error,
+                    userMessage: 'Неверный формат email',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Ошибка при отправке письма',
+            };
+        }
+    }
+
+    /**
+     * Сброс пароля по токену
+     * @param {Object} params - Параметры сброса
+     * @param {string} params.token - Токен из письма
+     * @param {string} params.newPassword - Новый пароль
+     * @returns {Promise<Object>} Результат сброса пароля
+     */
+    async resetPassword({ token, newPassword }) {
+        try {
+            const data = await apiService.request('/auth/reset-password', {
+                method: 'POST',
+                body: JSON.stringify({ token, newPassword }),
+            });
+
+            return {
+                ok: true,
+                message: data.message || 'Пароль успешно изменен',
+            };
+        } catch (error) {
+            console.error('resetPassword error', error);
+
+            if (error.error === 'INVALID_TOKEN') {
+                throw {
+                    ...error,
+                    userMessage: 'Недействительная или устаревшая ссылка для сброса пароля',
+                };
+            }
+
+            if (error.error === 'TOKEN_EXPIRED') {
+                throw {
+                    ...error,
+                    userMessage: 'Срок действия ссылки истек. Запросите новую ссылку.',
+                };
+            }
+
+            if (error.error === 'VALIDATION_ERROR') {
+                throw {
+                    ...error,
+                    userMessage: error.message || 'Пароль не соответствует требованиям',
+                };
+            }
+
+            throw {
+                ...error,
+                userMessage: error.message || 'Не удалось изменить пароль',
+            };
+        }
+    }
 }
 
 export const authService = new AuthService();

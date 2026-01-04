@@ -6,6 +6,7 @@ import AnalyticsView from '@/view/AnalyticsView.vue';
 import SettingsView from '@/view/SettingsView.vue';
 import { useAuthStore } from '@/store/auth.js';
 import { useAccountStore } from '@/store/account.js';
+import FormForgotPassword from '@/components/form/forgot-password/FormForgotPassword.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +18,12 @@ const router = createRouter({
             meta: {
                 requiresAuth: false,
             },
+        },
+        {
+            path: '/forgot-password',
+            name: 'ForgotPassword',
+            component: FormForgotPassword,
+            meta: { requiresAuth: false },
         },
         {
             path: '/main',
