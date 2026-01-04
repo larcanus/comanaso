@@ -314,34 +314,35 @@ export class AuthService {
     async validateResetToken(token) {
         try {
             const response = await apiService.request('/auth/password-reset/validate', {
-                params: { token },
+                method: 'POST',
+                body: JSON.stringify({ token }),
             });
             console.log('validateResetToken response', response);
             return {
                 ok: true,
-                data: response.data,
+                data: response,
             };
         } catch (error) {
             console.error('Validate reset token error:', error);
             return {
                 ok: false,
-                error: error.response?.data?.detail || 'Ошибка проверки токена',
+                error: error.response?.valid || 'Ошибка проверки токена',
             };
         }
     }
 
     /**
      * Сброс пароля по токену
-     * @param {Object} params - Параметры сброса
-     * @param {string} params.token - Токен из письма
-     * @param {string} params.newPassword - Новый пароль
+     * @param {string} token - Токен из письма
+     * @param {string} newPassword - Новый пароль
      * @returns {Promise<Object>} Результат сброса пароля
      */
-    async resetPassword({ token, newPassword }) {
+    async resetPassword(token, newPassword) {
         try {
+            console.log('resetPassword0', token, newPassword);
             const data = await apiService.request('/auth/password-reset/confirm', {
                 method: 'POST',
-                body: JSON.stringify({ token, newPassword }),
+                body: JSON.stringify({ token, new_password: newPassword }),
             });
 
             return {
