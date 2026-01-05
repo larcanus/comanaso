@@ -112,10 +112,10 @@ function goBack() {
 .form-container {
     background: white;
     padding: 40px;
-    border-radius: 12px;
+    border-radius: 2px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     max-width: 450px;
-    width: 100%;
+    width: 85%;
 }
 
 .forgot-form h2 {
@@ -145,7 +145,7 @@ function goBack() {
     width: 100%;
     padding: 12px;
     border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 2px;
     font-size: 14px;
     transition: border-color 0.2s;
 }
@@ -177,7 +177,7 @@ function goBack() {
     width: 100%;
     padding: 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 2px;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;

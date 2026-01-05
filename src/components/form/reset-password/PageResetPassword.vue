@@ -245,7 +245,7 @@ function requestNewLink() {
 .form-container {
     background: white;
     padding: 40px;
-    border-radius: 12px;
+    border-radius: 2px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     max-width: 500px;
     width: 100%;
@@ -317,7 +317,7 @@ function requestNewLink() {
     text-align: left;
     background: #f8f9fa;
     padding: 16px;
-    border-radius: 6px;
+    border-radius: 2px;
     margin-bottom: 24px;
 }
 
@@ -385,7 +385,7 @@ function requestNewLink() {
     width: 100%;
     padding: 12px;
     border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 2px;
     font-size: 14px;
     transition: border-color 0.2s;
 }
@@ -416,7 +416,7 @@ function requestNewLink() {
 .password-requirements {
     background: #f8f9fa;
     padding: 16px;
-    border-radius: 6px;
+    border-radius: 2px;
     margin-bottom: 20px;
 }
 
@@ -449,7 +449,7 @@ function requestNewLink() {
     width: 100%;
     padding: 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 2px;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
