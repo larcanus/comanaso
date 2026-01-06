@@ -10,19 +10,19 @@ import imageFencesPath from '@/assets/animated-fences.gif';
 const infoItems = ref([
     {
         icon: imageProtectionPath,
-        text: 'Мы не собираем ваши личные данные.',
+        text: 'Мы не собираем ваши личные данные',
     },
     {
         icon: imageAnalyticPath,
-        text: 'Анализ данных происходит только во время работы сайта.',
+        text: 'Анализ данных происходит только во время активной сессии',
     },
     {
         icon: imageDBSavePath,
-        text: 'Мы не храним ваши данные на наших серверах.',
+        text: 'Данные Telegram не сохраняются на наших серверах',
     },
     {
         icon: imageFencesPath,
-        text: 'Ваши данные защищены современными методами шифрования.',
+        text: 'Ваша сессия защищена современными методами шифрования',
     },
 ]);
 </script>

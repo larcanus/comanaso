@@ -2,21 +2,21 @@
 
 <template>
     <section class="section first">
-        <h3>Проанализируй свое время</h3>
-        <h1>На нашем сайте вы можете проводить анализ данных ваших аккаунтов.</h1>
-        <h1>Мы предлагаем инструменты для:</h1>
+        <h3>Проанализируй свое время в Telegram</h3>
+        <h1>Подключите свой Telegram-аккаунт и получите детальную аналитику вашей активности.</h1>
+        <h1>Сервис предлагает инструменты для:</h1>
         <div class="card">
             <div class="tools">
-                <img class="icon" src="@/assets/clock-icon.svg" alt="dots icon" />
-                <p>Анализа затраченного времени</p>
+                <img class="icon" src="@/assets/clock-icon.svg" alt="clock icon" />
+                <p>Анализа затраченного времени в диалогах</p>
             </div>
             <div class="tools">
-                <img class="icon" src="@/assets/list-icon.svg" alt="dots icon" />
-                <p>Отслеживания ключевых метрик</p>
+                <img class="icon" src="@/assets/list-icon.svg" alt="list icon" />
+                <p>Визуализации статистики по диаграммам</p>
             </div>
             <div class="tools">
-                <img class="icon" src="@/assets/layers-icon.svg" alt="dots icon" />
-                <p>Создания наглядных отчетов</p>
+                <img class="icon" src="@/assets/layers-icon.svg" alt="layers icon" />
+                <p>AI-аналитики вашей активности</p>
             </div>
         </div>
     </section>
@@ -93,10 +93,10 @@
 }
 
 .first {
-    background-color: #0a0000; /* Цвет фона */
+    background-color: #0a0000;
     background-repeat: no-repeat;
     background-position: bottom left 35%;
-    background-size: cover; /* Оставляем изображение в его естественном размере */
+    background-size: cover;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-image: url('@/assets/background-front-page-people.png');

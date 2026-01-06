@@ -7,15 +7,15 @@ import imageDataPath from '@/assets/data-card.png';
 const steps = ref([
     {
         imagePath: imageLoginPath,
-        text: 'Зарегистрируйтесь на сайте.',
+        text: 'Зарегистрируйтесь на сайте',
     },
     {
         imagePath: imageTgPath,
-        text: 'Подключите ваши аккаунты.',
+        text: 'Подключите ваш Telegram-аккаунт',
     },
     {
         imagePath: imageDataPath,
-        text: 'Начните анализировать данные.',
+        text: 'Получите детальную аналитику и AI-инсайты',
     },
 ]);
 </script>
@@ -103,7 +103,7 @@ const steps = ref([
     }
 
     .arrow {
-        transform: rotate(90deg); /* Поворачиваем стрелку для вертикального направления */
+        transform: rotate(90deg);
     }
 }
 </style>

@@ -18,6 +18,7 @@
     text-align: center;
     align-items: center;
     justify-content: center;
+    width: 100%;
 }
 
 .info-icon {
@@ -26,15 +27,23 @@
     padding: 0;
     border: 1px #c8d4e0 solid;
     border-radius: 2px;
+    flex-shrink: 0;
 }
 
 .info-text-div {
     padding: 0 10px 0 10px;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .info-text {
     font-size: 20px;
     color: #ffffff;
+    margin: 0;
+    text-align: center;
+    width: 100%;
 }
 
 @media (max-width: 1100px) {
