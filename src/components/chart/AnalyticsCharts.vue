@@ -13,6 +13,7 @@ import RadarChart from '@/components/chart/RadarChart.vue';
 import SankeyChart from '@/components/chart/SankeyChart.vue';
 import DraftsTimelineChart from '@/components/chart/DraftsTimelineChart.vue';
 import CorrelationMatrixChart from '@/components/chart/CorrelationMatrixChart.vue';
+import TimeAnalyticsChart from '@/components/chart/TimeAnalyticsChart.vue';
 </script>
 
 <template>
@@ -41,17 +42,21 @@ import CorrelationMatrixChart from '@/components/chart/CorrelationMatrixChart.vu
             <ActivityLineChart />
         </section>
 
-        <!-- Блок 5: Тепловая карта активности -->
+        <!-- Блок 5: Временная аналитика (НОВОЕ) -->
+        <section class="chart-section full-width">
+            <TimeAnalyticsChart />
+        </section>
+
+        <!-- Блок 6: Тепловая карта активности -->
         <section class="chart-section full-width">
             <ActivityHeatmapChart />
         </section>
 
-        <!-- Блок 6: Сообщества и уведомления -->
+        <!-- Блок 7: Сообщества и уведомления -->
         <section class="chart-section">
             <CommunitiesBubbleChart />
         </section>
 
-        <!-- Блок 7: уведомления -->
         <section class="chart-section">
             <NotificationsGroupedChart />
         </section>
@@ -106,23 +111,8 @@ import CorrelationMatrixChart from '@/components/chart/CorrelationMatrixChart.vu
     transition: all 0.3s ease;
 }
 
-/* Ряд с двумя графиками */
-.charts-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-}
-
-/* Секция на всю ширину */
 .full-width {
     grid-column: 1 / -1;
-}
-
-/* Адаптивность */
-@media (max-width: 1200px) {
-    .charts-row {
-        grid-template-columns: 1fr;
-    }
 }
 
 @media (max-width: 768px) {
@@ -133,10 +123,6 @@ import CorrelationMatrixChart from '@/components/chart/CorrelationMatrixChart.vu
 
     .chart-section {
         padding: 20px;
-    }
-
-    .charts-row {
-        gap: 20px;
     }
 }
 </style>
