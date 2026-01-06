@@ -15,6 +15,10 @@ const props = defineProps({
         default: 'center',
         validator: (value) => ['center', 'left'].includes(value),
     },
+    isHtml: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const emit = defineEmits(['close']);
@@ -42,7 +46,13 @@ function handleKeyDown(event) {
             <div class="modal-content">
                 <div class="content" :class="`content-${align}`">
                     <h3 class="modal-title">{{ message?.title }}</h3>
-                    <p class="modal-description">{{ message?.desc }}</p>
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <div
+                        v-if="isHtml"
+                        class="modal-description"
+                        v-html="message?.description || message?.desc"
+                    ></div>
+                    <p v-else class="modal-description">{{ message?.desc }}</p>
                 </div>
                 <button class="btn-close" @click="closeModal">OK</button>
             </div>
@@ -82,6 +92,8 @@ function handleKeyDown(event) {
     text-align: center;
     width: 90%;
     max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
     text-wrap: wrap;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     animation: slideIn 0.2s ease-out;
@@ -127,7 +139,47 @@ function handleKeyDown(event) {
     font-size: 15px;
     margin: 0;
     line-height: 1.6;
-    white-space: pre-line;
+}
+
+/* Стили для HTML-контента */
+.modal-description :deep(p) {
+    margin: 0 0 8px 0;
+}
+
+.modal-description :deep(p:last-child) {
+    margin-bottom: 0;
+}
+
+.modal-description :deep(strong) {
+    color: var(--color-heading);
+    font-weight: 600;
+}
+
+.modal-description :deep(em) {
+    font-style: italic;
+    color: #95949a;
+}
+
+.modal-description :deep(ul),
+.modal-description :deep(ol) {
+    margin: 4px 0 8px 0;
+    padding-left: 20px;
+}
+
+.modal-description :deep(li) {
+    margin-bottom: 4px;
+    line-height: 1.5;
+}
+
+.modal-description :deep(a) {
+    color: #3498db;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.modal-description :deep(a:hover) {
+    color: #2980b9;
+    text-decoration: underline;
 }
 
 .btn-close {
@@ -153,6 +205,7 @@ function handleKeyDown(event) {
     .modal-content {
         width: 85%;
         padding: 20px;
+        max-height: 85vh;
     }
 
     .modal-title {

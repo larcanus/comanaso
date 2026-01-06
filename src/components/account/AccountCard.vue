@@ -3,9 +3,11 @@ import { defineProps, reactive, computed, watch } from 'vue';
 import AccountStatus from '@/components/account/elements/AccountStatus.vue';
 import DetailPopup from '@/components/modal/DetailPopup.vue';
 import Confirm from '@/components/modal/Confirm.vue';
+import FieldInfoButton from '@/components/common/FieldInfoButton.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 import { accountService } from '@/services/account.service.js';
+import { ACCOUNT_FIELD_DESCRIPTIONS, ACCOUNT_GENERAL_INFO } from '@/constants/fieldDescriptions.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -39,6 +41,7 @@ const uiState = reactive({
     isModalPopupInfoVisible: false,
     isModalConfirmVisible: false,
     isModalConfirmDeleteVisible: false,
+    isGeneralInfoVisible: false,
     isLoading: false,
     modalConfirmMessage: null,
     modalConfirmDeleteMessage: null,
@@ -85,7 +88,6 @@ async function onClickSave() {
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_UPDATE);
     } catch (error) {
         console.error('Update account error:', error);
-        // TODO добавить обработку ошибок типа VALIDATION_ERROR Input should be a valid integer, unable to parse string as an integer
         toastStore.addToast('error', error.userMessage || 'Ошибка обновления аккаунта');
     } finally {
         uiState.isLoading = false;
@@ -284,6 +286,10 @@ async function showDetail() {
     uiState.isModalPopupInfoVisible = true;
 }
 
+function showGeneralInfo() {
+    uiState.isGeneralInfoVisible = true;
+}
+
 // Хранилище для активного промиса (для ввода кода)
 const confirmPromiseStore = { resolve: null };
 
@@ -358,34 +364,84 @@ function handleDeleteConfirmCancel() {
             />
         </div>
         <div class="product-details">
-            <input
-                :value="uiState.isEdit ? editableData.name : accountData.name"
-                type="text"
-                :disabled="!uiState.isEdit || uiState.isLoading"
-                placeholder="Название"
-                @input="uiState.isEdit && (editableData.name = $event.target.value)"
-            />
-            <input
-                :value="uiState.isEdit ? editableData.apiId : accountData.apiId"
-                placeholder="App api_id"
-                :disabled="!uiState.isEdit || uiState.isLoading"
-                type="text"
-                @input="uiState.isEdit && (editableData.apiId = $event.target.value)"
-            />
-            <input
-                :value="uiState.isEdit ? editableData.apiHash : accountData.apiHash"
-                type="text"
-                :disabled="!uiState.isEdit || uiState.isLoading"
-                placeholder="App api_hash"
-                @input="uiState.isEdit && (editableData.apiHash = $event.target.value)"
-            />
-            <input
-                :value="uiState.isEdit ? editableData.phoneNumber : accountData.phoneNumber"
-                type="text"
-                :disabled="!uiState.isEdit || uiState.isLoading"
-                placeholder="Номер телефона"
-                @input="uiState.isEdit && (editableData.phoneNumber = $event.target.value)"
-            />
+            <!-- Общая инструкция -->
+            <div v-if="!isConnect" class="general-info-section">
+                <div class="info-header">
+                    <span class="info-icon">ℹ️</span>
+                    <span class="info-text"
+                        >Для подключения заполните все поля и нажмите "Старт!"</span
+                    >
+                    <button type="button" class="info-link" @click="showGeneralInfo">
+                        Подробная инструкция
+                    </button>
+                </div>
+            </div>
+
+            <!-- Поля ввода с подсказками -->
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <input
+                        :value="uiState.isEdit ? editableData.name : accountData.name"
+                        type="text"
+                        :disabled="!uiState.isEdit || uiState.isLoading"
+                        placeholder="Название"
+                        @input="uiState.isEdit && (editableData.name = $event.target.value)"
+                    />
+                    <FieldInfoButton
+                        :title="ACCOUNT_FIELD_DESCRIPTIONS.name.title"
+                        :description="ACCOUNT_FIELD_DESCRIPTIONS.name.description"
+                    />
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <input
+                        :value="uiState.isEdit ? editableData.apiId : accountData.apiId"
+                        placeholder="App api_id"
+                        :disabled="!uiState.isEdit || uiState.isLoading"
+                        type="text"
+                        @input="uiState.isEdit && (editableData.apiId = $event.target.value)"
+                    />
+                    <FieldInfoButton
+                        :title="ACCOUNT_FIELD_DESCRIPTIONS.apiId.title"
+                        :description="ACCOUNT_FIELD_DESCRIPTIONS.apiId.description"
+                    />
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <input
+                        :value="uiState.isEdit ? editableData.apiHash : accountData.apiHash"
+                        type="text"
+                        :disabled="!uiState.isEdit || uiState.isLoading"
+                        placeholder="App api_hash"
+                        @input="uiState.isEdit && (editableData.apiHash = $event.target.value)"
+                    />
+                    <FieldInfoButton
+                        :title="ACCOUNT_FIELD_DESCRIPTIONS.apiHash.title"
+                        :description="ACCOUNT_FIELD_DESCRIPTIONS.apiHash.description"
+                    />
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <input
+                        :value="uiState.isEdit ? editableData.phoneNumber : accountData.phoneNumber"
+                        type="text"
+                        :disabled="!uiState.isEdit || uiState.isLoading"
+                        placeholder="Номер телефона"
+                        @input="uiState.isEdit && (editableData.phoneNumber = $event.target.value)"
+                    />
+                    <FieldInfoButton
+                        :title="ACCOUNT_FIELD_DESCRIPTIONS.phoneNumber.title"
+                        :description="ACCOUNT_FIELD_DESCRIPTIONS.phoneNumber.description"
+                    />
+                </div>
+            </div>
+
             <div class="buttons">
                 <button v-if="uiState.isEdit" :disabled="uiState.isLoading" @click="onClickSave">
                     {{ uiState.isLoading ? 'Сохранение...' : 'Сохранить' }}
@@ -439,6 +495,14 @@ function handleDeleteConfirmCancel() {
                 @confirm="handleDeleteConfirmOk"
                 @cancel="handleDeleteConfirmCancel"
             />
+
+            <!-- Модальное окно с общей инструкцией -->
+            <DetailPopup
+                :message="ACCOUNT_GENERAL_INFO"
+                :is-visible="uiState.isGeneralInfoVisible"
+                :is-html="true"
+                @close="uiState.isGeneralInfoVisible = false"
+            />
         </div>
     </div>
 </template>
@@ -475,8 +539,61 @@ function handleDeleteConfirmCancel() {
     flex-direction: column;
 }
 
-.product-details input {
+/* Общая инструкция */
+.general-info-section {
+    background: rgba(52, 152, 219, 0.1);
+    border-left: 3px solid #3498db;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.info-icon {
+    font-size: 18px;
+}
+
+.info-text {
+    color: #e3e2e2;
+    font-size: 14px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.info-link {
+    background: none;
+    border: none;
+    color: #3498db;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 13px;
+    padding: 0;
+    transition: color 0.3s ease;
+}
+
+.info-link:hover {
+    color: #2980b9;
+}
+
+/* Группы полей ввода */
+.input-group {
     margin-bottom: 10px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-wrapper input {
+    flex: 1;
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 3px;
@@ -492,6 +609,7 @@ input:disabled {
 .buttons {
     display: flex;
     justify-content: space-between;
+    margin-top: 10px;
 }
 
 .buttons button:disabled {
@@ -532,6 +650,7 @@ input:disabled {
     cursor: pointer;
     background-color: var(--vt-bt-info-background-color);
 }
+
 .button-detail:hover {
     background-color: var(--vt-bt-info-background-color-hover);
 }
@@ -549,6 +668,15 @@ input:disabled {
 
     .button-detail {
         margin-bottom: 10px;
+    }
+
+    .info-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .info-text {
+        min-width: 100%;
     }
 }
 </style>
