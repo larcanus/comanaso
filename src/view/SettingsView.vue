@@ -337,8 +337,8 @@ function cancelAccountChanges() {
             <section class="settings-section">
                 <h2 class="section-title">Настройки AI-анализа</h2>
                 <p class="section-description">
-                    Управляйте данными, которые передаются для AI-анализа. Отключение некоторых опций
-                    может снизить качество аналитики.
+                    Управляйте данными, которые передаются для AI-анализа. Отключение некоторых
+                    опций может снизить качество аналитики.
                 </p>
 
                 <div class="settings-list">
@@ -347,7 +347,8 @@ function cancelAccountChanges() {
                         <div class="setting-info">
                             <h3>Имя профиля</h3>
                             <p class="setting-description">
-                                Передавать имя и фамилию из профиля Telegram для персонализации анализа
+                                Передавать имя и фамилию из профиля Telegram для персонализации
+                                анализа
                             </p>
                         </div>
                         <label class="toggle-switch">
@@ -383,8 +384,8 @@ function cancelAccountChanges() {
                         <div class="setting-info">
                             <h3>Содержимое сообщений</h3>
                             <p class="setting-description">
-                                Передавать текст последних сообщений из диалогов для глубокого анализа
-                                контекста
+                                Передавать текст последних сообщений из диалогов для глубокого
+                                анализа контекста
                             </p>
                         </div>
                         <label class="toggle-switch">
@@ -425,7 +426,11 @@ function cancelAccountChanges() {
                     >
                         Отменить
                     </button>
-                    <button class="btn-save" :disabled="isSavingPrivacy" @click="savePrivacySettings">
+                    <button
+                        class="btn-save"
+                        :disabled="isSavingPrivacy"
+                        @click="savePrivacySettings"
+                    >
                         {{ isSavingPrivacy ? 'Сохранение...' : 'Сохранить изменения' }}
                     </button>
                 </div>
@@ -434,9 +439,7 @@ function cancelAccountChanges() {
             <!-- Раздел: Учетная запись -->
             <section class="settings-section">
                 <h2 class="section-title">Учетная запись</h2>
-                <p class="section-description">
-                    Управление основными данными вашей учетной записи
-                </p>
+                <p class="section-description">Управление основными данными вашей учетной записи</p>
 
                 <!-- Форма редактирования данных учетной записи -->
                 <div class="account-form">
@@ -473,7 +476,9 @@ function cancelAccountChanges() {
                         <p v-if="validationErrors.email" class="form-error">
                             {{ validationErrors.email }}
                         </p>
-                        <p v-else class="form-hint">Будет использоваться для восстановления доступа</p>
+                        <p v-else class="form-hint">
+                            Будет использоваться для восстановления доступа
+                        </p>
                     </div>
 
                     <!-- Поле Password -->
@@ -505,7 +510,11 @@ function cancelAccountChanges() {
                     >
                         Отменить
                     </button>
-                    <button class="btn-save" :disabled="isSavingAccount" @click="saveAccountSettings">
+                    <button
+                        class="btn-save"
+                        :disabled="isSavingAccount"
+                        @click="saveAccountSettings"
+                    >
                         {{ isSavingAccount ? 'Сохранение...' : 'Сохранить изменения' }}
                     </button>
                 </div>

@@ -158,16 +158,14 @@ const chartInfo = CHART_DESCRIPTIONS.communities;
                 <span>Группы (до 200 чел.)</span>
             </div>
             <div class="legend-item">
-                <span class="legend-marker" style="background: rgb(245,167,66)"></span>
+                <span class="legend-marker" style="background: rgb(245, 167, 66)"></span>
                 <span>Супергруппы (до 200K)</span>
             </div>
             <div class="legend-item">
                 <span class="legend-marker" style="background: rgba(100, 245, 134, 0.6)"></span>
                 <span>Каналы</span>
             </div>
-            <div class="legend-note">
-                * Размер пузырька = количество непрочитанных сообщений
-            </div>
+            <div class="legend-note">* Размер пузырька = количество непрочитанных сообщений</div>
         </div>
     </div>
 </template>
