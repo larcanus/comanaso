@@ -7,7 +7,7 @@ import FieldInfoButton from '@/components/common/FieldInfoButton.vue';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 import { accountService } from '@/services/account.service.js';
-import { ACCOUNT_FIELD_DESCRIPTIONS, ACCOUNT_GENERAL_INFO } from '@/constants/fieldDescriptions.js';
+import { ACCOUNT_FIELD_DESCRIPTIONS } from '@/constants/fieldDescriptions.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -41,7 +41,6 @@ const uiState = reactive({
     isModalPopupInfoVisible: false,
     isModalConfirmVisible: false,
     isModalConfirmDeleteVisible: false,
-    isGeneralInfoVisible: false,
     isLoading: false,
     modalConfirmMessage: null,
     modalConfirmDeleteMessage: null,
@@ -286,10 +285,6 @@ async function showDetail() {
     uiState.isModalPopupInfoVisible = true;
 }
 
-function showGeneralInfo() {
-    uiState.isGeneralInfoVisible = true;
-}
-
 // Хранилище для активного промиса (для ввода кода)
 const confirmPromiseStore = { resolve: null };
 
@@ -354,29 +349,8 @@ function handleDeleteConfirmCancel() {
         <div class="product-icon">
             <img src="@/assets/telegram.png" alt="account" />
             <AccountStatus v-bind="{ status: accountData?.status || 'offline' }" />
-            <button class="button-detail" :disabled="uiState.isLoading" @click="showDetail">
-                подробности
-            </button>
-            <DetailPopup
-                :message="uiState.modalPopupInfoMessage"
-                :is-visible="uiState.isModalPopupInfoVisible"
-                @close="uiState.isModalPopupInfoVisible = false"
-            />
         </div>
         <div class="product-details">
-            <!-- Общая инструкция -->
-            <div v-if="!isConnect" class="general-info-section">
-                <div class="info-header">
-                    <span class="info-icon">ℹ️</span>
-                    <span class="info-text"
-                        >Для подключения заполните все поля и нажмите "Старт!"</span
-                    >
-                    <button type="button" class="info-link" @click="showGeneralInfo">
-                        Подробная инструкция
-                    </button>
-                </div>
-            </div>
-
             <!-- Поля ввода с подсказками -->
             <div class="input-group">
                 <div class="input-wrapper">
@@ -495,14 +469,6 @@ function handleDeleteConfirmCancel() {
                 @confirm="handleDeleteConfirmOk"
                 @cancel="handleDeleteConfirmCancel"
             />
-
-            <!-- Модальное окно с общей инструкцией -->
-            <DetailPopup
-                :message="ACCOUNT_GENERAL_INFO"
-                :is-visible="uiState.isGeneralInfoVisible"
-                :is-html="true"
-                @close="uiState.isGeneralInfoVisible = false"
-            />
         </div>
     </div>
 </template>
@@ -537,48 +503,6 @@ function handleDeleteConfirmCancel() {
     padding-left: 10px;
     display: flex;
     flex-direction: column;
-}
-
-/* Общая инструкция */
-.general-info-section {
-    background: rgba(52, 152, 219, 0.1);
-    border-left: 3px solid #3498db;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-}
-
-.info-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.info-icon {
-    font-size: 18px;
-}
-
-.info-text {
-    color: #e3e2e2;
-    font-size: 14px;
-    flex: 1;
-    min-width: 200px;
-}
-
-.info-link {
-    background: none;
-    border: none;
-    color: #3498db;
-    cursor: pointer;
-    text-decoration: underline;
-    font-size: 13px;
-    padding: 0;
-    transition: color 0.3s ease;
-}
-
-.info-link:hover {
-    color: #2980b9;
 }
 
 /* Группы полей ввода */
@@ -668,15 +592,6 @@ input:disabled {
 
     .button-detail {
         margin-bottom: 10px;
-    }
-
-    .info-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .info-text {
-        min-width: 100%;
     }
 }
 </style>
