@@ -144,7 +144,6 @@ async function safeDisconnect(accountId) {
 }
 
 async function onClickStart() {
-    console.log('onClickStart', uiState);
     if (isLoading.value) return;
 
     if (
@@ -163,13 +162,9 @@ async function onClickStart() {
     try {
         // Шаг 1: Начать подключение
         const connectResult = await accountService.connectAccount(accountData.value.id);
-        console.log('connectResult', connectResult);
-
         if (connectResult.status === 'code_required') {
             // Шаг 2: Запросить код у пользователя
             const code = await showConfirm('Введите код из Telegram');
-            console.log('code', code);
-
             if (!code) {
                 await safeDisconnect(accountData.value.id);
                 await accountStore.changeStatus(accountData.value.id, 'offline');
@@ -182,7 +177,6 @@ async function onClickStart() {
                 code,
                 connectResult.phoneCodeHash
             );
-            console.log('verifyResult', verifyResult);
 
             if (verifyResult.status === 'connected') {
                 await accountStore.changeStatus(accountData.value.id, 'online');
@@ -233,7 +227,6 @@ async function onClickStart() {
 }
 
 async function onClickDisconnect() {
-    console.log('onClickDisconnect', uiState);
     if (isLoading.value) return;
 
     uiState.isDisconnecting = true;
@@ -250,7 +243,6 @@ async function onClickDisconnect() {
 }
 
 async function onClickCloseSession() {
-    console.log('onClickCloseSession', uiState);
     if (isLoading.value) return;
 
     uiState.isDisconnecting = true;
@@ -267,32 +259,37 @@ async function onClickCloseSession() {
 }
 
 function prepareDetailMessage() {
-    console.log('prepareDetailMessage', accountData.value);
     const status = accountData.value?.status || 'offline';
     let messageObj = { title: '', desc: '' };
 
     switch (status) {
         case 'online':
-            messageObj.title = 'Аккаунт активен';
+            messageObj.title = 'Аккаунт подключен';
             messageObj.desc =
-                'Telegram-сессия установлена. Можете отправлять сообщения, приглашать пользователей в группы, выполнять массовые рассылки.';
+                'Telegram-сессия активна. Данные аккаунта (диалоги, информация о пользователе, папки) загружены и доступны для аналитики.';
             break;
-
-        case 'error': {
-            const errorInfo = accountData.value?.errorMessage;
-            messageObj.title = errorInfo?.title || 'Ошибка подключения';
-            messageObj.desc =
-                errorInfo?.desc ||
-                'Не удалось установить соединение. Проверьте API-ключи и номер телефона, затем попробуйте снова.';
-            break;
-        }
 
         case 'offline':
-        default:
-            messageObj.title = 'Требуется подключение';
+            messageObj.title = 'Аккаунт отключен';
             messageObj.desc =
-                'Для работы с Telegram необходимо авторизоваться. Нажмите "Старт!" и следуйте инструкциям. Вам потребуется код из SMS или Telegram-приложения.';
+                'Telegram-сессия не установлена. Нажмите "Старт!" для подключения и загрузки данных аккаунта для аналитики.';
             break;
+
+        case 'error':
+            messageObj.title = 'Ошибка подключения';
+            messageObj.desc =
+                'Не удалось установить соединение с Telegram. Проверьте корректность данных аккаунта (API ID, API Hash, номер телефона) и попробуйте снова.';
+            break;
+
+        case 'disconnect':
+            messageObj.title = 'Отключение...';
+            messageObj.desc =
+                'Выполняется безопасное завершение Telegram-сессии. Пожалуйста, подождите.';
+            break;
+
+        default:
+            messageObj.title = 'Неизвестный статус';
+            messageObj.desc = 'Статус аккаунта не определен. Обратитесь к администратору.';
     }
 
     return messageObj;

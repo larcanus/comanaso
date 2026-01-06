@@ -93,7 +93,7 @@ function validateDialogs(dialogs = [], foldersState) {
             draft: getDraftDialogLoc(dialogData.draft),
         };
     });
-    console.log('preparedDialogs', preparedDialogs);
+
     return preparedDialogs;
 }
 

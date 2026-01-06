@@ -339,7 +339,6 @@ export class AuthService {
      */
     async resetPassword(token, newPassword) {
         try {
-            console.log('resetPassword0', token, newPassword);
             const data = await apiService.request('/auth/password-reset/confirm', {
                 method: 'POST',
                 body: JSON.stringify({ token, new_password: newPassword }),

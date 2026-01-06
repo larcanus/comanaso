@@ -22,8 +22,6 @@ export const useToastStore = defineStore('toast', () => {
 
         const toast = preparedToast(type, text);
         state.value.push(toast);
-
-        console.log(`[Toast] Added: ${type} - ${text}`);
     }
 
     function preparedToast(type, text) {
