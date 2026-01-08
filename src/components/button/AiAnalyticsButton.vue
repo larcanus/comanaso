@@ -529,113 +529,239 @@ const parsedResponse = computed(() => {
 /* Стили для markdown */
 .markdown-content {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    line-height: 1.6;
+    line-height: 1.7;
     color: #e3e2e2;
+    letter-spacing: 0.01em;
 }
 
 .markdown-content h1,
 .markdown-content h2,
-.markdown-content h3 {
-    margin-top: 1.5em;
+.markdown-content h3,
+.markdown-content h4 {
+    margin-top: 1.8em;
     margin-bottom: 0.8em;
-    font-weight: 600;
+    font-weight: 700;
     color: #ffffff;
+    position: relative;
 }
 
 .markdown-content h1 {
-    font-size: 1.8em;
-    border-bottom: 2px solid rgba(102, 126, 234, 0.5);
-    padding-bottom: 0.3em;
+    font-size: 2em;
+    border-bottom: 3px solid rgba(102, 126, 234, 0.7);
+    padding-bottom: 0.4em;
+    margin-top: 0.5em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .markdown-content h2 {
-    font-size: 1.5em;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 1.6em;
+    border-left: 4px solid #667eea;
+    padding-left: 0.8em;
+    margin-left: -0.8em;
+    padding-top: 0.2em;
     padding-bottom: 0.2em;
+    background: rgba(102, 126, 234, 0.08);
+    border-radius: 0 4px 4px 0;
 }
 
 .markdown-content h3 {
+    font-size: 1.3em;
+    color: #a5b4fc;
+    padding-bottom: 0.3em;
+    border-bottom: 2px dashed rgba(165, 180, 252, 0.3);
+}
+
+.markdown-content h4 {
+    font-size: 1.1em;
+    color: #c7d2fe;
+    padding-left: 0.5em;
+    position: relative;
+}
+
+.markdown-content h4::before {
+    content: "▸";
+    position: absolute;
+    left: -0.5em;
+    color: #667eea;
     font-size: 1.2em;
 }
 
 .markdown-content p {
-    margin-bottom: 1em;
+    margin-bottom: 1.2em;
+    text-align: justify;
+    hyphens: auto;
 }
 
 .markdown-content ul,
 .markdown-content ol {
-    margin-left: 1.5em;
-    margin-bottom: 1em;
+    margin-left: 1.8em;
+    margin-bottom: 1.5em;
+    padding-left: 0.5em;
 }
 
 .markdown-content li {
-    margin-bottom: 0.5em;
+    margin-bottom: 0.7em;
+    position: relative;
+    padding-left: 0.3em;
 }
 
-.markdown-content li::marker {
+.markdown-content ul li::before {
+    content: "•";
     color: #667eea;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+    font-size: 1.2em;
+}
+
+.markdown-content ol {
+    counter-reset: list-counter;
+}
+
+.markdown-content ol li {
+    counter-increment: list-counter;
+}
+
+.markdown-content ol li::before {
+    content: counter(list-counter) ".";
+    color: #764ba2;
+    font-weight: bold;
+    display: inline-block;
+    width: 1.5em;
+    margin-left: -1.5em;
 }
 
 .markdown-content strong {
     font-weight: 700;
     color: #ffffff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 0 0.1em;
 }
 
 .markdown-content em {
     font-style: italic;
     color: #d1d5db;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0 0.2em;
+    border-radius: 2px;
 }
 
 .markdown-content code {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.9em;
     color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.2);
 }
 
 .markdown-content pre {
-    background: rgba(0, 0, 0, 0.4);
-    padding: 1em;
-    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1.2em;
+    border-radius: 8px;
     overflow-x: auto;
-    margin: 1em 0;
-    border-left: 3px solid #667eea;
+    margin: 1.5em 0;
+    border-left: 4px solid #667eea;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .markdown-content pre code {
     background: transparent;
     padding: 0;
     color: #e3e2e2;
+    border: none;
+    font-size: 0.95em;
 }
 
 .markdown-content a {
     color: #667eea;
     text-decoration: none;
-    border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+    border-bottom: 2px solid rgba(102, 126, 234, 0.4);
+    padding-bottom: 1px;
     transition: all 0.2s ease;
+    font-weight: 500;
 }
 
 .markdown-content a:hover {
     color: #764ba2;
     border-bottom-color: #764ba2;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
 }
 
 .markdown-content blockquote {
     border-left: 4px solid #667eea;
-    padding-left: 1em;
-    margin-left: 0;
-    margin-right: 0;
-    color: #9ca3af;
+    padding: 1em 1.5em;
+    margin: 1.5em 0;
+    background: rgba(102, 126, 234, 0.08);
+    border-radius: 0 8px 8px 0;
+    color: #cbd5e1;
     font-style: italic;
+    position: relative;
+}
+
+.markdown-content blockquote::before {
+    content: '"';
+    position: absolute;
+    top: -0.5em;
+    left: 0.5em;
+    font-size: 3em;
+    color: rgba(102, 126, 234, 0.2);
+    font-family: Georgia, serif;
 }
 
 .markdown-content hr {
     border: none;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 2em 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.5), transparent);
+    margin: 2.5em 0;
+}
+
+/* Специальные стили для списков с отступами */
+.markdown-content ul ul,
+.markdown-content ol ol,
+.markdown-content ul ol,
+.markdown-content ol ul {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    margin-left: 1.5em;
+}
+
+/* Стили для вложенных списков */
+.markdown-content ul ul li::before {
+    content: "◦";
+    color: #764ba2;
+}
+
+.markdown-content ul ul ul li::before {
+    content: "▪";
+    color: #a5b4fc;
+}
+
+/* Улучшенные отступы для параграфов после заголовков */
+.markdown-content h1 + p,
+.markdown-content h2 + p,
+.markdown-content h3 + p,
+.markdown-content h4 + p {
+    margin-top: 0.5em;
+}
+
+/* Стили для выделенных блоков */
+.markdown-content > *:first-child {
+    margin-top: 0;
+}
+
+.markdown-content > *:last-child {
+    margin-bottom: 0;
 }
 
 /* Адаптивность */
