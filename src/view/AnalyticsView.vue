@@ -7,6 +7,7 @@ import LoadingProgress from '@/components/progress/LoadingProgress.vue';
 import UserInfoCard from '@/components/card/UserInfoCard.vue';
 import FolderCards from '@/components/card/FolderCards.vue';
 import AnalyticsCharts from '@/components/chart/AnalyticsCharts.vue';
+import AiAnalyticsButton from '@/components/button/AiAnalyticsButton.vue'; // Добавлен новый компонент
 import useAccountStore from '@/store/account.js';
 import useDialogStore from '@/store/dialogs.js';
 import useUserStore from '@/store/user.js';
@@ -273,6 +274,9 @@ async function refreshAnalytics() {
 
             <!-- Графики и диаграммы -->
             <AnalyticsCharts v-if="hasDialogsData" />
+
+            <!-- AI аналитика -->
+            <AiAnalyticsButton v-if="hasDialogsData" />
 
             <!-- Кнопка обновления -->
             <UpdateButton :is-disabled="!isAccountOnline" @refresh="refreshAnalytics" />

@@ -1,4 +1,5 @@
 import { apiService } from './api.js';
+import { log10 } from 'chart.js/helpers';
 
 /**
  * Конфигурация для запроса данных аналитики
@@ -112,6 +113,77 @@ class AnalyticsService {
         } catch (error) {
             console.error('[AnalyticsService] Error fetching folders:', error);
             throw this._handleError(error, 'Ошибка загрузки папок');
+        }
+    }
+
+    /**
+     * Получить AI анализ данных Telegram
+     * @param {Object} telegramData - Данные Telegram для анализа
+     * @param {Function} onChunk - Callback для обработки стриминговых чанков
+     * @returns {Promise<void>}
+     */
+    async getAiAnalysis(telegramData, onChunk) {
+        try {
+            const response = await apiService.aiStreamRequest(telegramData);
+
+            if (response.isError) {
+                throw response.userMessage;
+            }
+
+            // Обрабатываем стриминговый ответ
+            const reader = response?.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+
+                        if (data === '[DONE]') {
+                            console.info('[AnalyticsService] AI analysis completed');
+                            return;
+                        }
+
+                        try {
+                            const parsed = JSON.parse(data);
+                            const content = parsed.choices?.[0]?.delta?.content;
+
+                            if (content && onChunk) {
+                                onChunk({ content });
+                            }
+                        } catch (parseError) {
+                            console.warn(
+                                '[AnalyticsService] Failed to parse AI response chunk:',
+                                parseError
+                            );
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('[AnalyticsService] Error in AI analysis:', error);
+
+            // Если ошибка уже имеет userMessage, просто пробрасываем
+            if (error.userMessage) {
+                throw error;
+            }
+
+            // Обрабатываем сетевые ошибки
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw {
+                    code: 'NETWORK_ERROR',
+                    userMessage: 'Ошибка сети при подключении к AI сервису',
+                    details: error,
+                };
+            }
+
+            throw this._handleError(error, 'Ошибка при выполнении AI анализа');
         }
     }
 
@@ -258,6 +330,8 @@ class AnalyticsService {
             NETWORK_ERROR: 'Ошибка сети. Проверьте подключение к интернету',
             TIMEOUT_ERROR: 'Превышено время ожидания ответа от сервера',
             PHOTO_NOT_FOUND: 'Фото профиля не установлено',
+            AI_SERVICE_NOT_CONFIGURED: 'AI сервис не настроен',
+            AI_SERVICE_ERROR: 'Ошибка AI сервиса',
         };
 
         return messages[errorCode] || defaultMessage;

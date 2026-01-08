@@ -7,6 +7,7 @@ import { cryptoService } from '@/services/crypto.service.js';
 class ApiService {
     constructor() {
         this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+        this.aiURL = import.meta.env.VITE_API_AI_URL || 'http://localhost:8000/ai';
         this.timeout = parseInt(import.meta.env.VITE_API_TIMEOUT) || 10000;
         this.onAuthError = null;
     }
@@ -211,6 +212,82 @@ class ApiService {
                 Authorization: `Bearer ${token}`,
             },
         });
+    }
+
+    async aiStreamRequest(data) {
+        console.log('aiBaseURL', this.aiURL);
+        if (!this.aiURL) {
+            throw {
+                code: 'AI_SERVICE_NOT_CONFIGURED',
+                userMessage: 'AI сервис не настроен',
+            };
+        }
+
+        const token = await this.getToken();
+        console.log('aiStreamRequest', token ? '🔐 TOKEN_DECRYPTED' : 'NO_TOKEN');
+        if (!token) {
+            return {
+                code: 'NO_TOKEN',
+                userMessage: 'Требуется авторизация',
+            };
+        }
+
+        const requestBody = {
+            telegramData: data,
+            userId: `user-${Date.now()}`,
+            metadata: {
+                source: 'comanaso-web',
+                dataVersion: '1.0',
+                sessionId: `session-${Date.now()}`,
+            },
+            model: 'deepseek-chat',
+            temperature: 0.7,
+            max_tokens: 5000,
+            top_p: 0.9,
+        };
+
+        console.info('API SERVICE AI STREAM request >>>', {
+            url: `${this.aiURL}`,
+            dataSize: JSON.stringify(data).length,
+        });
+
+        const response = await fetch(`${this.aiURL}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({
+                error: 'AI_SERVICE_ERROR',
+                message: `HTTP ${response.status}: ${response.statusText}`,
+            }));
+
+            return {
+                isError: true,
+                status: response.status,
+                ...errorData,
+                userMessage: 'Ошибка AI сервиса',
+            };
+        }
+
+        if (response.status === 204 || response.status === 205 || response.status > 400) {
+            const errorData = await response.json().catch(() => ({
+                error: 'AI_SERVICE_ERROR',
+                message: `HTTP ${response.status}: ${response.statusText}`,
+            }));
+
+            return {
+                isError: true,
+                status: response.status,
+                ...errorData,
+                userMessage: 'Ошибка AI сервиса',
+            };
+        }
+
+        return response;
     }
 }
 
