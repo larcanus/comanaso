@@ -25,18 +25,22 @@ const hasDataForAnalysis = computed(() => {
     return dialogStore.state?.length > 0 && userStore.hasUser;
 });
 
-// Получаем последние сообщения (примерно 20 последних)
+// Получаем последние сообщения (до 50 последних диалогов)
 const getRecentMessages = () => {
     const allDialogs = dialogStore.state || [];
     const messages = [];
-
-    // Берем последние 20 диалогов и извлекаем последние сообщения
-    allDialogs.slice(0, 20).forEach((dialog) => {
+    // Берем до 50 последних диалогов
+    allDialogs.slice(0, 50).forEach((dialog) => {
         if (dialog.lastMessage) {
             messages.push({
-                id: dialog.id,
+                id: dialog.id || dialog.id || '',
                 text: dialog.lastMessage.text || '',
                 date: dialog.lastMessage.date || new Date().toISOString(),
+                dialogType: dialog.type || 'unknown',
+                dialogTitle: dialog.title || '',
+                unreadCount: dialog.unreadCount || 0,
+                isPinned: dialog.pinned || false,
+                isArchived: dialog.archived || false,
             });
         }
     });
@@ -44,48 +48,119 @@ const getRecentMessages = () => {
     return messages;
 };
 
-// Получаем информацию о пользователе
+// Получаем полную информацию о пользователе
 const getUserInfo = () => {
-    const user = userStore.hasUser;
-    if (!user) return null;
+    if (!userStore.hasUser) return null;
 
     return {
+        // Основная информация
+        id: userStore.id || 0,
         username: userStore.username || '',
         firstName: userStore.firstName || '',
         lastName: userStore.lastName || '',
-        bio: userStore.bio || '',
         phone: userStore.phone || '',
-        id: userStore.id || 0,
+        bio: userStore.bio || '',
+
+        // Статус и активность
+        isOnline: userStore.isOnline || false,
+        lastSeen: userStore.lastSeen ? userStore.lastSeen.toISOString() : null,
+        status: userStore.status || null,
+
+        // Флаги аккаунта
+        isBot: userStore.isBot || false,
+        isPremium: userStore.isPremium || false,
+        isVerified: userStore.isVerified || false,
+        isFake: userStore.isFake || false,
+        isScam: userStore.isScam || false,
+        isDeleted: userStore.isDeleted || false,
+        isSupport: userStore.isSupport || false,
+
+        // Социальные связи
+        isContact: userStore.isContact || false,
+        isMutualContact: userStore.isMutualContact || false,
+        isCloseFriend: userStore.isCloseFriend || false,
+
+        // Дополнительные данные
+        langCode: userStore.langCode || null,
+        usernames: userStore.usernames || [],
+        emojiStatus: userStore.emojiStatus || null,
+        color: userStore.color || null,
+        profileColor: userStore.profileColor || null,
+
+        // Истории
+        hasStories: userStore.hasStories || false,
+        isStoriesHidden: userStore.isStoriesHidden || false,
+        storiesMaxId: userStore.storiesMaxId || null,
+
+        // Ограничения
+        isRestricted: userStore.isRestricted || false,
+        restrictionReason: userStore.restrictionReason || null,
     };
 };
 
-// Получаем папки
+// Получаем детальную информацию о папках
 const getFolders = () => {
     const folders = dialogStore.foldersState.rawFoldersData || [];
     return folders.map((folder) => ({
-        name: folder.title,
-        chats: dialogStore.foldersState.dialogsIdByFolderId[folder.id]?.length || 0,
         id: folder.id,
+        name: folder.title,
+        description: folder.description || '',
+        chats: dialogStore.foldersState.dialogsIdByFolderId[folder.id]?.length || 0,
+        includedChatIds: folder.includedChatIds || [],
+        excludedChatIds: folder.excludedChatIds || [],
+        isDefault: folder.isDefault || false,
+        icon: folder.icon || null,
+        color: folder.color || null,
     }));
+};
+
+// Получаем статистику по диалогам
+const getDialogsStats = () => {
+    const allDialogs = dialogStore.state || [];
+
+    const stats = {
+        total: allDialogs.length,
+        byType: {},
+        pinned: 0,
+        archived: 0,
+        muted: 0,
+        unreadTotal: 0,
+    };
+
+    allDialogs.forEach((dialog) => {
+        console.log('dialog', dialog, dialog.value);
+        const type = dialog.type || 'unknown';
+        stats.byType[type] = (stats.byType[type] || 0) + 1;
+
+        if (dialog.pinned) stats.pinned++;
+        if (dialog.archived) stats.archived++;
+        if (dialog.mute) stats.muted++;
+        if (dialog.unreadCount > 0) stats.unreadTotal += dialog.unreadCount;
+    });
+
+    return stats;
 };
 
 // Фильтруем данные по настройкам приватности
 const filterDataByPrivacySettings = async (data) => {
     try {
         // Получаем актуальные настройки пользователя
-        const userData = await updateUserSettings();
-        const settings = userData.settings || {};
+        const settings = (await updateUserSettings()) || {};
 
         const filteredData = { ...data };
-
+        console.log('settings', settings);
+        console.log('data', data);
+        console.log('filteredData', filteredData);
         // Фильтруем userInfo
         if (filteredData.userInfo) {
             if (!settings.shareUserName) {
                 delete filteredData.userInfo.firstName;
                 delete filteredData.userInfo.lastName;
+                delete filteredData.userInfo.fullName;
             }
             if (!settings.shareNickname) {
                 delete filteredData.userInfo.username;
+                delete filteredData.userInfo.usernames;
             }
         }
 
@@ -97,11 +172,11 @@ const filterDataByPrivacySettings = async (data) => {
             }));
         }
 
-        // Фильтруем folders (названия папок)
-        if (filteredData.folders && !settings.shareDialogTitles) {
-            filteredData.folders = filteredData.folders.map((folder) => ({
-                ...folder,
-                name: '[папка скрыта]',
+        // Фильтруем информацию о диалогах в сообщениях
+        if (filteredData.recentMessages && !settings.shareDialogTitles) {
+            filteredData.recentMessages = filteredData.recentMessages.map((msg) => ({
+                ...msg,
+                dialogTitle: '[название диалога скрыто]',
             }));
         }
 
@@ -116,8 +191,9 @@ const filterDataByPrivacySettings = async (data) => {
 const updateUserSettings = async () => {
     try {
         const userData = await authService.getCurrentUser();
+        console.log('updateUserSettings userData', userData);
         authStore.setUser(userData);
-
+        console.log('userData.settings', userData.settings);
         if (userData.settings) {
             return userData.settings;
         }
@@ -142,15 +218,35 @@ const runAiAnalysis = async () => {
     isExpanded.value = true;
 
     try {
-        // Собираем данные
+        // Собираем полные данные
         const telegramData = {
             recentMessages: getRecentMessages(),
             userInfo: getUserInfo(),
             folders: getFolders(),
+            dialogsStats: getDialogsStats(),
+            metadata: {
+                totalDialogs: dialogStore.state?.length || 0,
+                totalFolders: dialogStore.foldersState.rawFoldersData?.length || 0,
+                collectedAt: new Date().toISOString(),
+                dataVersion: '2.0', // Увеличиваем версию данных
+            },
         };
+
+        console.log('Отправляемые данные для AI анализа:', {
+            messagesCount: telegramData.recentMessages.length,
+            userInfoFields: Object.keys(telegramData.userInfo || {}).length,
+            foldersCount: telegramData.folders.length,
+            stats: telegramData.dialogsStats,
+        });
 
         // Фильтруем по настройкам приватности
         const filteredData = await filterDataByPrivacySettings(telegramData);
+
+        console.log('Отфильтрованные данные:', {
+            messagesCount: filteredData.recentMessages?.length || 0,
+            userInfoFields: Object.keys(filteredData.userInfo || {}).length,
+            foldersCount: filteredData.folders?.length || 0,
+        });
 
         // Запускаем AI анализ
         await analyticsService.getAiAnalysis(filteredData, (chunk) => {
@@ -247,10 +343,7 @@ const parsedResponse = computed(() => {
             </div>
 
             <div v-if="aiResponse" class="ai-response-content">
-                <div
-                    class="response-text markdown-content"
-                    v-html="parsedResponse"
-                ></div>
+                <div class="response-text markdown-content" v-html="parsedResponse"></div>
             </div>
 
             <div v-if="!isLoading && !aiResponse && !errorMessage" class="empty-state">
