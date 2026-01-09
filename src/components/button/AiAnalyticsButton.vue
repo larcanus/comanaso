@@ -264,7 +264,7 @@ const runAiAnalysis = async () => {
                 totalDialogs: dialogStore.state?.length || 0,
                 totalFolders: dialogStore.foldersState.rawFoldersData?.length || 0,
                 collectedAt: new Date().toISOString(),
-                dataVersion: '2.0', // Увеличиваем версию данных
+                dataVersion: '2.0',
             },
         };
 
@@ -414,8 +414,7 @@ const parsedResponse = computed(() => {
 }
 
 .ai-analytics-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 18px rgba(102, 126, 234, 0.4);
 }
 
 .ai-analytics-button:disabled {
@@ -543,6 +542,9 @@ const parsedResponse = computed(() => {
     padding: 20px;
     max-height: 400px;
     overflow-y: auto;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .response-text {
@@ -564,6 +566,8 @@ const parsedResponse = computed(() => {
     line-height: 1.7;
     color: #e3e2e2;
     letter-spacing: 0.01em;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .markdown-content h1,
@@ -693,16 +697,20 @@ const parsedResponse = computed(() => {
     font-size: 0.9em;
     color: #fbbf24;
     border: 1px solid rgba(251, 191, 36, 0.2);
+    word-break: break-all;
 }
 
 .markdown-content pre {
     background: rgba(0, 0, 0, 0.5);
     padding: 1.2em;
     border-radius: 8px;
-    overflow-x: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     margin: 1.5em 0;
     border-left: 4px solid #667eea;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .markdown-content pre code {
@@ -711,6 +719,8 @@ const parsedResponse = computed(() => {
     color: #e3e2e2;
     border: none;
     font-size: 0.95em;
+    word-break: break-all;
+    white-space: pre-wrap;
 }
 
 .markdown-content a {
@@ -720,6 +730,7 @@ const parsedResponse = computed(() => {
     padding-bottom: 1px;
     transition: all 0.2s ease;
     font-weight: 500;
+    word-break: break-word;
 }
 
 .markdown-content a:hover {
