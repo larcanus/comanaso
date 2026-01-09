@@ -21,7 +21,6 @@ const errorMessage = ref('');
 
 // Проверяем, есть ли данные для анализа
 const hasDataForAnalysis = computed(() => {
-    console.log('dialogStore.state', dialogStore.state);
     return dialogStore.state?.length > 0 && userStore.hasUser;
 });
 
@@ -431,10 +430,6 @@ const parsedResponse = computed(() => {
 
 .ai-analytics-button.loading {
     background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-}
-
-.button-icon {
-    font-size: 20px;
 }
 
 .button-text {
