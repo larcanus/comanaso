@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, toRaw } from 'vue';
 import { analyticsService } from '@/services/analytics.service.js';
 import { authService } from '@/services/auth.service.js';
 import { parseMarkdown } from '@/utils/markdownParser.js';
@@ -25,27 +25,52 @@ const hasDataForAnalysis = computed(() => {
     return dialogStore.state?.length > 0 && userStore.hasUser;
 });
 
-// Получаем последние сообщения (до 50 последних диалогов)
+// Получаем последние сообщения из нормализованных диалогов
 const getRecentMessages = () => {
-    const allDialogs = dialogStore.state || [];
-    const messages = [];
-    // Берем до 50 последних диалогов
-    allDialogs.slice(0, 50).forEach((dialog) => {
-        if (dialog.lastMessage) {
-            messages.push({
-                id: dialog.id || dialog.id || '',
-                text: dialog.lastMessage.text || '',
-                date: dialog.lastMessage.date || new Date().toISOString(),
-                dialogType: dialog.type || 'unknown',
-                dialogTitle: dialog.title || '',
-                unreadCount: dialog.unreadCount || 0,
-                isPinned: dialog.pinned || false,
-                isArchived: dialog.archived || false,
-            });
-        }
-    });
+    // Получаем нормализованные диалоги из store
+    const normalizedDialogs = dialogStore.getPreparedDialogs();
 
-    return messages;
+    // Берем до 50 последних диалогов
+    return normalizedDialogs.slice(0, 50).map((dialog) => ({
+        dialogId: dialog.id,
+        dialogTitle: dialog.title,
+        dialogType: dialog.type,
+
+        // Информация о последнем сообщении
+        lastMessage: dialog.lastMessage
+            ? {
+                  text: dialog.lastMessage.text,
+                  date: dialog.lastMessage.date,
+                  isOutgoing: dialog.lastMessage.out,
+                  mediaType: dialog.lastMessage.mediaType,
+              }
+            : null,
+
+        // Метаданные диалога
+        isPinned: dialog.pinned,
+        isArchived: dialog.archived,
+        isMuted: dialog.muted,
+        unreadCount: dialog.unreadCount,
+        unreadMark: dialog.unreadMark,
+
+        // Информация о папке
+        // folderId: dialog.folderId,
+        folderName: dialog.folderName,
+
+        // Черновик
+        draft: dialog.draft,
+
+        // Дополнительная информация об entity
+        // entityInfo: dialog.entity
+        //     ? {
+        //           username: dialog.entity.username,
+        //           isBot: dialog.entity.isBot,
+        //           isVerified: dialog.entity.isVerified,
+        //           isPremium: dialog.entity.isPremium,
+        //           participantsCount: dialog.entity.participantsCount,
+        //       }
+        //     : null,
+    }));
 };
 
 // Получаем полную информацию о пользователе
@@ -64,7 +89,7 @@ const getUserInfo = () => {
         // Статус и активность
         isOnline: userStore.isOnline || false,
         lastSeen: userStore.lastSeen ? userStore.lastSeen.toISOString() : null,
-        status: userStore.status || null,
+        status: userStore.status ? toRaw(userStore.status) : null,
 
         // Флаги аккаунта
         isBot: userStore.isBot || false,
@@ -81,8 +106,8 @@ const getUserInfo = () => {
         isCloseFriend: userStore.isCloseFriend || false,
 
         // Дополнительные данные
-        langCode: userStore.langCode || null,
-        usernames: userStore.usernames || [],
+        // langCode: userStore.langCode || null,
+        usernames: userStore.usernames?.length > 0 ? userStore.usernames : [],
         emojiStatus: userStore.emojiStatus || null,
         color: userStore.color || null,
         profileColor: userStore.profileColor || null,
@@ -116,24 +141,27 @@ const getFolders = () => {
 
 // Получаем статистику по диалогам
 const getDialogsStats = () => {
-    const allDialogs = dialogStore.state || [];
+    const normalizedDialogs = dialogStore.getPreparedDialogs();
 
     const stats = {
-        total: allDialogs.length,
+        total: normalizedDialogs.length,
         byType: {},
         pinned: 0,
         archived: 0,
         muted: 0,
         unreadTotal: 0,
+        withDrafts: 0,
     };
 
-    allDialogs.forEach((dialog) => {
-        const type = dialog.type || 'unknown';
-        stats.byType[type] = (stats.byType[type] || 0) + 1;
+    normalizedDialogs.forEach((dialog) => {
+        // Подсчет по типам
+        stats.byType[dialog.type] = (stats.byType[dialog.type] || 0) + 1;
 
-        if (dialog.isPinned) stats.pinned++;
-        if (dialog.isArchived) stats.archived++;
-        if (dialog.isMuted) stats.muted++;
+        // Подсчет различных состояний
+        if (dialog.pinned) stats.pinned++;
+        if (dialog.archived) stats.archived++;
+        if (dialog.muted) stats.muted++;
+        if (dialog.draft) stats.withDrafts++;
         if (dialog.unreadCount > 0) stats.unreadTotal += dialog.unreadCount;
     });
 
@@ -150,12 +178,12 @@ const filterDataByPrivacySettings = async (data) => {
         console.log('settings', settings);
         console.log('data', data);
         console.log('filteredData', filteredData);
+
         // Фильтруем userInfo
         if (filteredData.userInfo) {
             if (!settings.shareUserName) {
                 delete filteredData.userInfo.firstName;
                 delete filteredData.userInfo.lastName;
-                delete filteredData.userInfo.fullName;
             }
             if (!settings.shareNickname) {
                 delete filteredData.userInfo.username;
@@ -167,7 +195,18 @@ const filterDataByPrivacySettings = async (data) => {
         if (filteredData.recentMessages && !settings.shareMessageText) {
             filteredData.recentMessages = filteredData.recentMessages.map((msg) => ({
                 ...msg,
-                text: '[сообщение скрыто]',
+                lastMessage: msg.lastMessage
+                    ? {
+                          ...msg.lastMessage,
+                          text: '[сообщение скрыто]',
+                      }
+                    : null,
+                draft: msg.draft
+                    ? {
+                          ...msg.draft,
+                          text: '[черновик скрыт]',
+                      }
+                    : null,
             }));
         }
 
@@ -580,7 +619,7 @@ const parsedResponse = computed(() => {
 }
 
 .markdown-content h4::before {
-    content: "▸";
+    content: '▸';
     position: absolute;
     left: -0.5em;
     color: #667eea;
@@ -607,7 +646,7 @@ const parsedResponse = computed(() => {
 }
 
 .markdown-content ul li::before {
-    content: "•";
+    content: '•';
     color: #667eea;
     font-weight: bold;
     display: inline-block;
@@ -625,7 +664,7 @@ const parsedResponse = computed(() => {
 }
 
 .markdown-content ol li::before {
-    content: counter(list-counter) ".";
+    content: counter(list-counter) '.';
     color: #764ba2;
     font-weight: bold;
     display: inline-block;
@@ -736,12 +775,12 @@ const parsedResponse = computed(() => {
 
 /* Стили для вложенных списков */
 .markdown-content ul ul li::before {
-    content: "◦";
+    content: '◦';
     color: #764ba2;
 }
 
 .markdown-content ul ul ul li::before {
-    content: "▪";
+    content: '▪';
     color: #a5b4fc;
 }
 

@@ -48,6 +48,10 @@ const useDialogStore = defineStore('dialog', () => {
         return prepareDialogsLoc(state.value, foldersState);
     }
 
+    function getPreparedDialogs() {
+        return prepareDialogs(state.value, foldersState);
+    }
+
     function clear() {
         state.value = [];
     }
@@ -58,11 +62,236 @@ const useDialogStore = defineStore('dialog', () => {
         clear,
         setDialogs,
         getPreparedDialogsByLoc,
+        getPreparedDialogs,
         setFolders,
     };
 });
 
 /**
+ * Нормализует данные диалогов без локализации
+ * @param {Array<object>} dialogs
+ * @param {object} foldersState
+ * @return {Array<object>}
+ */
+function prepareDialogs(dialogs = [], foldersState) {
+    return dialogs?.map((dialog) => {
+        const dialogData = toValue(dialog);
+        const idValue = dialogData.id || dialogData.entity?.id || '';
+
+        return {
+            id: idValue,
+            title: getTitleDialog(dialogData),
+            type: getTypeDialog(dialogData),
+            archived: dialogData.isArchived || false,
+            pinned: dialogData.isPinned || false,
+            folderId: getFolderIdDialog(dialogData, foldersState),
+            folderName: getFolderNameDialog(dialogData, foldersState),
+            unreadCount: dialogData.unreadCount || 0,
+            muted: getMuteDialog(dialogData.notifySettings),
+            muteUntil: dialogData.notifySettings?.muteUntil || null,
+            date: dialogData.date || null,
+            creator: dialogData.entity?.isCreator || false,
+            unreadMark: dialogData.unreadMark || false,
+            draft: getDraftDialog(dialogData.draft),
+            lastMessage: getLastMessageDialog(dialogData),
+            entity: getEntityInfo(dialogData.entity),
+        };
+    });
+}
+
+/**
+ * Получает заголовок диалога
+ */
+function getTitleDialog(dialogData) {
+    // Приоритет: name из корня диалога
+    if (dialogData.name && dialogData.name.length > 0) {
+        return dialogData.name;
+    }
+
+    // Затем проверяем title в entity (для групп и каналов)
+    if (dialogData.entity?.title && dialogData.entity.title.length > 0) {
+        return dialogData.entity.title;
+    }
+
+    // Для пользователей составляем имя из firstName и lastName
+    if (dialogData.entity?.firstName || dialogData.entity?.lastName) {
+        const firstName = dialogData.entity.firstName || '';
+        const lastName = dialogData.entity.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        if (fullName.length > 0) {
+            return fullName;
+        }
+    }
+
+    // Проверяем username как запасной вариант
+    if (dialogData.entity?.username && dialogData.entity.username.length > 0) {
+        return `@${dialogData.entity.username}`;
+    }
+
+    return 'Удаленный аккаунт';
+}
+
+/**
+ * Получает тип диалога
+ */
+function getTypeDialog(dialogData) {
+    const typeValue = dialogData.type || '';
+
+    // Уточняем тип для каналов и мегагрупп
+    let finalType = typeValue;
+    if (typeValue === 'channel' && dialogData.entity?.isBroadcast === false) {
+        finalType = 'supergroup';
+    }
+    if (dialogData.entity?.isBot) {
+        finalType = 'bot';
+    }
+
+    return finalType || 'unknown';
+}
+
+/**
+ * Получает ID папок диалога
+ */
+function getFolderIdDialog(dialogData, foldersState) {
+    const folderIds = [];
+
+    // Проверяем архивные диалоги
+    if (dialogData.isArchived) {
+        return [1]; // Архив всегда имеет ID 1
+    }
+
+    // Проверяем folderId из нового API
+    if (dialogData.folderId !== null && dialogData.folderId !== undefined) {
+        return [Number(dialogData.folderId)];
+    }
+
+    // Получаем ID диалога (приводим к строке для сравнения)
+    const entityId = String(dialogData.id || '');
+
+    if (!entityId) {
+        return folderIds;
+    }
+
+    // Ищем диалог в папках
+    Object.keys(foldersState.value.dialogsIdByFolderId).forEach((folderId) => {
+        const folderDialogIds = foldersState.value.dialogsIdByFolderId[folderId];
+
+        if (folderDialogIds.includes(entityId)) {
+            folderIds.push(Number(folderId));
+        }
+    });
+
+    return folderIds;
+}
+
+/**
+ * Получает названия папок диалога
+ */
+function getFolderNameDialog(dialogData, foldersState) {
+    const folderIds = getFolderIdDialog(dialogData, foldersState);
+
+    if (folderIds.length === 0) {
+        return null;
+    }
+
+    if (folderIds.includes(1)) {
+        return 'Архив';
+    }
+
+    const folderNames = folderIds
+        .map((folderId) => {
+            const folder = foldersState.value.rawFoldersData.find(
+                (folderData) => folderData.id === folderId
+            );
+            return folder?.title || null;
+        })
+        .filter(Boolean);
+
+    return folderNames.length > 0 ? folderNames.join(', ') : null;
+}
+
+/**
+ * Проверяет, заглушен ли диалог
+ */
+function getMuteDialog(notifySettings) {
+    if (!notifySettings) {
+        return false;
+    }
+
+    // Проверяем silent флаг
+    if (notifySettings.silent) {
+        return true;
+    }
+
+    // Проверяем muteUntil
+    if (notifySettings.muteUntil && notifySettings.muteUntil > 0) {
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        return notifySettings.muteUntil > currentTimestamp;
+    }
+
+    return false;
+}
+
+/**
+ * Получает черновик диалога
+ */
+function getDraftDialog(draft) {
+    if (!draft || !draft.message) {
+        return null;
+    }
+
+    return {
+        text: draft.message,
+        date: draft.date || null,
+    };
+}
+
+/**
+ * Получает последнее сообщение диалога
+ */
+function getLastMessageDialog(dialogData) {
+    const message = dialogData.lastMessage || dialogData.message;
+
+    if (!message) {
+        return null;
+    }
+
+    return {
+        id: message.id || null,
+        text: message.message || message.text || '',
+        date: message.date || null,
+        out: message.out || false,
+        fromId: message.fromId || message.from_id || null,
+        mediaType: message.media?.className || null,
+    };
+}
+
+/**
+ * Получает информацию об entity диалога
+ */
+function getEntityInfo(entity) {
+    if (!entity) {
+        return null;
+    }
+
+    return {
+        id: entity.id || null,
+        username: entity.username || null,
+        firstName: entity.firstName || null,
+        lastName: entity.lastName || null,
+        phone: entity.phone || null,
+        isBot: entity.isBot || false,
+        isVerified: entity.isVerified || false,
+        isPremium: entity.isPremium || false,
+        isBroadcast: entity.isBroadcast || false,
+        isMegagroup: entity.isMegagroup || false,
+        participantsCount: entity.participantsCount || null,
+    };
+}
+
+/**
+ * Нормализует данные диалогов с локализацией (оригинальная функция)
  * @param {Array<object>} dialogs
  * @param {object} foldersState
  * @return {Array<object>}
