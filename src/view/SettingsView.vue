@@ -75,7 +75,7 @@ const loadUserSettings = async () => {
             password: '',
         };
     } catch (error) {
-        console.error('Load user settings error:', error);
+        logger.error('Load user settings error:', error);
         toastStore.addToast('error', error.userMessage || 'Не удалось загрузить настройки');
     } finally {
         isLoadingSettings.value = false;
@@ -183,7 +183,7 @@ async function handleDeleteAccount() {
         logoutAllStore();
         await router.push('/login');
     } catch (error) {
-        console.error('Delete account error:', error);
+        logger.error('Delete account error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка удаления учетной записи');
     } finally {
         isDeleting.value = false;
@@ -207,7 +207,7 @@ async function savePrivacySettings() {
 
         toastStore.addToast('ok', 'Настройки приватности сохранены');
     } catch (error) {
-        console.error('Save privacy settings error:', error);
+        logger.error('Save privacy settings error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка сохранения настроек');
     } finally {
         isSavingPrivacy.value = false;
@@ -305,7 +305,7 @@ async function saveAccountSettings() {
 
         toastStore.addToast('ok', 'Данные учетной записи обновлены');
     } catch (error) {
-        console.error('Save account settings error:', error);
+        logger.error('Save account settings error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка сохранения данных');
     } finally {
         isSavingAccount.value = false;

@@ -3,6 +3,7 @@ import router from '@/router/index.js';
 
 import { useAuthStore } from '@/store/auth';
 import { cryptoService } from '@/services/crypto.service.js';
+import logger from '../utils/logger.js';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
@@ -17,7 +18,7 @@ async function initLocalStore() {
 
     // Инициализируем шифрование
     if (!cryptoService.isSupported()) {
-        console.warn('⚠️ Web Crypto API недоступен');
+        logger.warn('⚠️ Web Crypto API недоступен');
     }
 
     const token = await checkAuthToken();
@@ -49,7 +50,7 @@ function isLocalStorageAvailable() {
         storage = localStorage;
         return true;
     } catch (e) {
-        console.warn('localStorage недоступен, пробуем sessionStorage');
+        logger.warn('localStorage недоступен, пробуем sessionStorage');
         return false;
     }
 }
@@ -62,13 +63,13 @@ function isSessionStorageAvailable() {
         sessionStorage.removeItem(test);
         storageType = 'sessionStorage';
         storage = sessionStorage;
-        console.info('✅ Используется sessionStorage (данные сохраняются только на время сессии)');
+        logger.info('✅ Используется sessionStorage (данные сохраняются только на время сессии)');
         return true;
     } catch (e) {
-        console.error('sessionStorage также недоступен:', e);
+        logger.error('sessionStorage также недоступен:', e);
         storageType = 'memory';
         storage = createMemoryStorage();
-        console.warn(
+        logger.warn(
             '⚠️  Используется хранилище в памяти (данные будут потеряны при перезагрузке)'
         );
         return false;
@@ -114,7 +115,7 @@ function safeGetItem(key) {
     try {
         return store.getItem(key);
     } catch (e) {
-        console.error(`Ошибка чтения ${key} из ${storageType}:`, e);
+        logger.error(`Ошибка чтения ${key} из ${storageType}:`, e);
         return null;
     }
 }

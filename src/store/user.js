@@ -52,7 +52,7 @@ export const useUserStore = defineStore('user', () => {
      */
     function normalizeUserData(rawData) {
         if (!rawData || typeof rawData !== 'object') {
-            console.warn('[UserStore] Invalid user data received:', rawData);
+            logger.warn('[UserStore] Invalid user data received:', rawData);
             return null;
         }
 
@@ -111,7 +111,7 @@ export const useUserStore = defineStore('user', () => {
         const normalized = normalizeUserData(userData);
 
         if (!normalized) {
-            console.error('[UserStore] Failed to normalize user data');
+            logger.error('[UserStore] Failed to normalize user data');
             return;
         }
 

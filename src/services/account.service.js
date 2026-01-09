@@ -1,4 +1,5 @@
 import { apiService } from './api.js';
+import logger from '../utils/logger.js';
 
 /**
  * Сервис для работы с аккаунтами Telegram
@@ -14,7 +15,7 @@ export class AccountService {
                 method: 'GET',
             });
         } catch (error) {
-            console.error('Get accounts error:', error);
+            logger.error('Get accounts error:', error);
 
             if (error.error === 'NO_TOKEN') {
                 throw {
@@ -53,7 +54,7 @@ export class AccountService {
 
             return account;
         } catch (error) {
-            console.error('Create account error:', error);
+            logger.error('Create account error:', error);
 
             if (error.error === 'ACCOUNT_EXISTS') {
                 throw {
@@ -94,7 +95,7 @@ export class AccountService {
 
             return account;
         } catch (error) {
-            console.error('Update account error:', error);
+            logger.error('Update account error:', error);
 
             if (error.error === 'ACCOUNT_NOT_FOUND') {
                 throw {
@@ -141,7 +142,7 @@ export class AccountService {
                 ...result,
             };
         } catch (error) {
-            console.error('Delete account error:', error);
+            logger.error('Delete account error:', error);
 
             if (error.error === 'ACCOUNT_NOT_FOUND') {
                 throw {
@@ -177,7 +178,7 @@ export class AccountService {
 
             return account;
         } catch (error) {
-            console.error('Get account by ID error:', error);
+            logger.error('Get account by ID error:', error);
 
             if (error.error === 'ACCOUNT_NOT_FOUND') {
                 throw {
@@ -208,7 +209,7 @@ export class AccountService {
 
             return result;
         } catch (error) {
-            console.error('Connect account error:', error);
+            logger.error('Connect account error:', error);
 
             if (error.error === 'INVALID_API_CREDENTIALS') {
                 throw {

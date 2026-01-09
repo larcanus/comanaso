@@ -14,7 +14,7 @@ let isLoggingOut = false;
  */
 export async function logInAllStore(userData) {
     try {
-        console.log('=== logInAllStore START ===', userData);
+        logger.log('=== logInAllStore START ===', userData);
 
         const authStore = useAuthStore();
         const userStore = useUserStore();
@@ -47,11 +47,11 @@ export async function logInAllStore(userData) {
         // Показываем уведомление об успешном входе
         toastStore.addToast('success', 'Успешный вход в систему');
 
-        console.log('=== logInAllStore SUCCESS ===');
+        logger.log('=== logInAllStore SUCCESS ===');
         return true;
     } catch (error) {
-        console.error('Ошибка при входе в систему:', error);
-        console.error('Error stack:', error.stack);
+        logger.error('Ошибка при входе в систему:', error);
+        logger.error('Error stack:', error.stack);
 
         // Показываем уведомление об ошибке
         const toastStore = useToastStore();
@@ -82,17 +82,17 @@ export async function logoutAllStore() {
         // Очищаем localStorage
         localStorageUtils.clearLocalStorage();
 
-        console.log('=== logoutAllStore: все данные очищены ===');
+        logger.log('=== logoutAllStore: все данные очищены ===');
 
         return true;
     } catch (error) {
-        console.error('Ошибка при выходе:', error);
+        logger.error('Ошибка при выходе:', error);
 
         // В случае ошибки всё равно пытаемся очистить localStorage
         try {
             localStorageUtils.clearLocalStorage();
         } catch (e) {
-            console.error('Не удалось очистить localStorage:', e, error);
+            logger.error('Не удалось очистить localStorage:', e, error);
         }
 
         return false;
@@ -107,12 +107,12 @@ export async function logoutAllStore() {
 export async function forceLogout(error) {
     // Если уже идет процесс logout, игнорируем повторные вызовы
     if (isLoggingOut) {
-        console.log('⚠️ Logout уже выполняется, пропускаем повторный вызов');
+        logger.log('⚠️ Logout уже выполняется, пропускаем повторный вызов');
         return;
     }
 
     isLoggingOut = true;
-    console.warn('🔴 Принудительный выход из системы:', error);
+    logger.warn('🔴 Принудительный выход из системы:', error);
 
     const toastStore = useToastStore();
 

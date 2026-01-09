@@ -1,4 +1,5 @@
 import { apiService } from './api.js';
+import logger from '../utils/logger.js';
 
 /**
  * Сервис для работы с аутентификацией
@@ -66,7 +67,7 @@ export class AuthService {
 
             return data;
         } catch (error) {
-            console.error('login error', error);
+            logger.error('login error', error);
             if (error.error === 'INVALID_CREDENTIALS') {
                 throw {
                     ...error,
@@ -94,7 +95,7 @@ export class AuthService {
 
             return data;
         } catch (error) {
-            console.error('getCurrentUser error', error);
+            logger.error('getCurrentUser error', error);
 
             if (error.error === 'UNAUTHORIZED') {
                 throw {
@@ -131,7 +132,7 @@ export class AuthService {
 
             return data;
         } catch (error) {
-            console.error('updateUserSettings error', error);
+            logger.error('updateUserSettings error', error);
 
             if (error.error === 'UNAUTHORIZED') {
                 throw {
@@ -214,7 +215,7 @@ export class AuthService {
                 data,
             };
         } catch (error) {
-            console.error('deleteAccount error', error);
+            logger.error('deleteAccount error', error);
 
             if (error.error === 'UNAUTHORIZED') {
                 throw {
@@ -269,13 +270,13 @@ export class AuthService {
                 method: 'POST',
                 body: JSON.stringify({ email }),
             });
-            console.log('requestPasswordReset data', data);
+            logger.log('requestPasswordReset data', data);
             return {
                 ok: true,
                 message: data.message || 'Письмо отправлено',
             };
         } catch (error) {
-            console.error('requestPasswordReset error', error);
+            logger.error('requestPasswordReset error', error);
 
             if (error.error === 'USER_NOT_FOUND') {
                 // Не раскрываем информацию о существовании пользователя

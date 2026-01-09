@@ -8,6 +8,7 @@ import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
 import { accountService } from '@/services/account.service.js';
 import { ACCOUNT_FIELD_DESCRIPTIONS } from '@/constants/fieldDescriptions.js';
+import logger from '../../utils/logger.js';
 
 const accountStore = useAccountStore();
 const toastStore = useToastStore();
@@ -100,7 +101,7 @@ async function onClickSave() {
         uiState.isEdit = false;
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_UPDATE);
     } catch (error) {
-        console.error('Update account error:', error);
+        logger.error('Update account error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка обновления аккаунта');
     } finally {
         uiState.isSaving = false;
@@ -123,7 +124,7 @@ async function onClickDelete() {
         await accountStore.deleteAccountData(accountData.value.id);
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_DELETE);
     } catch (error) {
-        console.error('Delete account error:', error);
+        logger.error('Delete account error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка удаления аккаунта');
     } finally {
         uiState.isDeleting = false;
@@ -137,9 +138,9 @@ async function onClickDelete() {
 async function safeDisconnect(accountId) {
     try {
         await accountService.disconnectAccount(accountId);
-        console.log(`Account ${accountId} disconnected successfully`);
+        logger.log(`Account ${accountId} disconnected successfully`);
     } catch (disconnectError) {
-        console.warn('Disconnect error (non-critical):', disconnectError);
+        logger.warn('Disconnect error (non-critical):', disconnectError);
     }
 }
 
@@ -184,7 +185,7 @@ async function onClickStart() {
             }
         }
     } catch (error) {
-        console.error('Connection error:', error);
+        logger.error('Connection error:', error);
 
         // Если требуется 2FA
         if (error.error === 'PASSWORD_REQUIRED') {
@@ -235,7 +236,7 @@ async function onClickDisconnect() {
         await accountStore.changeStatus(accountData.value.id, 'offline');
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_DISCONNECT);
     } catch (error) {
-        console.error('Disconnect error:', error);
+        logger.error('Disconnect error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка отключения');
     } finally {
         uiState.isDisconnecting = false;
@@ -251,7 +252,7 @@ async function onClickCloseSession() {
         await accountStore.changeStatus(accountData.value.id, 'offline');
         toastStore.addToast('ok', LOC_TOAST_SUCCESS_CLOSE_SESSION);
     } catch (error) {
-        console.error('Close session error:', error);
+        logger.error('Close session error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка закрытия сессии');
     } finally {
         uiState.isDisconnecting = false;

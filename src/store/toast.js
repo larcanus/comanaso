@@ -10,13 +10,13 @@ export const useToastStore = defineStore('toast', () => {
     function addToast(type, text) {
         // Валидация типа
         if (!VALID_TOAST_TYPES.includes(type)) {
-            console.warn(`[Toast] Invalid toast type: "${type}". Using "info" as fallback.`);
+            logger.warn(`[Toast] Invalid toast type: "${type}". Using "info" as fallback.`);
             type = 'info';
         }
 
         // Валидация текста
         if (!text || typeof text !== 'string') {
-            console.warn('[Toast] Invalid toast text. Toast not added.');
+            logger.warn('[Toast] Invalid toast text. Toast not added.');
             return;
         }
 

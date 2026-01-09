@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/auth.js';
 import { useAccountStore } from '@/store/account.js';
 import FormForgotPassword from '@/components/form/forgot-password/FormForgotPassword.vue';
 import PageResetPassword from '@/components/form/reset-password/PageResetPassword.vue';
+import logger from '../utils/logger.js';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -81,7 +82,7 @@ router.beforeEach(async (to, from, next) => {
 
     // Если маршрут требует аутентификации и пользователь не аутентифицирован
     if (to.meta.requiresAuth && !isAuthenticated) {
-        console.info('🔴 Доступ запрещен: требуется авторизация');
+        logger.info('🔴 Доступ запрещен: требуется авторизация');
         next({ name: 'home' });
         return;
     }
@@ -104,7 +105,7 @@ router.beforeEach(async (to, from, next) => {
         const hasAccounts = accountStore.accountIds && accountStore.accountIds.length > 0;
 
         if (!hasAccounts) {
-            console.info('⚠️ Загрузка аккаунтов для доступа к странице:', to.name);
+            logger.info('⚠️ Загрузка аккаунтов для доступа к странице:', to.name);
 
             try {
                 await accountStore.loadAccountsFromServer();
@@ -114,14 +115,14 @@ router.beforeEach(async (to, from, next) => {
                     accountStore.accountIds && accountStore.accountIds.length > 0;
 
                 if (!accountsLoaded) {
-                    console.warn(
+                    logger.warn(
                         '⚠️ Нет доступных аккаунтов, перенаправление на страницу аккаунтов'
                     );
                     next({ name: 'account' });
                     return;
                 }
             } catch (error) {
-                console.error('🔴 Ошибка загрузки аккаунтов:', error);
+                logger.error('🔴 Ошибка загрузки аккаунтов:', error);
                 next({ name: 'account' });
                 return;
             }
@@ -134,7 +135,7 @@ router.beforeEach(async (to, from, next) => {
 
 // Глобальный обработчик ошибок навигации
 router.onError((error) => {
-    console.error('🔴 Ошибка навигации:', error);
+    logger.error('🔴 Ошибка навигации:', error);
 });
 
 export default router;

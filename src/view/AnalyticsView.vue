@@ -15,6 +15,7 @@ import useToastStore from '@/store/toast.js';
 import { analyticsService } from '@/services/analytics.service.js';
 import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
 import { accountService } from '@/services/account.service.js';
+import logger from '../utils/logger.js';
 
 const accountStore = useAccountStore();
 const dialogStore = useDialogStore();
@@ -89,13 +90,13 @@ watch(selectedAccountId, async (newAccountId) => {
     const hasData = accountStore.hasAnalyticsData(newAccountId);
 
     if (hasData) {
-        console.log(`[AnalyticsView] Data already loaded for account ${newAccountId}`);
+        logger.log(`[AnalyticsView] Data already loaded for account ${newAccountId}`);
         toastStore.addToast('info', 'Используются ранее загруженные данные');
         return;
     }
 
     // Если данных нет - загружаем
-    console.log(`[AnalyticsView] Loading data for account ${newAccountId}`);
+    logger.log(`[AnalyticsView] Loading data for account ${newAccountId}`);
     await loadAnalyticsData(newAccountId, false);
 });
 

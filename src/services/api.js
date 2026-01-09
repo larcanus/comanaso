@@ -1,5 +1,6 @@
 import useAuthStore from '@/store/auth.js';
 import { cryptoService } from '@/services/crypto.service.js';
+import logger from '../utils/logger.js';
 
 /**
  * Сервис для работы с API
@@ -27,7 +28,7 @@ class ApiService {
             // Дешифруем токен перед использованием
             return await cryptoService.decrypt(encryptedToken);
         } catch (error) {
-            console.error('Ошибка дешифрования токена:', error);
+            logger.error('Ошибка дешифрования токена:', error);
             return null;
         }
     }
@@ -50,7 +51,7 @@ class ApiService {
         if (error.status === 401) {
             return true;
         }
-        console.log('isAuthError', error);
+        logger.log('isAuthError', error);
         // 403 - Forbidden
         if (error.status === 403 && error.error !== 'ACCOUNT_NOT_CONNECTED') {
             return true;
@@ -74,13 +75,13 @@ class ApiService {
      * @param {Object} error - Объект ошибки
      */
     async handleAuthError(error) {
-        console.info('🔴 Критическая ошибка авторизации:', error);
+        logger.info('🔴 Критическая ошибка авторизации:', error);
 
         if (this.onAuthError) {
             try {
                 await this.onAuthError(error);
             } catch (callbackError) {
-                console.error('Ошибка в обработчике авторизации:', callbackError);
+                logger.error('Ошибка в обработчике авторизации:', callbackError);
             }
         }
     }
@@ -114,14 +115,14 @@ class ApiService {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-            console.info('API SERVICE request fetch >>>', url, mergedOptions);
+            logger.info('API SERVICE request fetch >>>', url, mergedOptions);
 
             const response = await fetch(url, {
                 ...mergedOptions,
                 signal: controller.signal,
             });
 
-            console.info('API SERVICE request response <<<', response);
+            logger.info('API SERVICE request response <<<', response);
             clearTimeout(timeoutId);
 
             if (!response.ok) {
@@ -192,7 +193,7 @@ class ApiService {
      */
     async authRequest(endpoint, options = {}) {
         const token = await this.getToken();
-        console.log('authRequest', endpoint, options, token ? '🔐 TOKEN_DECRYPTED' : 'NO_TOKEN');
+        logger.log('authRequest', endpoint, options, token ? '🔐 TOKEN_DECRYPTED' : 'NO_TOKEN');
 
         if (!token) {
             const error = {
@@ -215,7 +216,7 @@ class ApiService {
     }
 
     async aiStreamRequest(data) {
-        console.log('aiBaseURL', this.aiURL);
+        logger.log('aiBaseURL', this.aiURL);
         if (!this.aiURL) {
             throw {
                 code: 'AI_SERVICE_NOT_CONFIGURED',
@@ -224,7 +225,7 @@ class ApiService {
         }
 
         const token = await this.getToken();
-        console.log('aiStreamRequest', token ? '🔐 TOKEN_DECRYPTED' : 'NO_TOKEN');
+        logger.log('aiStreamRequest', token ? '🔐 TOKEN_DECRYPTED' : 'NO_TOKEN');
         if (!token) {
             return {
                 code: 'NO_TOKEN',
@@ -246,7 +247,7 @@ class ApiService {
             top_p: 0.9,
         };
 
-        console.info('API SERVICE AI STREAM request >>>', {
+        logger.info('API SERVICE AI STREAM request >>>', {
             url: `${this.aiURL}`,
             dataSize: JSON.stringify(data).length,
         });

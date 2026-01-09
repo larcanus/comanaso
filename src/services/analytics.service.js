@@ -1,5 +1,5 @@
 import { apiService } from './api.js';
-import { log10 } from 'chart.js/helpers';
+import logger from '../utils/logger.js';
 
 /**
  * Конфигурация для запроса данных аналитики
@@ -24,7 +24,7 @@ class AnalyticsService {
         try {
             return await apiService.authRequest(`/accounts/${accountId}/me`);
         } catch (error) {
-            console.error('[AnalyticsService] Error fetching account info:', error);
+            logger.error('[AnalyticsService] Error fetching account info:', error);
             throw this._handleError(error, 'Ошибка загрузки информации об аккаунте');
         }
     }
@@ -46,23 +46,23 @@ class AnalyticsService {
             // Создаем blob URL для изображения
             if (blob && blob instanceof Blob && blob.size > 0) {
                 const photoUrl = URL.createObjectURL(blob);
-                console.info('[AnalyticsService] Profile photo loaded successfully', {
+                logger.info('[AnalyticsService] Profile photo loaded successfully', {
                     size: blob.size,
                     type: blob.type,
                 });
                 return photoUrl;
             }
 
-            console.warn('[AnalyticsService] Received empty blob');
+            logger.warn('[AnalyticsService] Received empty blob');
             return null;
         } catch (error) {
             // Если фото не установлено - это нормально
             if (error.error === 'PHOTO_NOT_FOUND') {
-                console.info('[AnalyticsService] Profile photo not set');
+                logger.info('[AnalyticsService] Profile photo not set');
                 return null;
             }
 
-            console.error('[AnalyticsService] Error fetching profile photo:', error);
+            logger.error('[AnalyticsService] Error fetching profile photo:', error);
             throw this._handleError(error, 'Ошибка загрузки фото профиля');
         }
     }

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { shallowRef, toValue } from 'vue';
+import logger from '../utils/logger.js';
 
 const useDialogStore = defineStore('dialog', () => {
     const state = shallowRef([]);
@@ -36,7 +37,7 @@ const useDialogStore = defineStore('dialog', () => {
             }
         });
 
-        console.log('Folders processed:', {
+        logger.log('Folders processed:', {
             rawFolders: foldersState.value.rawFoldersData,
             dialogsByFolder: foldersState.value.dialogsIdByFolderId,
         });

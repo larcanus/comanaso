@@ -2,6 +2,7 @@
 import imagePlusPath from '@/assets/plus.png';
 import useAccountStore from '@/store/account.js';
 import useToastStore from '@/store/toast.js';
+import logger from '../../utils/logger.js';
 
 const accStore = useAccountStore();
 const toastStore = useToastStore();
@@ -21,7 +22,7 @@ async function onClickDiv() {
 
         toastStore.addToast('ok', 'Аккаунт создан. Заполните данные для подключения');
     } catch (error) {
-        console.error('Create account error:', error);
+        logger.error('Create account error:', error);
         toastStore.addToast('error', error.userMessage || 'Ошибка создания аккаунта');
     }
 }

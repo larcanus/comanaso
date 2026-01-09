@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { accountService } from '@/services/account.service.js';
+import logger from '../utils/logger.js';
 
 export const useAccountStore = defineStore('account', () => {
     const defaultStateModel = {
@@ -40,7 +41,7 @@ export const useAccountStore = defineStore('account', () => {
     async function loadAccountsFromServer(force = false) {
         // Если уже загружаем и не форсируем - пропускаем
         if (isLoading.value && !force) {
-            console.log('Accounts are already loading, skipping...');
+            logger.log('Accounts are already loading, skipping...');
             return state.value;
         }
 

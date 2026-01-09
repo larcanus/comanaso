@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-// import { authService } from '@/services/auth.service.js';
+import logger from '../utils/logger.js';
 import { ref, computed } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
      */
     function setAiPrivacySettings(settings) {
         if (!settings || typeof settings !== 'object') {
-            console.warn('[AuthStore] Invalid AI privacy settings:', settings);
+            logger.warn('[AuthStore] Invalid AI privacy settings:', settings);
             return;
         }
 
@@ -98,7 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
     //             return false;
     //         }
     //     } catch (error) {
-    //         console.error('Ошибка проверки токена:', error);
+    //         logger.error('Ошибка проверки токена:', error);
     //         clear();
     //         return false;
     //     } finally {

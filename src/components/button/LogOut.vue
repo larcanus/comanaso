@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import { logoutAllStore } from '@/store/storeController.js';
 import { authService } from '@/services/auth.service.js';
+import logger from '../../utils/logger.js';
 
 const router = useRouter();
 
@@ -9,7 +10,7 @@ async function onClickContainer() {
     try {
         // Выполняем выход на сервере
         const result = await authService.logout();
-        console.log('logout result:', result);
+        logger.log('logout result:', result);
 
         // Очищаем все stores и localStorage
         await logoutAllStore();
@@ -17,7 +18,7 @@ async function onClickContainer() {
         // Перенаправляем на главную страницу
         await router.replace({ name: 'home' });
     } catch (error) {
-        console.error('Ошибка при выходе:', error);
+        logger.error('Ошибка при выходе:', error);
 
         // Даже при ошибке очищаем локальные данные
         await logoutAllStore();
