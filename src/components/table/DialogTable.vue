@@ -5,7 +5,7 @@ import { useResponsiveWidth } from '@/composables/useResponsiveWidth.js';
 
 const dialogStore = useDialogStore();
 
-const dialogState = ref(dialogStore.getPreparedDialogs());
+const dialogState = ref(dialogStore.getPreparedDialogsByLoc());
 const dialogsFiltered = ref(dialogState.value);
 const tableHeaderLoc = computed(() => {
     if (dialogState.value.length === 0) {

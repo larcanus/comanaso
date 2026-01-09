@@ -44,8 +44,8 @@ const useDialogStore = defineStore('dialog', () => {
         return foldersState.value;
     }
 
-    function getPreparedDialogs() {
-        return validateDialogs(state.value, foldersState);
+    function getPreparedDialogsByLoc() {
+        return prepareDialogsLoc(state.value, foldersState);
     }
 
     function clear() {
@@ -57,7 +57,7 @@ const useDialogStore = defineStore('dialog', () => {
         foldersState,
         clear,
         setDialogs,
-        getPreparedDialogs,
+        getPreparedDialogsByLoc,
         setFolders,
     };
 });
@@ -67,8 +67,8 @@ const useDialogStore = defineStore('dialog', () => {
  * @param {object} foldersState
  * @return {Array<object>}
  */
-function validateDialogs(dialogs = [], foldersState) {
-    const preparedDialogs = dialogs?.map((dialog) => {
+function prepareDialogsLoc(dialogs = [], foldersState) {
+    return dialogs?.map((dialog) => {
         const dialogData = toValue(dialog);
         const idValue = dialogData.id || dialogData.entity?.id || '';
 
@@ -93,8 +93,6 @@ function validateDialogs(dialogs = [], foldersState) {
             draft: getDraftDialogLoc(dialogData.draft),
         };
     });
-
-    return preparedDialogs;
 }
 
 function getTitleDialogLoc(dialogData) {

@@ -128,13 +128,12 @@ const getDialogsStats = () => {
     };
 
     allDialogs.forEach((dialog) => {
-        console.log('dialog', dialog, dialog.value);
         const type = dialog.type || 'unknown';
         stats.byType[type] = (stats.byType[type] || 0) + 1;
 
-        if (dialog.pinned) stats.pinned++;
-        if (dialog.archived) stats.archived++;
-        if (dialog.mute) stats.muted++;
+        if (dialog.isPinned) stats.pinned++;
+        if (dialog.isArchived) stats.archived++;
+        if (dialog.isMuted) stats.muted++;
         if (dialog.unreadCount > 0) stats.unreadTotal += dialog.unreadCount;
     });
 
@@ -183,7 +182,7 @@ const filterDataByPrivacySettings = async (data) => {
         return filteredData;
     } catch (error) {
         console.error('Ошибка при фильтрации данных:', error);
-        return data; // Возвращаем исходные данные в случае ошибки
+        return data;
     }
 };
 
@@ -191,9 +190,8 @@ const filterDataByPrivacySettings = async (data) => {
 const updateUserSettings = async () => {
     try {
         const userData = await authService.getCurrentUser();
-        console.log('updateUserSettings userData', userData);
         authStore.setUser(userData);
-        console.log('userData.settings', userData.settings);
+
         if (userData.settings) {
             return userData.settings;
         }
