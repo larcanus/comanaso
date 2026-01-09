@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import logger from '@/utils/logger';
 
 const TOAST_TIME = 4000;
 const VALID_TOAST_TYPES = ['ok', 'success', 'error', 'warning', 'info'];

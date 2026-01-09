@@ -9,6 +9,7 @@ import { useToastStore } from '@/store/toast.js';
 import { useAccountStore } from '@/store/account.js';
 import { useAuthStore } from '@/store/auth.js';
 import { validateUsername, validateEmail, validatePassword } from '@/utils/validators.js';
+import logger from '@/utils/logger';
 
 const router = useRouter();
 const toastStore = useToastStore();

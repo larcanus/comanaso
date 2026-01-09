@@ -32,7 +32,10 @@ export function parseMarkdown(text) {
 
     const parseInline = (line) => {
         // Ссылки [текст](url)
-        line = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="markdown-link">$1</a>');
+        line = line.replace(
+            /\[([^\]]+)\]\(([^)]+)\)/g,
+            '<a href="$2" target="_blank" rel="noopener noreferrer" class="markdown-link">$1</a>'
+        );
 
         // Жирный текст **текст** или __текст__
         line = line.replace(/\*\*([^*]+)\*\*/g, '<strong class="markdown-bold">$1</strong>');
@@ -46,7 +49,10 @@ export function parseMarkdown(text) {
         line = line.replace(/`([^`]+)`/g, '<code class="markdown-code">$1</code>');
 
         // Код блоки ```код```
-        line = line.replace(/```([^`]+)```/g, '<pre class="markdown-code-block"><code>$1</code></pre>');
+        line = line.replace(
+            /```([^`]+)```/g,
+            '<pre class="markdown-code-block"><code>$1</code></pre>'
+        );
 
         return line;
     };
@@ -107,7 +113,9 @@ export function parseMarkdown(text) {
         // Цитаты >
         if (line.startsWith('> ')) {
             flushList();
-            result.push(`<blockquote class="markdown-blockquote">${parseInline(line.substring(2))}</blockquote>`);
+            result.push(
+                `<blockquote class="markdown-blockquote">${parseInline(line.substring(2))}</blockquote>`
+            );
             continue;
         }
 
@@ -157,13 +165,13 @@ export const MarkdownRenderer = {
     props: {
         text: {
             type: String,
-            default: ''
-        }
+            default: '',
+        },
     },
     computed: {
         html() {
             return parseMarkdown(this.text);
-        }
+        },
     },
-    template: '<div class="markdown-content" v-html="html"></div>'
+    template: '<div class="markdown-content" v-html="html"></div>',
 };

@@ -55,11 +55,7 @@ const uiState = reactive({
 
 // Общий флаг загрузки для блокировки всех действий
 const isLoading = computed(
-    () =>
-        uiState.isConnecting ||
-        uiState.isDisconnecting ||
-        uiState.isSaving ||
-        uiState.isDeleting
+    () => uiState.isConnecting || uiState.isDisconnecting || uiState.isSaving || uiState.isDeleting
 );
 
 // Редактируемые поля (только для режима редактирования)

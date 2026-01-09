@@ -5,6 +5,7 @@ import { useDialogStore } from '@/store/dialogs.js';
 import { useToastStore } from '@/store/toast.js';
 import localStorageUtils from '@/store/localStorage.js';
 import router from '@/router/index.js';
+import logger from '@/utils/logger';
 
 // Флаг для предотвращения множественных вызовов logout
 let isLoggingOut = false;

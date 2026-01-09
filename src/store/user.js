@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import logger from '@/utils/logger';
 
 export const useUserStore = defineStore('user', () => {
     // State - основные данные

@@ -48,9 +48,7 @@ function showGeneralInfo() {
                         Заполните все поля в карточке аккаунта и жмите "Старт!".
                     </p>
                 </div>
-                <button type="button" class="info-link" @click="showGeneralInfo">
-                    Инструкция
-                </button>
+                <button type="button" class="info-link" @click="showGeneralInfo">Инструкция</button>
             </div>
         </div>
 
