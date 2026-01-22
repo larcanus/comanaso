@@ -1,22 +1,16 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import packageJson from '../../../package.json';
 
-const showEmail = ref(false);
 const versionApp = packageJson.version;
+const authorWebsite = 'https://alexrulser.com/';
 
-const toggleEmail = () => {
-    showEmail.value = !showEmail.value;
+const openAuthorWebsite = () => {
+    window.open(authorWebsite, '_blank', 'noopener,noreferrer');
 };
 
 const displayText = computed(() => {
-    const baseText = `© 2025 | Author: AlexRulSer | v${versionApp}`;
-
-    if (showEmail.value) {
-        return `${baseText} | alex.rulser@gmail.com`;
-    }
-
-    return baseText;
+    return `© 2025 | v${versionApp} | Author: `;
 });
 </script>
 
@@ -26,11 +20,11 @@ const displayText = computed(() => {
             <p class="author-info">
                 {{ displayText }}
                 <button
-                    class="email-toggle"
-                    :aria-label="showEmail ? 'Скрыть email' : 'Показать email'"
-                    @click="toggleEmail"
+                    class="author-link"
+                    aria-label="Перейти на сайт автора"
+                    @click="openAuthorWebsite"
                 >
-                    {{ showEmail ? ' [Скрыть]' : ' [Контакты]' }}
+                    AlexRulSer
                 </button>
             </p>
         </div>
@@ -61,23 +55,23 @@ const displayText = computed(() => {
     gap: 4px;
 }
 
-.email-toggle {
+.author-link {
     background: none;
     border: none;
     color: #467e91;
     cursor: pointer;
     font-size: 14px;
     padding: 0;
-    text-decoration: none;
+    text-decoration: underline;
     transition: color 0.3s;
     font-family: inherit;
 }
 
-.email-toggle:hover {
+.author-link:hover {
     color: #ff4500;
 }
 
-.email-toggle:focus {
+.author-link:focus {
     outline: 2px solid #467e91;
     outline-offset: 2px;
 }
